@@ -1,0 +1,22 @@
+# Tema-base: só aparece até as cores serem geradas de um papel de parede (a partir de #6750A4, a cor-base
+# do Material). Ao gerar, o Kortex grava o tema real em ~/.local/share/kortex/themes/matugen, que o substitui.
+mode = "dark"
+
+accent = "#cfbdfe"
+selection = "#4a4458"
+muted = "#49454e"
+
+background = "#141218"
+dark_background = "#0f0d13"
+lighter_background = "#2b292f"
+
+foreground = "#cac4cf"
+dark_foreground = "#948f99"
+bright_foreground = "#e6e0e9"
+
+red = "#ffb2bc"
+green = "#b0d18b"
+yellow = "#f3bd6e"
+blue = "#aec6ff"
+magenta = "#d3bbfc"
+cyan = "#91cef4"

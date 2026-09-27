@@ -1,0 +1,82 @@
+/* Kortex: cores do tema na interface do Firefox. As cores vêm de kortex-colors.css (gerado a cada
+   troca de tema). Só variáveis e regras simples: um seletor inválido derruba a regra inteira. */
+@import "kortex-colors.css";
+
+:root {
+  color-scheme: var(--kortex-scheme);
+  --toolbar-background-color: var(--kortex-bg-alt) !important;
+  --toolbar-text-color: var(--kortex-fg) !important;
+  --toolbarbutton-icon-fill: var(--kortex-fg) !important;
+  --toolbarbutton-icon-fill-attention: var(--kortex-accent) !important;
+  --toolbarbutton-background-color-hover: color-mix(in srgb, var(--kortex-fg) 14%, transparent) !important;
+  --toolbarbutton-background-color-active: color-mix(in srgb, var(--kortex-fg) 24%, transparent) !important;
+  --tab-background-color-selected: var(--kortex-bg-alt) !important;
+  --tab-background-color-hover: color-mix(in srgb, var(--kortex-fg) 11%, transparent) !important;
+  --tab-selected-textcolor: var(--kortex-fg) !important;
+  --tab-loading-fill: var(--kortex-accent) !important;
+  --toolbar-field-background-color: var(--kortex-bg) !important;
+  --toolbar-field-background-color-focus: var(--kortex-bg) !important;
+  --toolbar-field-text-color: var(--kortex-fg) !important;
+  --toolbar-field-text-color-focus: var(--kortex-fg-bright) !important;
+  --toolbar-field-border-color: var(--kortex-muted) !important;
+  --toolbar-field-border-color-focus: var(--kortex-accent) !important;
+  --panel-background-color: var(--kortex-bg-alt) !important;
+  --panel-text-color: var(--kortex-fg) !important;
+  --panel-border-color: var(--kortex-muted) !important;
+  --panel-separator-color: var(--kortex-muted) !important;
+  --sidebar-background-color: var(--kortex-bg) !important;
+  --sidebar-text-color: var(--kortex-fg) !important;
+  --sidebar-border-color: var(--kortex-muted) !important;
+  --focus-outline-color: var(--kortex-accent) !important;
+  --urlbar-box-background-color: color-mix(in srgb, var(--kortex-fg) 12%, transparent) !important;
+  --urlbar-box-background-color-focus: color-mix(in srgb, var(--kortex-fg) 16%, transparent) !important;
+  --urlbar-box-background-color-hover: color-mix(in srgb, var(--kortex-fg) 22%, transparent) !important;
+  --urlbar-box-background-color-active: color-mix(in srgb, var(--kortex-fg) 30%, transparent) !important;
+  --urlbar-box-text-color: var(--kortex-fg) !important;
+  --urlbar-box-text-color-hover: var(--kortex-fg-bright) !important;
+  --icon-color: var(--kortex-fg) !important;
+  --border-color-interactive: var(--kortex-muted) !important;
+  --text-color-deemphasized: var(--kortex-fg-dim) !important;
+  --color-accent-primary: var(--kortex-accent) !important;
+  --text-color-accent-primary-selected: var(--kortex-bg) !important;
+}
+
+/* Faixa das abas e barras (o quadro da janela) */
+#navigator-toolbox { background-color: var(--kortex-bg) !important; color: var(--kortex-fg) !important; }
+#TabsToolbar { background-color: var(--kortex-bg) !important; }
+#nav-bar { background-color: var(--kortex-bg-alt) !important; }
+#PersonalToolbar { background-color: var(--kortex-bg-alt) !important; }
+#toolbar-menubar { background-color: var(--kortex-bg) !important; color: var(--kortex-fg) !important; }
+
+/* Aba selecionada: regra explícita além da variável, porque um tema de extensão (como o Dark
+   embutido) pode redefinir a variável por conta própria */
+.tab-background:is([selected], [multiselected]) { background-color: var(--kortex-bg-alt) !important; }
+.tabbrowser-tab[selected] { color: var(--kortex-fg) !important; }
+
+/* Menus e painéis definem estas variáveis no próprio elemento, então o valor da raiz não chega */
+menupopup {
+  --panel-border-radius: 6px !important;
+  --panel-padding: 3px !important;
+  --panel-background-color: var(--kortex-bg-alt) !important;
+  --panel-text-color: var(--kortex-fg) !important;
+  --panel-border-color: var(--kortex-muted) !important;
+  --panel-separator-color: var(--kortex-muted) !important;
+}
+panel {
+  --panel-background-color: var(--kortex-bg-alt) !important;
+  --panel-text-color: var(--kortex-fg) !important;
+  --panel-border-color: var(--kortex-muted) !important;
+  --panel-separator-color: var(--kortex-muted) !important;
+  --arrowpanel-background: var(--kortex-bg-alt) !important;
+  --arrowpanel-color: var(--kortex-fg) !important;
+  --arrowpanel-border-color: var(--kortex-muted) !important;
+}
+
+/* Menus: cantos e borda no tema (o fundo vem de --panel-background-color) */
+menuitem { border-radius: 4px !important; }
+menu { border-radius: 4px !important; }
+menuitem[_moz-menuactive="true"] { background-color: var(--kortex-accent) !important; color: var(--kortex-bg) !important; }
+menu[_moz-menuactive="true"] { background-color: var(--kortex-accent) !important; color: var(--kortex-bg) !important; }
+
+/* Lista de sugestões do endereço */
+.urlbarView-row[selected] { background-color: var(--kortex-accent) !important; color: var(--kortex-bg) !important; }

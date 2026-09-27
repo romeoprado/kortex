@@ -1,0 +1,11 @@
+[SddmGreeterTheme]
+Name=Kortex
+Description=Tela de login do Kortex, com as cores do tema ativo
+Author=Kortex
+Type=sddm-theme
+Version=1.0
+MainScript=Main.qml
+ConfigFile=theme.conf
+Theme-Id=kortex
+Theme-API=2.0
+QtVersion=6

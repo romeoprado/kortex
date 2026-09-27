@@ -1,0 +1,45 @@
+/* Kortex: cores do tema nas páginas internas do Firefox (about:…, nova aba, configurações). Os
+   sites não são tocados. As cores vêm de kortex-colors.css, gerado a cada troca de tema. */
+@import "kortex-colors.css";
+@-moz-document url-prefix("about:") {
+  :root {
+    --in-content-page-background: var(--kortex-bg) !important;
+    --in-content-page-color: var(--kortex-fg) !important;
+    --in-content-text-color: var(--kortex-fg) !important;
+    --in-content-deemphasized-text: var(--kortex-fg-dim) !important;
+    --in-content-box-background: var(--kortex-bg-alt) !important;
+    --in-content-box-background-hover: color-mix(in srgb, var(--kortex-fg) 8%, var(--kortex-bg-alt)) !important;
+    --in-content-box-border-color: var(--kortex-muted) !important;
+    --in-content-border-color: var(--kortex-muted) !important;
+    --in-content-primary-button-background: var(--kortex-accent) !important;
+    --in-content-primary-button-text-color: var(--kortex-bg) !important;
+    --in-content-accent-color: var(--kortex-accent) !important;
+    --in-content-link-color: var(--kortex-accent) !important;
+    --background-color-canvas: var(--kortex-bg) !important;
+    --background-color-box: var(--kortex-bg-alt) !important;
+    --text-color: var(--kortex-fg) !important;
+    --text-color-deemphasized: var(--kortex-fg-dim) !important;
+    --border-color: var(--kortex-muted) !important;
+    --color-accent-primary: var(--kortex-accent) !important;
+    --link-color: var(--kortex-accent) !important;
+    --newtab-background-color: var(--kortex-bg) !important;
+    --newtab-background-color-secondary: var(--kortex-bg-alt) !important;
+    --newtab-text-primary-color: var(--kortex-fg) !important;
+    --newtab-textbox-background-color: var(--kortex-bg-alt) !important;
+    --input-text-background-color: var(--kortex-bg) !important;
+    --input-text-color: var(--kortex-fg) !important;
+    --input-text-border-color: var(--kortex-muted) !important;
+    --border-color-interactive: var(--kortex-muted) !important;
+    --icon-color: var(--kortex-fg) !important;
+    --message-bar-background-color: var(--kortex-bg-alt) !important;
+    --message-bar-text-color: var(--kortex-fg) !important;
+    --message-bar-border-color: var(--kortex-muted) !important;
+    --message-bar-icon-color: var(--kortex-accent) !important;
+    --background-color-information: var(--kortex-bg-alt) !important;
+    --text-color-information: var(--kortex-fg) !important;
+    --border-color-information: var(--kortex-muted) !important;
+    --background-color-information-subdued: var(--kortex-bg-alt) !important;
+    color-scheme: var(--kortex-scheme);
+  }
+  body { background-color: var(--kortex-bg) !important; color: var(--kortex-fg) !important; }
+}

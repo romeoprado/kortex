@@ -1,0 +1,26 @@
+# Modelo do Matugen: transforma as cores Material You geradas do papel de parede na paleta do Kortex.
+# O scripts/matugen-generate.sh o entrega ao Matugen e grava o resultado como o tema "matugen".
+# Vermelho, verde, amarelo, azul, magenta e ciano NÃO vêm da imagem: são os tons fixos de
+# semantic-dark.json e semantic-light.json, iguais em qualquer papel de parede e estilo,
+# porque alguns estilos do Matugen giram o matiz (o vermelho viraria lilás) ou tiram toda a cor.
+# Só o acento, os fundos, o texto e a seleção seguem a imagem.
+mode = "{{mode}}"
+
+accent = "{{colors.primary.default.hex}}"
+selection = "{{colors.secondary_container.default.hex}}"
+muted = "{{colors.outline_variant.default.hex}}"
+
+background = "{{colors.surface.default.hex}}"
+dark_background = "{{colors.surface_container_lowest.default.hex}}"
+lighter_background = "{{colors.surface_container_high.default.hex}}"
+
+foreground = "{{colors.on_surface_variant.default.hex}}"
+dark_foreground = "{{colors.outline.default.hex}}"
+bright_foreground = "{{colors.on_surface.default.hex}}"
+
+red = "{{sem.red}}"
+green = "{{sem.green}}"
+yellow = "{{sem.yellow}}"
+blue = "{{sem.blue}}"
+magenta = "{{sem.magenta}}"
+cyan = "{{sem.cyan}}"
