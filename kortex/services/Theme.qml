@@ -30,9 +30,8 @@ Singleton {
     readonly property int textBody: fontSize        // texto comum, campos, linhas de lista
     readonly property int textLarge: fontSize + 2   // destaques, títulos de seção e de cartão
     readonly property int textTitle: fontSize + 5   // títulos dos painéis e números grandes
-    // Altura da barra: compacta 24 px, padrão 30 px ou confortável 36 px; nunca menor que a fonte pede
-    readonly property int barHeight: Math.max(fontSize + 12, Settings.data.barSize === "compact" ? 24
-                                                          : Settings.data.barSize === "comfortable" ? 36 : 30)
+    // Altura da barra: fixa em 30 px (cabe o maior tamanho de texto, 16 + 12)
+    readonly property int barHeight: 30
     readonly property int radius: Math.max(0, Math.min(20, Settings.data.radius))
     readonly property int radiusSmall: Math.max(0, radius - 2)   // controles dentro dos painéis
     readonly property int gap: 8

@@ -3,7 +3,7 @@ import QtQuick.Layouts
 import qs.services
 import qs.widgets
 
-// Configurações › Barra: estilo, posição, altura, áreas de trabalho e itens
+// Configurações › Barra: estilo, posição, áreas de trabalho e itens
 SettingsPage {
     id: page
 
@@ -20,7 +20,7 @@ SettingsPage {
         { id: "power", text: "Sessão" }
     ]
 
-    SettingsSection { text: "Posição e Tamanho" }
+    SettingsSection { text: "Estilo e Posição" }
 
     SettingRow {
         title: "Estilo da barra"
@@ -46,19 +46,6 @@ SettingsPage {
             current: Settings.data.barPosition
             model: [{ label: "Topo", value: "top" }, { label: "Fundo", value: "bottom" }]
             onPicked: v => Settings.data.barPosition = v
-        }
-    }
-
-    SettingRow {
-        title: "Altura da barra"
-        Segmented {
-            current: Settings.data.barSize
-            model: [
-                { label: "Compacta", value: "compact" },
-                { label: "Padrão", value: "normal" },
-                { label: "Confortável", value: "comfortable" }
-            ]
-            onPicked: v => Settings.data.barSize = v
         }
     }
 
