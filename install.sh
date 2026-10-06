@@ -5,7 +5,7 @@ src="$(cd "$(dirname "$0")" && pwd)/kortex"
 dest="${XDG_CONFIG_HOME:-$HOME/.config}/quickshell/kortex"
 
 command -v qs >/dev/null || echo "Aviso: 'qs' (Quickshell) não encontrado. Instale com: yay -S quickshell-git"
-for dep in nmcli brightnessctl hyprsunset curl bluetoothctl xdg-mime; do
+for dep in nmcli brightnessctl hyprsunset curl bluetoothctl xdg-mime grim slurp jq; do
     command -v "$dep" >/dev/null || echo "Aviso: '$dep' não encontrado (alguns widgets ficarão limitados)."
 done
 command -v powerprofilesctl >/dev/null || echo "Aviso: 'power-profiles-daemon' não encontrado (sem ele o widget Energia só mostra a bateria). Instale com: sudo pacman -S power-profiles-daemon && sudo systemctl enable --now power-profiles-daemon"

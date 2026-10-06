@@ -80,6 +80,11 @@ Singleton {
     readonly property string edit: "edit"
     readonly property string shuffle: "shuffle"
     readonly property string folder: "folder"
+    readonly property string parentFolder: "drive_folder_upload"   // subir para a pasta de cima
+    readonly property string screenshot: "screenshot_region"       // captura de tela (título e avisos)
+    readonly property string shotScreen: "fullscreen"              // captura: tela inteira
+    readonly property string shotWindow: "select_window"           // captura: janela
+    readonly property string shotArea: "highlight_alt"             // captura: área
     readonly property string cog: "settings"
     readonly property string terminal: "terminal"
     readonly property string display: "monitor"

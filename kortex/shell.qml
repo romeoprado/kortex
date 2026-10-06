@@ -20,6 +20,7 @@ import qs.modules.notifications
 import qs.modules.wallpaper
 import qs.modules.settings
 import qs.modules.osd
+import qs.modules.screenshot
 
 ShellRoot {
     Wallpaper {}
@@ -41,12 +42,15 @@ ShellRoot {
     KortexSettings {}
     NotificationToasts {}
     OsdWindow {}
+    ScreenshotMenu {}
+    ScreenshotSave {}
 
     // Atalhos via IPC (use no hyprland.conf):
     //   qs -c kortex ipc call launcher toggle
     //   qs -c kortex ipc call themes toggle | wallpapers | matugen | set <nome>
     //   qs -c kortex ipc call keyboard next | prev | set <posição> | settings | language
     //   qs -c kortex ipc call settings toggle | open <appearance|bar|apps|power|general|about>
+    //   qs -c kortex ipc call screenshot toggle
     IpcHandler {
         target: "launcher"
         function toggle(): void { Popups.toggleLauncher() }
@@ -84,6 +88,12 @@ ShellRoot {
     IpcHandler {
         target: "osd"
         function locks(): void { Osd.checkLocks() }
+    }
+
+    // Captura de tela (a tecla Print): abre o menu Tela Inteira / Janela / Área
+    IpcHandler {
+        target: "screenshot"
+        function toggle(): void { Screenshot.toggle() }
     }
 
     IpcHandler {

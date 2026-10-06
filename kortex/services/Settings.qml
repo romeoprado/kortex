@@ -55,6 +55,8 @@ Singleton {
             property bool use24h: true
             property int clockFormat: 0       // formato do relógio da barra (clique do meio alterna): 0…4
             property string weatherCity: ""   // vazio = detecta pela rede
+            property string screenshotDir: ""      // última pasta em que uma captura foi salva; vazio = ~/Pictures/Screenshots
+            property string screenshotFormat: "png"   // último formato usado: "png" | "jpeg"
 
             // Widget Recursos: o que aparece na barra
             property bool statsCpu: true

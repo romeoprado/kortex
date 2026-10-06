@@ -700,9 +700,8 @@ bind = SUPER, mouse_up, workspace, e-1
 bindm = SUPER, mouse:272, movewindow
 bindm = SUPER, mouse:273, resizewindow
 
-# Capturas de tela
-bind = , Print, exec, grim -g "\$(slurp)" - | wl-copy
-bind = SHIFT, Print, exec, grim ~/Pictures/Screenshots/\$(date +%Y%m%d-%H%M%S).png
+# Captura de tela do Kortex: tela inteira, janela ou área; depois escolhe nome, formato e pasta
+bind = , Print, exec, \$kortex screenshot toggle
 
 # Teclas de mídia
 bindel = , XF86AudioRaiseVolume, exec, wpctl set-volume -l 1 @DEFAULT_AUDIO_SINK@ 5%+

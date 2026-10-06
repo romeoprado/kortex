@@ -24,6 +24,7 @@ Singleton {
     property bool languageOpen: false
     property bool settingsOpen: false
     property bool wallpaperCarouselOpen: false   // seletor rápido de papel de parede (carrossel)
+    property bool screenshotOpen: false          // menu da captura de tela (a janela de salvar segue Screenshot.pending)
     property string settingsPage: "appearance"  // appearance | bar | apps | power | general | about
     property string languageTab: "keyboard"    // "keyboard" | "language"
 
@@ -40,6 +41,7 @@ Singleton {
         languageOpen = false
         settingsOpen = false
         wallpaperCarouselOpen = false
+        screenshotOpen = false
     }
 
     // Clique fora de tudo: fecha o popup da barra e as janelas
@@ -86,6 +88,12 @@ Singleton {
         close()
         _closeOverlays()
         wallpaperCarouselOpen = !wasOpen
+    }
+
+    function openScreenshot() {
+        close()
+        _closeOverlays()
+        screenshotOpen = true
     }
 
     function openCityPrompt() {

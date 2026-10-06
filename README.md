@@ -2,7 +2,7 @@
 
 Shell para **Hyprland** feito em **Quickshell**. Versão **0.1**.
 
-Inclui barra superior, lançador estilo Rofi, central de notificações, controles de teclado e idioma, Bluetooth, Wi‑Fi, som e tela, energia (modo de energia e bateria), menu de sessão, calendário, previsão do tempo, estatísticas de hardware e um seletor de temas e papéis de parede. O tema também chega ao Kitty, ao btop, ao Firefox, à tela de login e aos apps do GNOME.
+Inclui barra superior, lançador estilo Rofi, central de notificações, controles de teclado e idioma, Bluetooth, Wi‑Fi, som e tela, energia (modo de energia e bateria), menu de sessão, calendário, previsão do tempo, estatísticas de hardware, captura de tela e um seletor de temas e papéis de parede. O tema também chega ao Kitty, ao btop, ao Firefox, à tela de login e aos apps do GNOME.
 
 ## 0. Instalação em um Arch Linux limpo (recomendado)
 
@@ -26,7 +26,7 @@ Se você já tem Hyprland configurado, pule para as seções 1 e 2.
 # Repositórios oficiais
 sudo pacman -S --needed qt6-declarative qt6-svg qt6-imageformats qt6-wayland ttf-jetbrains-mono-nerd ttc-iosevka \
     networkmanager bluez bluez-utils pipewire wireplumber pipewire-pulse \
-    brightnessctl hyprsunset curl pavucontrol btop pciutils xdg-utils power-profiles-daemon
+    brightnessctl hyprsunset curl pavucontrol btop pciutils xdg-utils power-profiles-daemon grim slurp jq
 
 # AUR (com yay ou paru)
 yay -S quickshell-git     # ou: quickshell
@@ -93,6 +93,7 @@ bind = SUPER, N, exec, $kortex notifications toggleDnd
 bind = SUPER SHIFT, N, exec, $kortex notifications clear
 bind = SUPER, comma, exec, $kortex settings toggle
 bind = SUPER SHIFT, A, exec, $kortex keepAwake toggle
+bind = , Print, exec, $kortex screenshot toggle
 
 # Terminal, explorador de arquivos e navegador: o open-app.sh abre o que foi escolhido em
 # Configurações › Aplicativos (ele não depende do shell estar rodando)
@@ -155,9 +156,9 @@ Se um arquivo carregado depois (como o de uma ferramenta gráfica de configuraç
 
 **Ícones.** Todos os ícones de interface são os do Google (**Material Symbols**, estilo *Outlined*, peso 400, de [fonts.google.com/icons](https://fonts.google.com/icons)). A fonte vai dentro do Kortex (`kortex/fonts/`, licença Apache-2.0 incluída), então não precisa instalar nada. Cada ícone é escrito pelo nome do catálogo em `services/Icons.qml` (por exemplo `wifi`, `notifications`): para trocar um, ponha outro nome; o peso está em `Icons.weight`. Os ícones são desenhados pelo componente `widgets/Icon.qml`. Só o logo do Arch, no botão do lançador, vem da Nerd Font, porque é uma marca e o Google não a tem.
 
-**Animações dos painéis.** Abrir e fechar os painéis usa as animações do próprio Hyprland, que o Kortex configura ao vivo (`services/HyprSync.qml`, sem gravar no `hyprland.conf`, e de novo a cada recarga do Hyprland): o lançador, o seletor de temas, as Configurações, as janelas de rede, cidade, idioma e confirmação de tela e o aviso de volume/brilho surgem crescendo um pouco a partir do centro (`popin 92%`, cerca de 250 ms) e somem mais depressa; os painéis da barra esmaecem ao abrir e ao fechar (cerca de 200 ms) e, ao abrir, deslizam 6 px a partir da barra. As velocidades valem para as camadas e os popups de qualquer programa (sem elas, herdariam a velocidade global, de cerca de 800 ms); as animações de janelas e áreas de trabalho não mudam. Se você configurar `layersIn/Out`, `fadeLayersIn/Out` ou `fadePopupsIn/Out` no seu `hyprland.conf`, o Kortex as sobrescreve.
+**Animações dos painéis.** Abrir e fechar os painéis usa as animações do próprio Hyprland, que o Kortex configura ao vivo (`services/HyprSync.qml`, sem gravar no `hyprland.conf`, e de novo a cada recarga do Hyprland): o lançador, o seletor de temas, as Configurações, as janelas de rede, cidade, idioma, confirmação de tela e captura de tela e o aviso de volume/brilho surgem crescendo um pouco a partir do centro (`popin 92%`, cerca de 250 ms) e somem mais depressa; os painéis da barra esmaecem ao abrir e ao fechar (cerca de 200 ms) e, ao abrir, deslizam 6 px a partir da barra. As velocidades valem para as camadas e os popups de qualquer programa (sem elas, herdariam a velocidade global, de cerca de 800 ms); as animações de janelas e áreas de trabalho não mudam. Se você configurar `layersIn/Out`, `fadeLayersIn/Out` ou `fadePopupsIn/Out` no seu `hyprland.conf`, o Kortex as sobrescreve.
 
-**Cabeçalho dos painéis.** Os painéis da barra e as janelas de cidade do clima, rede (senha e conexões) e confirmação de tela começam com o mesmo cabeçalho: um ícone (na cor de acento, sem fundo nem contorno, alinhado ao título principal e não à legenda), o título em fonte maior e numa fonte secundária, a Iosevka Fixed SmBd Ex (pacote `ttc-iosevka`, que o `arch-setup.sh` instala; troque pela chave `titleFont` do `settings.json`, e sem ela o Noto Sans assume), os controles à direita e um filete sólido embaixo, na cor de acento. O título, o ícone e os controles da direita ficam sempre à mesma distância da borda de cima (uma faixa de 38 px de referência), com ou sem legenda: a legenda fica embaixo e só aumenta a altura do painel. Quando há um estado útil, ele aparece numa segunda linha sob o título: o Bluetooth mostra *Desligado* ou quantos dispositivos estão conectados, a Rede mostra o estado (*Conectado*, *Desconectado* ou *Desligado*) e as Notificações avisam quando o *Não Perturbe* está ligado. O ícone do Clima é um pino de localização, o do painel Tela é um monitor, o do Som é um fone de ouvido (riscado no mudo) e o do painel Notificações fica preenchido quando há notificações e troca para o sino cortado no *Não Perturbe*.
+**Cabeçalho dos painéis.** Os painéis da barra e as janelas de cidade do clima, rede (senha e conexões), confirmação de tela e captura de tela começam com o mesmo cabeçalho: um ícone (na cor de acento, sem fundo nem contorno, alinhado ao título principal e não à legenda), o título em fonte maior e numa fonte secundária, a Iosevka Fixed SmBd Ex (pacote `ttc-iosevka`, que o `arch-setup.sh` instala; troque pela chave `titleFont` do `settings.json`, e sem ela o Noto Sans assume), os controles à direita e um filete sólido embaixo, na cor de acento. O título, o ícone e os controles da direita ficam sempre à mesma distância da borda de cima (uma faixa de 38 px de referência), com ou sem legenda: a legenda fica embaixo e só aumenta a altura do painel. Quando há um estado útil, ele aparece numa segunda linha sob o título: o Bluetooth mostra *Desligado* ou quantos dispositivos estão conectados, a Rede mostra o estado (*Conectado*, *Desconectado* ou *Desligado*) e as Notificações avisam quando o *Não Perturbe* está ligado. O ícone do Clima é um pino de localização, o do painel Tela é um monitor, o do Som é um fone de ouvido (riscado no mudo) e o do painel Notificações fica preenchido quando há notificações e troca para o sino cortado no *Não Perturbe*.
 
 Por segurança, **nada dentro do tema é executado**: só são lidos o `colors.toml`, o nome no `icons.theme` e as imagens de `backgrounds/`.
 
@@ -166,6 +167,8 @@ Por segurança, **nada dentro do tema é executado**: só são lidos o `colors.t
 **Papéis de Parede.** A aba mostra os fundos do tema atual e os da sua pasta (padrão `~/Pictures/Wallpapers`, alterável na própria aba). Com o tema Matugen ativo, escolher uma imagem aqui já gera as cores dela e troca tudo na hora (veja acima). Para excluir um papel de parede, use o ícone de lixeira no canto da imagem (aparece ao passar o mouse e na imagem selecionada), o clique direito ou a tecla `Delete`: o primeiro toque pede confirmação e o segundo **move o arquivo para a Lixeira** (dá para recuperar pelo gerenciador de arquivos; se a Lixeira falhar, nada é apagado). Só podem ser excluídos arquivos da sua pasta de papéis de parede, de `~/.local/share/kortex/backgrounds` e dos temas do próprio Kortex. Se o papel de parede em uso for excluído, o Kortex passa para o vizinho na lista.
 
 **Recursos.** O painel tem um bloco por componente, com o que a máquina informa (linhas sem dado somem) e a temperatura sempre na primeira linha: *CPU* (temperatura, carga média e threads), *RAM* (temperatura dos módulos e quanto está em uso), *GPU* (temperatura, consumo e memória de vídeo) e *Armazenamento* (temperatura do disco, usado e livre). Havendo mais de uma GPU ou disco, os demais aparecem como subseções do mesmo bloco. A **engrenagem** do painel abre a tela *Exibição*, com interruptores para o que aparece na barra (CPU, RAM, GPU, memória de vídeo e armazenamento; por padrão, só CPU e RAM) e, havendo mais de um disco, qual deles vai para a barra. A barra mostra sempre a porcentagem, e um item fica vermelho a partir de 90%. Detalhes: a NVIDIA é lida com o `nvidia-smi` e a AMD pelo sysfs; a Intel não informa uso sem root, então mostra só a frequência (e fica fora da barra). Numa GPU dedicada em repouso (notebooks híbridos) o Kortex não a consulta, para não acordá-la e gastar bateria: ela aparece como *em repouso*. O consumo da CPU não é exibido porque o kernel restringe o RAPL ao root. A temperatura do disco só aparece para NVMe ou SATA com o módulo `drivetemp`. O armazenamento junta subvolumes do mesmo disco (btrfs) num só e omite `/boot`. GPU e armazenamento só são consultados quando a barra os mostra ou o painel está aberto; as temperaturas, só com o painel aberto. O botão *Monitor do Sistema*, no pé do painel, abre o `btop` no terminal (o mesmo que o clique direito no widget).
+
+**Captura de tela.** A tecla `Print` (ou `qs -c kortex ipc call screenshot toggle`) abre o menu *Captura de Tela* com três opções: **Tela Inteira** (o monitor em que o menu abriu), **Janela** (as janelas visíveis ganham um contorno; clique na que quer capturar) e **Área** (arraste um retângulo; o tamanho aparece durante a seleção). As teclas `1`, `2` e `3` também escolhem, e `Esc` no menu ou durante a seleção cancela sem salvar nada. O menu some antes da captura, então ele não sai na imagem. Em seguida abre a janela *Salvar Captura*, com a prévia e o tamanho em pixels, o **nome** (sugerido com a data e a hora; a extensão é posta sozinha), o **formato** (*PNG*, sem perda, ou *JPEG*, menor, com qualidade 90) e a **pasta**: atalhos para *Capturas* (`~/Pictures/Screenshots`), *Imagens*, *Área de Trabalho* e *Downloads* (as pastas do `xdg-user-dirs`, quando existem) e *Pasta Pessoal*, e embaixo a pasta atual com as subpastas dela (clique para entrar; o botão à esquerda do caminho sobe uma pasta). `Enter` salva e um aviso no canto mostra onde; se a pasta não existir, ela é criada. Se já houver um arquivo com o mesmo nome, a janela avisa e o botão vira *Substituir*. *Descartar* ou `Esc` jogam a captura fora; clicar fora da janela não a descarta. A pasta e o formato usados ficam salvos para a próxima vez. A captura usa o `grim` e o `slurp` (o JPEG sai do `cjpeg`, que vem com o `grim`), e enquanto não é salva fica só em `$XDG_RUNTIME_DIR/kortex`. A captura de uma janela grava o retângulo dela como está na tela: o que estiver por cima dela também sai.
 
 ## 5. Configuração
 
@@ -190,6 +193,7 @@ As preferências ficam em `~/.local/state/kortex/settings.json` e são recarrega
 | `powerActions` | `{}` | Botões de sessão escondidos, por exemplo `{ "suspend": false }` (`lock`, `suspend`, `logout`, `reboot`, `firmware`, `shutdown`) |
 | `powerConfirm` | `true` | Sair, reiniciar, UEFI e desligar pedem um segundo clique |
 | `toastSeconds` | `6` | Segundos que um aviso flutuante fica na tela |
+| `screenshotDir`, `screenshotFormat` | `""`, `"png"` | Pasta e formato (`png` ou `jpeg`) da última captura de tela salva, que a janela de salvar sugere na próxima (vazio = `~/Pictures/Screenshots`) |
 | `terminal` | `""` | Terminal usado pelo shell, por exemplo ao abrir o `btop` (vazio = detecta, começando pelo `kitty`) |
 | `fileManager`, `browser` | `""` | Ids dos `.desktop` (sem o sufixo) escolhidos em Configurações › Aplicativos; vazio = o padrão do sistema |
 | `theme` | `"morello"` | Tema ativo (nome da pasta do tema; o seletor de temas escreve aqui) |
@@ -337,13 +341,14 @@ kortex/
 ├── modules/network      editor de conexões e janela de senha do Wi‑Fi
 ├── modules/weather      janela da cidade do clima
 ├── modules/display      janela de teste da resolução, taxa e escala
+├── modules/screenshot   menu e janela de salvar da captura de tela
 ├── modules/clickaway    camada que fecha os popups ao clicar fora
 ├── modules/notifications
 ├── modules/wallpaper
 ├── firefox/             CSS do Firefox (interface e páginas internas)
 ├── matugen/             modelo do Matugen (correspondência das cores Material com as do Kortex) e as cores fixas de cada modo
 ├── sddm/                tema da tela de login (SDDM)
-├── scripts/             auxiliares em bash (inclui theme-apply.sh, icon-theme.sh, open-app.sh, apps-apply.sh, kitty-theme.sh, btop-theme.sh, terminal-apply.sh, firefox-setup.sh, firefox-theme.sh, gnome-setup.sh, gnome-theme.sh, matugen-generate.sh, sddm-setup.sh e sddm-colors.sh)
+├── scripts/             auxiliares em bash (inclui theme-apply.sh, icon-theme.sh, open-app.sh, apps-apply.sh, kitty-theme.sh, btop-theme.sh, terminal-apply.sh, firefox-setup.sh, firefox-theme.sh, gnome-setup.sh, gnome-theme.sh, matugen-generate.sh, screenshot.sh, sddm-setup.sh e sddm-colors.sh)
 └── themes/              temas embutidos
 ```
 
