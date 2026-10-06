@@ -27,17 +27,20 @@ BarButton {
         .filter(a => Settings.powerActionEnabled(a.id))
         .map(a => Object.assign({ confirm: a.destructive && Settings.data.powerConfirm }, a))
 
-    // Ação sob o mouse (id), para a etiqueta com o nome aparecer embaixo do botão
+    // Ação sob o mouse (id): o nome dela aparece numa etiqueta à direita do título
     property string hovered: ""
-    readonly property string confirmText: "Clique novamente para confirmar."
-    // Etiqueta: sob o botão da ação que pede confirmação ou, senão, da que está sob o mouse
+    readonly property string confirmText: "Confirmar?"
+    // Etiqueta: o pedido de confirmação ou, senão, o nome da ação sob o mouse
     readonly property int tagIndex: actions.findIndex(a => a.id === (confirming !== "" ? confirming : hovered))
+    readonly property string tagText: confirming !== "" ? confirmText : tagIndex >= 0 ? actions[tagIndex].text : ""
     FontMetrics { id: tagMetrics; font.family: Theme.font; font.pixelSize: Theme.textSmall }
     FontMetrics { id: tagBoldMetrics; font.family: Theme.font; font.pixelSize: Theme.textSmall; font.bold: true }
-    readonly property real longestLabel: {
-        void tagMetrics.font, tagBoldMetrics.font   // refaz a conta quando a fonte muda
-        return Math.max(0, ...actions.map(a => a.confirm ? tagBoldMetrics.advanceWidth(confirmText)
-                                                         : tagMetrics.advanceWidth(a.text))) + 20   // folga da etiqueta
+    FontMetrics { id: titleMetrics; font.family: Theme.titleFont; font.pixelSize: Theme.textTitle; font.bold: true }
+    // Cabeçalho mais largo possível: ícone, "Sessão" e a maior etiqueta (nome de ação ou confirmação)
+    readonly property real headerWidth: {
+        void tagMetrics.font, tagBoldMetrics.font, titleMetrics.font   // refaz a conta quando a fonte muda
+        const tag = Math.max(tagBoldMetrics.advanceWidth(confirmText), ...actions.map(a => tagMetrics.advanceWidth(a.text))) + 20
+        return Theme.iconSize + 8 + 10 + titleMetrics.advanceWidth("Sessão") + 8 + tag
     }
 
     function run(a) {
@@ -69,11 +72,43 @@ BarButton {
         target: root
         popupId: "power"
         screenName: root.screenName
-        // Justo ao conteúdo: a linha de botões ou, se for mais larga, a maior frase possível embaixo
-        panelWidth: Math.ceil(Math.max(root.actions.length * 52 - 8, root.longestLabel, 200)) + padding * 2
+        // Justo ao conteúdo: a linha de botões ou, se for mais largo, o cabeçalho com a maior etiqueta
+        panelWidth: Math.ceil(Math.max(root.actions.length * 52 - 8, root.headerWidth, 200)) + padding * 2
         onWantedChanged: root.confirming = ""
 
-        PopupTitle { text: "Sessão"; icon: Icons.session }
+        PopupTitle {
+            text: "Sessão"
+            icon: Icons.session
+
+            // Etiqueta à direita do título: o nome da ação sob o mouse ou, em vermelho, a confirmação.
+            // Guarda o último texto para sumir inteira (sem encolher antes de apagar).
+            Rectangle {
+                id: tag
+                readonly property bool asking: root.confirming !== ""
+                property string shown: ""
+                implicitWidth: tagLabel.implicitWidth + 20
+                implicitHeight: tagLabel.implicitHeight + 6
+                radius: height / 2
+                color: asking ? Theme.red : Theme.bgAlt
+                opacity: root.tagText !== "" ? 1 : 0
+                Behavior on opacity { NumberAnimation { duration: 120 } }
+                Behavior on color { ColorAnimation { duration: 120 } }
+                Connections {
+                    target: root
+                    function onTagTextChanged() { if (root.tagText !== "") tag.shown = root.tagText }
+                }
+
+                Text {
+                    id: tagLabel
+                    anchors.centerIn: parent
+                    text: tag.shown
+                    color: tag.asking ? Theme.redText : Theme.fg
+                    font.family: Theme.font
+                    font.pixelSize: Theme.textSmall
+                    font.bold: tag.asking
+                }
+            }
+        }
 
         Text {
             visible: root.actions.length === 0
@@ -87,7 +122,7 @@ BarButton {
             font.pixelSize: Theme.textBody
         }
 
-        // Um botão só com ícone por ação; embaixo, o nome da ação sob o mouse ou o pedido de confirmação
+        // Um botão só com ícone por ação; o nome aparece na etiqueta do cabeçalho
         RowLayout {
             visible: root.actions.length > 0
             Layout.fillWidth: true
@@ -110,18 +145,6 @@ BarButton {
                     }
                 }
             }
-        }
-
-        // Etiqueta sob o botão: o nome da ação ou, em vermelho, o pedido de confirmação
-        ButtonTag {
-            visible: root.actions.length > 0
-            Layout.fillWidth: true
-            readonly property bool asking: root.confirming !== ""
-            index: root.tagIndex
-            text: asking ? root.confirmText : root.tagIndex >= 0 ? root.actions[root.tagIndex].text : ""
-            fill: asking ? Theme.red : Theme.bgAlt
-            textColor: asking ? Theme.redText : Theme.fg
-            bold: asking
         }
     }
 }
