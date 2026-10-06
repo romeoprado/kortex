@@ -13,8 +13,9 @@ import qs.widgets
 // Dois estilos (Configurações › Barra › Estilo da barra):
 //  Inteira (padrão): de ponta a ponta, colada à borda da tela.
 //  Flutuante: solta da borda e das laterais (a Theme.gap px), centralizada, só da largura do
-//    conteúdo e com o raio e a borda dos painéis (a borda pode ser desligada). A largura é
-//    simétrica (o lado maior vale para os dois), para o relógio continuar no centro da tela.
+//    conteúdo e com o raio e a borda dos painéis (a borda pode ser desligada). Sem seções: o
+//    lançador, as áreas de trabalho e todos os itens numa fileira só, com ordem própria
+//    (Settings.barFloatingLayout); a fileira da esquerda recebe tudo e as outras ficam vazias.
 PanelWindow {
     id: bar
 
@@ -26,9 +27,7 @@ PanelWindow {
 
     // folga entre os grupos e a ponta da barra, e entre os grupos e o relógio (estilo flutuante)
     readonly property int inset: floating ? Math.max(4, Math.round(Theme.radius / 2)) + frameBorder : 4
-    readonly property int groupGap: 16
-    readonly property real contentWidth: 2 * (Math.max(leftGroup.implicitWidth, rightGroup.implicitWidth) + inset + groupGap)
-                                         + centerGroup.implicitWidth
+    readonly property real contentWidth: leftGroup.implicitWidth + 2 * inset
 
     screen: modelData
     // sem âncoras laterais, o Hyprland centraliza a camada
@@ -64,8 +63,10 @@ PanelWindow {
         onPressed: Popups.dismiss()
     }
 
-    // ── Itens (ordem em Settings.barLayout; segure um item e arraste para mudá-lo de lugar) ──
+    // ── Itens (ordem em Settings.barLayout, ou barFloatingLayout na flutuante; segure um item e
+    //    arraste para mudá-lo de lugar) ──
     readonly property var layout: Settings.barLayout()
+    readonly property var floatingOrder: Settings.barFloatingLayout()
     readonly property var components: ({
         stats: cStats, clock: cClock, weather: cWeather, keyboard: cKeyboard, bluetooth: cBluetooth,
         network: cNetwork, audio: cAudio, display: cDisplay, notifications: cNotifications,
@@ -108,14 +109,14 @@ PanelWindow {
     RowLayout {
         id: leftGroup
         anchors { left: parent.left; top: parent.top; bottom: parent.bottom; leftMargin: bar.inset }
-        spacing: 2
+        spacing: bar.floating ? 0 : 2
 
         LauncherButton {}
         // espaçadores ao redor das áreas de trabalho, com folga só do lado de fora do conjunto
         Rectangle { Layout.alignment: Qt.AlignVCenter; Layout.leftMargin: 6; width: 4; height: 4; color: Theme.muted }
         Workspaces { shellScreen: bar.modelData }
         Rectangle { id: fixedEnd; Layout.alignment: Qt.AlignVCenter; Layout.rightMargin: 6; width: 4; height: 4; color: Theme.muted }
-        Repeater { id: leftItems; model: bar.layout.left; delegate: slotDelegate }
+        Repeater { id: leftItems; model: bar.floating ? bar.floatingOrder : bar.layout.left; delegate: slotDelegate }
     }
 
     RowLayout {
@@ -123,7 +124,7 @@ PanelWindow {
         anchors { horizontalCenter: parent.horizontalCenter; top: parent.top; bottom: parent.bottom }
         spacing: 0
 
-        Repeater { id: centerItems; model: bar.layout.center; delegate: slotDelegate }
+        Repeater { id: centerItems; model: bar.floating ? [] : bar.layout.center; delegate: slotDelegate }
     }
 
     RowLayout {
@@ -131,7 +132,7 @@ PanelWindow {
         anchors { right: parent.right; top: parent.top; bottom: parent.bottom; rightMargin: bar.inset }
         spacing: 0
 
-        Repeater { id: rightItems; model: bar.layout.right; delegate: slotDelegate }
+        Repeater { id: rightItems; model: bar.floating ? [] : bar.layout.right; delegate: slotDelegate }
     }
 
     // ── Arrastar ──
@@ -146,9 +147,10 @@ PanelWindow {
     // vazio, o lugar do próprio grupo. `index` conta na lista do grupo sem o item arrastado.
     function _slots() {
         const out = []
-        const groups = [["left", leftItems], ["center", centerItems], ["right", rightItems]]
+        const groups = floating ? [["flat", leftItems]]
+                     : [["left", leftItems], ["center", centerItems], ["right", rightItems]]
         for (const [g, rep] of groups) {
-            const ids = layout[g].filter(id => id !== dragId)
+            const ids = (g === "flat" ? floatingOrder : layout[g]).filter(id => id !== dragId)
             const shown = []
             for (let i = 0; i < rep.count; i++) {
                 const it = rep.itemAt(i)
@@ -157,10 +159,10 @@ PanelWindow {
                 shown.push({ index: ids.indexOf(it.itemId), x0: p.x, x1: p.x + it.width })
             }
             if (shown.length === 0) {
-                const x = g === "left" ? fixedEnd.mapToItem(null, fixedEnd.width + 8, 0).x
+                const x = g === "left" || g === "flat" ? fixedEnd.mapToItem(null, fixedEnd.width + 8, 0).x
                         : g === "center" ? bar.width / 2
                         : bar.width - inset - 4
-                out.push({ group: g, index: g === "left" ? 0 : ids.length, x: x })
+                out.push({ group: g, index: g === "left" || g === "flat" ? 0 : ids.length, x: x })
                 continue
             }
             for (const it of shown) out.push({ group: g, index: it.index, x: it.x0 })
@@ -192,7 +194,9 @@ PanelWindow {
         dragId = ""
         dragSlot = null
         dropSlot = null
-        if (dropped && !outside && target) Settings.moveBarItem(id, target.group, target.index)
+        if (!dropped || outside || !target) return
+        if (target.group === "flat") Settings.moveFloatingItem(id, target.index)
+        else Settings.moveBarItem(id, target.group, target.index)
     }
 
     // cópia do item seguindo o cursor

@@ -59,6 +59,7 @@ Singleton {
             property int workspaceCount: 5          // 1…10
             property var barItems: ({})             // { stats: false, ... }: item ausente = visível
             property var barLayout: ({})            // ordem dos itens: { left: [...], center: [...], right: [...] }; vazio = padrão
+            property var barFloatingOrder: []       // ordem na barra flutuante (uma fileira só); vazio = a da barra inteira
             property var powerActions: ({})         // { lock: false, ... }: botão ausente = visível
             property bool powerConfirm: true        // sair/reiniciar/desligar pedem um segundo clique
             property int toastSeconds: 6            // tempo dos avisos flutuantes
@@ -125,6 +126,31 @@ Singleton {
     function barLayoutIsDefault() {
         const cur = barLayout()
         return ["left", "center", "right"].every(g => cur[g].join() === barDefaultLayout[g].join())
+            && (adapter.barFloatingOrder || []).length === 0
+    }
+    // Barra flutuante: os itens numa fileira só. Sem ordem própria gravada, segue a da barra
+    // inteira (esquerda, centro e direita em sequência); a gravada é conferida como a outra.
+    function barFloatingLayout() {
+        const full = barLayout()
+        const base = full.left.concat(full.center, full.right)
+        const seen = {}
+        const out = []
+        const saved = adapter.barFloatingOrder || []
+        for (let i = 0; i < saved.length; i++) {
+            const id = saved[i]
+            if (base.includes(id) && !seen[id]) { seen[id] = true; out.push(id) }
+        }
+        for (const id of base) if (!seen[id]) out.push(id)
+        return out
+    }
+    function moveFloatingItem(id, index) {
+        const cur = barFloatingLayout().filter(x => x !== id)
+        cur.splice(Math.max(0, Math.min(index, cur.length)), 0, id)
+        adapter.barFloatingOrder = cur
+    }
+    function resetBarOrder() {
+        adapter.barLayout = ({})
+        adapter.barFloatingOrder = []
     }
     // Põe `id` no grupo `group`, na posição `index` da lista desse grupo já sem ele
     function moveBarItem(id, group, index) {
@@ -172,7 +198,7 @@ Singleton {
             ["animations", true], ["animIntensity", "elegant"], ["animSpeed", "normal"], ["animWindows", "popin"],
             ["animWorkspaces", "horizontal"],
             ["workspaceCount", 5],
-            ["barItems", ({})], ["barLayout", ({})], ["powerActions", ({})], ["powerConfirm", true], ["toastSeconds", 6]
+            ["barItems", ({})], ["barLayout", ({})], ["barFloatingOrder", []], ["powerActions", ({})], ["powerConfirm", true], ["toastSeconds", 6]
         ])
     }
 

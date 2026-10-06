@@ -92,7 +92,7 @@ SettingsPage {
             icon: Icons.undo
             text: "Restaurar ordem padrão"
             enabled: !Settings.barLayoutIsDefault()
-            onClicked: Settings.data.barLayout = ({})
+            onClicked: Settings.resetBarOrder()
         }
     }
 
