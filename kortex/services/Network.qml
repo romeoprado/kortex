@@ -17,7 +17,7 @@ Singleton {
     property string wiredName: ""
     property var networks: []
     property var known: []
-    property var connections: []       // [{ name, type: "wifi"|"ethernet", active, device, autoconnect }]
+    property var connections: []       // [{ name, type: "wifi"|"ethernet", active, device, autoconnect, path }]
     property string connecting: ""
     property string error: ""
     property bool lastConnectOk: false // resultado da última tentativa de conexão
@@ -29,6 +29,21 @@ Singleton {
     property var current: null
     readonly property bool watchCurrent: Popups.current === "network"
     onWatchCurrentChanged: if (watchCurrent) refreshCurrent()
+
+    // Dados recebidos e enviados na sessão da conexão em uso (desde que ela foi ativada), em bytes;
+    // -1 = ainda não lidos. Atualizados a cada segundo com o painel de rede aberto.
+    property real sessionRx: -1
+    property real sessionTx: -1
+    readonly property bool watchTraffic: watchCurrent && current !== null
+    onWatchTrafficChanged: if (!watchTraffic) { sessionRx = -1; sessionTx = -1 }
+
+    // Os contadores da interface (/sys/class/net/<dev>/statistics) só zeram quando ela é desligada,
+    // e o NetworkManager troca de rede ou religa o cabo sem desligá-la. Por isso cada ativação (o
+    // caminho ActiveConnection/N do NM, novo a cada vez) guarda o valor dos contadores ao ser vista,
+    // em network-sessions.json com o boot_id: reiniciar o shell não zera a sessão. Sem registro
+    // deste boot (a conexão feita no boot, antes do login), a sessão conta desde que a interface subiu.
+    property var _sessions: ({})       // caminho da ativação → { device, rx, tx }
+    property string _bootId: ""
 
     // Perfil em edição
     property var details: null         // ver _parseDetails()
@@ -109,7 +124,7 @@ Singleton {
             const f = fields(l)
             const kind = f[1] === "802-11-wireless" ? "wifi" : f[1] === "802-3-ethernet" ? "ethernet" : ""
             if (!kind) continue
-            conns.push({ name: f[0], type: kind, active: f[2] === "yes", device: f[3] || "", autoconnect: f[4] === "yes" })
+            conns.push({ name: f[0], type: kind, active: f[2] === "yes", device: f[3] || "", autoconnect: f[4] === "yes", path: f[5] || "" })
         }
         connections = conns.sort((a, b) => (b.active - a.active) || a.name.localeCompare(b.name))
         known = conns.filter(c => c.type === "wifi").map(c => c.name)
@@ -126,6 +141,11 @@ Singleton {
         }
         networks = Object.values(map).sort((a, b) => (b.active - a.active) || (b.signal - a.signal))
         if (watchCurrent) refreshCurrent()
+
+        // ativação nova (ou que acabou): lê os contadores para registrar a sessão
+        const paths = conns.filter(c => c.active && c.device && c.path).map(c => c.path)
+        const tracked = Object.keys(_sessions)
+        if (!_bootId || paths.length !== tracked.length || paths.some(p => !_sessions[p])) readCounters()
     }
 
     function refreshCurrent() {
@@ -163,6 +183,74 @@ Singleton {
 
     function refresh() {
         if (!status.running) status.running = true
+    }
+
+    // ── Dados da sessão ─────────────────────────────────────────────────
+    function readCounters() {
+        if (counters.running) return
+        const devices = connections.filter(c => c.active && c.device && c.path).map(c => c.device)
+        counters.command = ["sh", "-c",
+            "cat /proc/sys/kernel/random/boot_id; for d; do s=/sys/class/net/$d/statistics; "
+            + "echo \"$d $(cat $s/rx_bytes) $(cat $s/tx_bytes)\"; done", "sh"].concat(devices)
+        counters.running = true
+    }
+
+    // 1ª linha: boot_id; depois "interface recebidos enviados"
+    function _parseCounters(text) {
+        const lines = text.trim().split("\n")
+        const boot = (lines[0] || "").trim()
+        if (!boot) return
+        const now = {}
+        for (const l of lines.slice(1)) {
+            const f = l.split(" ")
+            if (f.length === 3 && f[1] !== "" && f[2] !== "") now[f[0]] = { rx: Number(f[1]), tx: Number(f[2]) }
+        }
+
+        // 1ª leitura: retoma o registro deste boot, se houver
+        let fresh = false
+        if (_bootId !== boot) {
+            let saved = null
+            try { saved = JSON.parse(sessionsFile.text()) } catch (e) {}
+            fresh = !saved || saved.boot !== boot
+            _sessions = fresh ? {} : (saved.sessions || {})
+            _bootId = boot
+        }
+
+        const sessions = {}
+        let changed = fresh
+        for (const c of connections) {
+            const v = now[c.device]
+            if (!c.active || !c.path || !v) continue
+            const old = _sessions[c.path]
+            if (old && old.device === c.device && v.rx >= old.rx && v.tx >= old.tx) {
+                sessions[c.path] = old
+                continue
+            }
+            // ativação nova: conta a partir de agora; na 1ª do boot, ou se os contadores zeraram
+            // (a interface foi religada), desde que a interface subiu
+            sessions[c.path] = fresh || old ? { device: c.device, rx: 0, tx: 0 } : { device: c.device, rx: v.rx, tx: v.tx }
+            changed = true
+        }
+        if (Object.keys(sessions).length !== Object.keys(_sessions).length) changed = true
+        _sessions = sessions
+        if (changed) sessionsFile.setText(JSON.stringify({ boot: boot, sessions: sessions }))
+
+        const cur = current ? Object.values(sessions).find(x => x.device === current.device) : null
+        const v = cur ? now[cur.device] : null
+        sessionRx = v ? v.rx - cur.rx : -1
+        sessionTx = v ? v.tx - cur.tx : -1
+    }
+
+    // Bytes por extenso: 0 B · 850 KB · 12,4 MB · 1,8 GB
+    function bytes(n) {
+        if (n < 0) return "—"
+        const units = ["B", "KB", "MB", "GB", "TB"]
+        let i = 0
+        while (n >= 1024 && i < units.length - 1) {
+            n /= 1024
+            i++
+        }
+        return (i === 0 || n >= 100 ? Math.round(n) : Theme.decimal(n, 1)) + " " + units[i]
     }
 
     function rescan() {
@@ -311,7 +399,7 @@ Singleton {
         command: ["sh", "-c",
             "nmcli -t -f WIFI general; echo '@@'; " +
             "nmcli -t -f TYPE,STATE,CONNECTION device; echo '@@'; " +
-            "nmcli -t -f NAME,TYPE,ACTIVE,DEVICE,AUTOCONNECT connection show; echo '@@'; " +
+            "nmcli -t -f NAME,TYPE,ACTIVE,DEVICE,AUTOCONNECT,ACTIVE-PATH connection show; echo '@@'; " +
             "nmcli -t -f IN-USE,SIGNAL,SECURITY,SSID device wifi list --rescan no"]
         stdout: StdioCollector {
             id: statusOut
@@ -329,6 +417,21 @@ Singleton {
             id: currentOut
             onStreamFinished: root._parseCurrent(currentOut.text)
         }
+    }
+
+    Process {
+        id: counters
+        stdout: StdioCollector {
+            id: countersOut
+            onStreamFinished: root._parseCounters(countersOut.text)
+        }
+    }
+
+    FileView {
+        id: sessionsFile
+        path: Settings.stateDir + "/network-sessions.json"
+        blockLoading: true
+        printErrors: false
     }
 
     Process {
@@ -428,6 +531,15 @@ Singleton {
         repeat: true
         triggeredOnStart: true
         onTriggered: root.refresh()
+    }
+
+    // dados da sessão ao vivo com o painel de rede aberto
+    Timer {
+        interval: 1000
+        running: root.watchTraffic
+        repeat: true
+        triggeredOnStart: true
+        onTriggered: root.readCounters()
     }
 
     Timer {

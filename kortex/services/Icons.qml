@@ -55,6 +55,8 @@ Singleton {
     readonly property string dns: "dns"
     readonly property string ipv6: "public"
     readonly property string mac: "fingerprint"
+    readonly property string received: "arrow_downward"   // dados recebidos na sessão
+    readonly property string sent: "arrow_upward"         // dados enviados na sessão
     readonly property string logout: "logout"
     readonly property string reboot: "restart_alt"
     readonly property string firmware: "developer_board"   // reiniciar direto na BIOS/UEFI

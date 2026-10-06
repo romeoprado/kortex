@@ -52,8 +52,9 @@ BarButton {
             }
         }
 
-        // Conexão em uso: cabeçalho (rede, interface e sinal) e um bloco por dado; o IPv6 só aparece
-        // se houver um endereço global e ocupa a linha inteira
+        // Conexão em uso: cabeçalho (rede, interface e sinal) e um bloco por dado: primeiro os dados
+        // recebidos e enviados nesta sessão (ao vivo), depois os endereços; o IPv6 só aparece se
+        // houver um endereço global e ocupa a linha inteira
         GradientBorder {
             id: info
             readonly property var c: Network.current
@@ -143,6 +144,8 @@ BarButton {
                             const c = info.c
                             if (!c) return []
                             const rows = [
+                                { icon: Icons.received, label: "Recebidos", traffic: "rx" },
+                                { icon: Icons.sent, label: "Enviados", traffic: "tx" },
                                 { icon: Icons.ipAddress, label: "IP", value: c.ip },
                                 { icon: Icons.gateway, label: "Gateway", value: c.gateway },
                                 { icon: Icons.dns, label: "DNS", value: c.dns },
@@ -185,7 +188,9 @@ BarButton {
                                 }
                                 Text {
                                     Layout.fillWidth: true
-                                    text: tileBox.modelData.value || "—"
+                                    text: tileBox.modelData.traffic === "rx" ? Network.bytes(Network.sessionRx)
+                                        : tileBox.modelData.traffic === "tx" ? Network.bytes(Network.sessionTx)
+                                        : tileBox.modelData.value || "—"
                                     color: Theme.fg
                                     font.family: Theme.font
                                     font.pixelSize: Theme.textSmall
