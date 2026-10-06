@@ -1,1 +1,4 @@
 kortex.tar.gz
+
+# Skills e configurações locais do Claude Code (não vão ao GitHub)
+.claude/
