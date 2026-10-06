@@ -37,7 +37,7 @@ Singleton {
             property string matugenScheme: "scheme-tonal-spot"    // variante do Matugen (--type)
             property bool hyprBorders: true
             property string mainFont: ""       // fonte principal; vazio = JetBrainsMono Nerd Font
-            property int fontSize: 12          // 10…16
+            property int fontSize: 13          // 10…16 (a tela oferece 12, 13 e 14)
             property int radius: 6             // raio dos cantos arredondados dos painéis, 0…20 px
             property real borderWidth: 2       // espessura da borda dos painéis, inteiro de 0 a 5 px
             property bool hyprSyncAppearance: false   // aplica raio e borda também às janelas do Hyprland
@@ -192,7 +192,7 @@ Singleton {
     // Volta aos padrões o que a janela de Configurações controla (menos tema, papel de parede e aplicativos)
     function resetAppearance() {
         applyBatch([
-            ["mainFont", ""], ["titleFont", ""], ["fontSize", 12], ["radius", 6], ["borderWidth", 2],
+            ["mainFont", ""], ["titleFont", ""], ["fontSize", 13], ["radius", 6], ["borderWidth", 2],
             ["hyprSyncAppearance", false], ["terminalOpacity", 85], ["terminalBlur", true], ["barPosition", "top"], ["barStyle", "full"], ["barBorder", true],
             ["animations", true], ["animIntensity", "elegant"], ["animSpeed", "normal"], ["animWindows", "popin"],
             ["animWorkspaces", "horizontal"],

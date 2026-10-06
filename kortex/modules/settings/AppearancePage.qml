@@ -14,7 +14,7 @@ SettingsPage {
     SettingRow {
         title: "Fonte principal"
         Text {
-            Layout.maximumWidth: 190
+            Layout.maximumWidth: Theme.fontSize * 16   // cabe "JetBrainsMono Nerd Font" em qualquer tamanho
             text: Theme.font
             color: Theme.fgBright
             font.family: Theme.font
@@ -47,7 +47,7 @@ SettingsPage {
     SettingRow {
         title: "Fonte dos títulos"
         Text {
-            Layout.maximumWidth: 190
+            Layout.maximumWidth: Theme.fontSize * 16   // cabe "JetBrainsMono Nerd Font" em qualquer tamanho
             text: Theme.titleFont
             color: Theme.fgBright
             font.family: Theme.titleFont
@@ -83,9 +83,9 @@ SettingsPage {
         Segmented {
             current: Settings.data.fontSize
             model: [
-                { label: "Pequeno", value: 11 },
-                { label: "Normal", value: 12 },
-                { label: "Grande", value: 13 }
+                { label: "Pequeno", value: 12 },
+                { label: "Normal", value: 13 },
+                { label: "Grande", value: 14 }
             ]
             onPicked: v => Settings.data.fontSize = v
         }
