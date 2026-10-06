@@ -28,6 +28,17 @@ Singleton {
     property string settingsPage: "appearance"  // appearance | animations | bar | apps | power | general | about
     property string languageTab: "keyboard"    // "keyboard" | "language"
 
+    // Largura da barra flutuante em cada monitor (nome → px; a barra informa), para a camada
+    // ClickAway recortar exatamente o espaço dela
+    property var barWidths: ({})
+
+    function setBarWidth(screenName, width) {
+        if (!screenName || barWidths[screenName] === width) return
+        const widths = Object.assign({}, barWidths)
+        widths[screenName] = width
+        barWidths = widths
+    }
+
     // Ignora um segundo clique em até 300 ms no botão que acabou de fechar o popup (duplo clique)
     property real _closedAt: 0
     property string _closedKey: ""

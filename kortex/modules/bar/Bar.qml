@@ -42,6 +42,11 @@ PanelWindow {
 
     Behavior on color { ColorAnimation { duration: 300 } }
 
+    // a camada ClickAway recorta o espaço da barra flutuante com esta largura
+    readonly property real floatingWidth: floating ? implicitWidth : 0
+    onFloatingWidthChanged: Popups.setBarWidth(screenName, floatingWidth)
+    Component.onCompleted: Popups.setBarWidth(screenName, floatingWidth)
+
     // fundo da barra flutuante: a mesma moldura dos painéis
     GradientFrame {
         anchors.fill: parent
@@ -56,7 +61,7 @@ PanelWindow {
         enabled: KeepAwake.active
     }
 
-    // Espaço vazio da barra: a camada ClickAway começa abaixo dela, então fecha aqui também
+    // Espaço vazio da barra: a camada ClickAway deixa a barra de fora, então fecha aqui também
     MouseArea {
         anchors.fill: parent
         acceptedButtons: Qt.AllButtons
