@@ -13,6 +13,7 @@ PanelWindow {
     // Cada aviso entra deslizando da direita e sai deslizando de volta e esmaecendo (por tempo,
     // clique ou fechado pelo app); os outros abrem ou fecham o espaço suavemente. A camada não tem
     // animação do Hyprland (ver HyprSync) e só encolhe depois que a saída termina (heldHeight).
+    // Deslocamento, escala, curvas e durações vêm de Motion (Configurações › Animações).
     visible: Notifs.toasts.length > 0 || heldHeight > 0
     anchors { top: true; right: true }
     margins { top: Theme.gap; right: Theme.gap }
@@ -36,14 +37,9 @@ PanelWindow {
     }
     Timer {
         id: shrink
-        interval: 480
+        interval: Motion.enabled ? Motion.ms(480) : 0
         onTriggered: win.heldHeight = Math.max(0, win.listHeight)
     }
-
-    // curvas iguais às do Hyprland (kortexOut/kortexIn/kortexStd, ver HyprSync)
-    readonly property var curveOut: [0.05, 0.7, 0.1, 1, 1, 1]
-    readonly property var curveIn: [0.3, 0, 0.8, 0.15, 1, 1]
-    readonly property var curveStd: [0.2, 0, 0, 1, 1, 1]
 
     ListView {
         id: list
@@ -67,29 +63,33 @@ PanelWindow {
         }
 
         add: Transition {
-            NumberAnimation { property: "x"; from: 56; to: 0; duration: 450; easing.type: Easing.BezierSpline; easing.bezierCurve: win.curveOut }
-            NumberAnimation { property: "scale"; from: 0.94; to: 1; duration: 450; easing.type: Easing.BezierSpline; easing.bezierCurve: win.curveOut }
-            NumberAnimation { property: "opacity"; from: 0; to: 1; duration: 220; easing.type: Easing.OutQuad }
+            enabled: Motion.enabled
+            NumberAnimation { property: "x"; from: Motion.toastShift; to: 0; duration: Motion.ms(450); easing.type: Easing.BezierSpline; easing.bezierCurve: Motion.curveOut }
+            NumberAnimation { property: "scale"; from: Motion.toastScale; to: 1; duration: Motion.ms(450); easing.type: Easing.BezierSpline; easing.bezierCurve: Motion.curveOut }
+            NumberAnimation { property: "opacity"; from: 0; to: 1; duration: Motion.ms(220); easing.type: Easing.OutQuad }
         }
         remove: Transition {
-            NumberAnimation { property: "x"; to: 56; duration: 240; easing.type: Easing.BezierSpline; easing.bezierCurve: win.curveIn }
-            NumberAnimation { property: "scale"; to: 0.94; duration: 240; easing.type: Easing.BezierSpline; easing.bezierCurve: win.curveIn }
-            NumberAnimation { property: "opacity"; to: 0; duration: 180; easing.type: Easing.InQuad }
+            enabled: Motion.enabled
+            NumberAnimation { property: "x"; to: Motion.toastShift; duration: Motion.ms(240); easing.type: Easing.BezierSpline; easing.bezierCurve: Motion.curveIn }
+            NumberAnimation { property: "scale"; to: Motion.toastScale; duration: Motion.ms(240); easing.type: Easing.BezierSpline; easing.bezierCurve: Motion.curveIn }
+            NumberAnimation { property: "opacity"; to: 0; duration: Motion.ms(180); easing.type: Easing.InQuad }
         }
         // quem é empurrado desliza; se estava entrando, termina de entrar
         addDisplaced: Transition {
-            NumberAnimation { property: "y"; duration: 360; easing.type: Easing.BezierSpline; easing.bezierCurve: win.curveStd }
-            NumberAnimation { properties: "x"; to: 0; duration: 360; easing.type: Easing.BezierSpline; easing.bezierCurve: win.curveOut }
-            NumberAnimation { properties: "opacity,scale"; to: 1; duration: 200 }
+            enabled: Motion.enabled
+            NumberAnimation { property: "y"; duration: Motion.ms(360); easing.type: Easing.BezierSpline; easing.bezierCurve: Motion.curveStd }
+            NumberAnimation { properties: "x"; to: 0; duration: Motion.ms(360); easing.type: Easing.BezierSpline; easing.bezierCurve: Motion.curveOut }
+            NumberAnimation { properties: "opacity,scale"; to: 1; duration: Motion.ms(200) }
         }
         // ao sair um aviso, os de baixo esperam ele esmaecer um pouco antes de subir
         removeDisplaced: Transition {
+            enabled: Motion.enabled
             SequentialAnimation {
-                PauseAnimation { duration: 90 }
-                NumberAnimation { property: "y"; duration: 360; easing.type: Easing.BezierSpline; easing.bezierCurve: win.curveStd }
+                PauseAnimation { duration: Motion.ms(90) }
+                NumberAnimation { property: "y"; duration: Motion.ms(360); easing.type: Easing.BezierSpline; easing.bezierCurve: Motion.curveStd }
             }
-            NumberAnimation { properties: "x"; to: 0; duration: 360; easing.type: Easing.BezierSpline; easing.bezierCurve: win.curveOut }
-            NumberAnimation { properties: "opacity,scale"; to: 1; duration: 200 }
+            NumberAnimation { properties: "x"; to: 0; duration: Motion.ms(360); easing.type: Easing.BezierSpline; easing.bezierCurve: Motion.curveOut }
+            NumberAnimation { properties: "opacity,scale"; to: 1; duration: Motion.ms(200) }
         }
     }
 }

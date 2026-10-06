@@ -44,6 +44,13 @@ Singleton {
             property int terminalOpacity: 85          // opacidade do fundo do terminal, 30…100 %
             property bool terminalBlur: true          // desfoque do que aparece por trás do terminal
 
+            // Animações (ver services/Motion.qml)
+            property bool animations: true             // desligado = nada se anima (Hyprland e Kortex)
+            property string animIntensity: "elegant"   // "subtle" | "elegant" | "intense"
+            property string animSpeed: "normal"        // "slow" | "normal" | "fast"
+            property string animWindows: "popin"       // abertura das janelas: "popin" | "slide" | "gnomed"
+            property string animWorkspaces: "horizontal"   // troca de área de trabalho: "horizontal" | "vertical" | "fade"
+
             // Barra
             property string barPosition: "top"      // "top" | "bottom"
             property string barSize: "normal"       // "compact" (24 px) | "normal" (30 px, o padrão) | "comfortable" (36 px)
@@ -124,6 +131,8 @@ Singleton {
         applyBatch([
             ["mainFont", ""], ["titleFont", ""], ["fontSize", 12], ["radius", 6], ["borderWidth", 2],
             ["hyprSyncAppearance", false], ["terminalOpacity", 85], ["terminalBlur", true], ["barPosition", "top"], ["barSize", "normal"],
+            ["animations", true], ["animIntensity", "elegant"], ["animSpeed", "normal"], ["animWindows", "popin"],
+            ["animWorkspaces", "horizontal"],
             ["workspaceCount", 5],
             ["barItems", ({})], ["powerActions", ({})], ["powerConfirm", true], ["toastSeconds", 6]
         ])

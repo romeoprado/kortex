@@ -91,6 +91,7 @@ Singleton {
     readonly property string calendar: "calendar_month"
     readonly property string chart: "bar_chart"
     readonly property string sliders: "tune"
+    readonly property string animation: "animation"
     readonly property string apps: "apps"
     readonly property string font: "text_fields"
     readonly property string bars: "menu"

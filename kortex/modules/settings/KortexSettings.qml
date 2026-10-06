@@ -6,7 +6,7 @@ import Quickshell.Hyprland
 import qs.services
 import qs.widgets
 
-// Configurações gerais do Kortex: aparência, barra, aplicativos padrão, sessão e outras opções.
+// Configurações gerais do Kortex: aparência, animações, barra, aplicativos padrão, sessão e outras opções.
 // Abre pelo lançador (botão de engrenagem ou digitando "config") ou por
 //   qs -c kortex ipc call settings toggle
 // Vive numa janela com foco exclusivo, como as outras (popups da barra não recebem o teclado).
@@ -24,6 +24,7 @@ LazyLoader {
 
         readonly property var pages: [
             { id: "appearance", icon: Icons.brush, text: "Aparência" },
+            { id: "animations", icon: Icons.animation, text: "Animações" },
             { id: "bar", icon: Icons.bars, text: "Barra" },
             { id: "apps", icon: Icons.apps, text: "Aplicativos" },
             { id: "power", icon: Icons.session, text: "Sessão" },
@@ -110,6 +111,7 @@ LazyLoader {
                         currentIndex: win.pageIndex
 
                         AppearancePage {}
+                        AnimationsPage {}
                         BarPage {}
                         AppsPage {}
                         PowerPage {}

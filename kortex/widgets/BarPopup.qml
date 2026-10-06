@@ -34,16 +34,20 @@ PopupWindow {
     anchor.edges: below ? Edges.Bottom : Edges.Top
     anchor.gravity: below ? Edges.Bottom : Edges.Top
 
-    // O Hyprland só esmaece popups, então o movimento é do Qt: ao abrir, o painel cresce de 92% a
-    // partir da barra, descendo (ou subindo) 10 px e surgindo; ao fechar, recolhe mais depressa
-    // em direção à barra e some. Mesmas curvas do Hyprland (kortexOut/kortexIn, ver HyprSync).
+    // O Hyprland só esmaece popups, então o movimento é do Qt: ao abrir, o painel cresce a partir
+    // da barra, descendo (ou subindo) e surgindo; ao fechar, recolhe mais depressa em direção à
+    // barra e some. Escala, deslocamento, curvas e durações vêm de Motion (Configurações › Animações).
     onWantedChanged: {
         if (wanted) {
             outro.stop()
             _leaving = false
+            if (!Motion.enabled) {
+                frame.opacity = 1; frame.scale = 1; frame.y = 0
+                return
+            }
             frame.opacity = 0
             intro.restart()
-        } else if (visible) {
+        } else if (visible && Motion.enabled) {
             intro.stop()
             _leaving = true
             outro.restart()
@@ -72,28 +76,28 @@ PopupWindow {
         ParallelAnimation {
             id: intro
             NumberAnimation {
-                target: frame; property: "y"; from: root.below ? -10 : 10; to: 0
-                duration: 320; easing.type: Easing.BezierSpline; easing.bezierCurve: [0.05, 0.7, 0.1, 1, 1, 1]
+                target: frame; property: "y"; from: root.below ? -Motion.popupShift : Motion.popupShift; to: 0
+                duration: Motion.ms(320); easing.type: Easing.BezierSpline; easing.bezierCurve: Motion.curveOut
             }
             NumberAnimation {
-                target: frame; property: "scale"; from: 0.92; to: 1
-                duration: 320; easing.type: Easing.BezierSpline; easing.bezierCurve: [0.05, 0.7, 0.1, 1, 1, 1]
+                target: frame; property: "scale"; from: Motion.popupScale; to: 1
+                duration: Motion.ms(320); easing.type: Easing.BezierSpline; easing.bezierCurve: Motion.curveOut
             }
-            NumberAnimation { target: frame; property: "opacity"; from: 0; to: 1; duration: 160; easing.type: Easing.OutQuad }
+            NumberAnimation { target: frame; property: "opacity"; from: 0; to: 1; duration: Motion.ms(160); easing.type: Easing.OutQuad }
         }
 
         ParallelAnimation {
             id: outro
             onFinished: root._leaving = false
             NumberAnimation {
-                target: frame; property: "y"; to: root.below ? -6 : 6
-                duration: 150; easing.type: Easing.BezierSpline; easing.bezierCurve: [0.3, 0, 0.8, 0.15, 1, 1]
+                target: frame; property: "y"; to: root.below ? -Motion.popupShift * 0.6 : Motion.popupShift * 0.6
+                duration: Motion.ms(150); easing.type: Easing.BezierSpline; easing.bezierCurve: Motion.curveIn
             }
             NumberAnimation {
-                target: frame; property: "scale"; to: 0.96
-                duration: 150; easing.type: Easing.BezierSpline; easing.bezierCurve: [0.3, 0, 0.8, 0.15, 1, 1]
+                target: frame; property: "scale"; to: 1 - (1 - Motion.popupScale) / 2
+                duration: Motion.ms(150); easing.type: Easing.BezierSpline; easing.bezierCurve: Motion.curveIn
             }
-            NumberAnimation { target: frame; property: "opacity"; to: 0; duration: 150; easing.type: Easing.InQuad }
+            NumberAnimation { target: frame; property: "opacity"; to: 0; duration: Motion.ms(150); easing.type: Easing.InQuad }
         }
     }
 }

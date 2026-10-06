@@ -25,7 +25,7 @@ Singleton {
     property bool settingsOpen: false
     property bool wallpaperCarouselOpen: false   // seletor rápido de papel de parede (carrossel)
     property bool screenshotOpen: false          // menu da captura de tela (a janela de salvar segue Screenshot.pending)
-    property string settingsPage: "appearance"  // appearance | bar | apps | power | general | about
+    property string settingsPage: "appearance"  // appearance | animations | bar | apps | power | general | about
     property string languageTab: "keyboard"    // "keyboard" | "language"
 
     // Ignora um segundo clique em até 300 ms no botão que acabou de fechar o popup (duplo clique)
