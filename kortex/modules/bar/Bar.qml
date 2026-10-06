@@ -3,25 +3,50 @@ import QtQuick.Layouts
 import Quickshell
 import Quickshell.Wayland
 import qs.services
+import qs.widgets
 
 // Barra superior (uma por monitor)
 //  esquerda: lançador · áreas de trabalho · CPU/RAM
 //  centro:   relógio/calendário · clima
 //  direita:  teclado · bluetooth · wi-fi · som · tela · notificações · energia · sessão
+//
+// Dois estilos (Configurações › Barra › Estilo da barra):
+//  Inteira (padrão): de ponta a ponta, colada à borda da tela.
+//  Flutuante: solta da borda e das laterais (a Theme.gap px), centralizada, só da largura do
+//    conteúdo e com o raio e a borda dos painéis. A largura é simétrica (o lado maior vale para
+//    os dois), para o relógio continuar no centro da tela.
 PanelWindow {
     id: bar
 
     required property ShellScreen modelData
     readonly property string screenName: modelData ? modelData.name : ""
+    readonly property bool floating: Theme.barFloating
+
+    // folga entre os grupos e a ponta da barra, e entre os grupos e o relógio (estilo flutuante)
+    readonly property int inset: floating ? Math.max(4, Math.round(Theme.radius / 2)) + Theme.border : 4
+    readonly property int groupGap: 16
+    readonly property real contentWidth: 2 * (Math.max(leftGroup.implicitWidth, rightGroup.implicitWidth) + inset + groupGap)
+                                         + centerGroup.implicitWidth
 
     screen: modelData
-    anchors { top: !Theme.barBottom; bottom: Theme.barBottom; left: true; right: true }
+    // sem âncoras laterais, o Hyprland centraliza a camada
+    anchors { top: !Theme.barBottom; bottom: Theme.barBottom; left: !floating; right: !floating }
+    margins.top: floating && !Theme.barBottom ? Theme.gap : 0
+    margins.bottom: floating && Theme.barBottom ? Theme.gap : 0
+    implicitWidth: floating ? Theme.snapUp(Math.min(contentWidth, (modelData ? modelData.width : 1920) - 2 * Theme.gap), devicePixelRatio) : 0
     implicitHeight: Theme.barHeight
-    color: Theme.bg
+    color: floating ? "transparent" : Theme.bg
     WlrLayershell.namespace: "kortex-bar"
     WlrLayershell.layer: WlrLayer.Top
 
     Behavior on color { ColorAnimation { duration: 300 } }
+
+    // fundo da barra flutuante: a mesma moldura dos painéis
+    GradientFrame {
+        anchors.fill: parent
+        visible: bar.floating
+        Behavior on color { ColorAnimation { duration: 300 } }
+    }
 
     // Manter Acordado: a barra está sempre à vista, então segura o pedido de "não ficar inativo"
     IdleInhibitor {
@@ -37,7 +62,8 @@ PanelWindow {
     }
 
     RowLayout {
-        anchors { left: parent.left; top: parent.top; bottom: parent.bottom; leftMargin: 4 }
+        id: leftGroup
+        anchors { left: parent.left; top: parent.top; bottom: parent.bottom; leftMargin: bar.inset }
         spacing: 2
 
         LauncherButton {}
@@ -49,6 +75,7 @@ PanelWindow {
     }
 
     RowLayout {
+        id: centerGroup
         anchors { horizontalCenter: parent.horizontalCenter; top: parent.top; bottom: parent.bottom }
         spacing: 0
 
@@ -57,7 +84,8 @@ PanelWindow {
     }
 
     RowLayout {
-        anchors { right: parent.right; top: parent.top; bottom: parent.bottom; rightMargin: 4 }
+        id: rightGroup
+        anchors { right: parent.right; top: parent.top; bottom: parent.bottom; rightMargin: bar.inset }
         spacing: 0
 
         KeyboardIndicator { screenName: bar.screenName; visible: Settings.barItemVisible("keyboard") }

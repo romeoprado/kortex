@@ -47,10 +47,11 @@ RowLayout {
                      : ws.occupied ? Theme.fg : Theme.fgDim
             }
 
-            // Área com janela aberta: linha embaixo do número
+            // Área com janela aberta: linha embaixo do número (na barra flutuante, um pouco mais
+            // para dentro, para não encostar no contorno)
             Rectangle {
                 anchors.bottom: parent.bottom
-                anchors.bottomMargin: 3
+                anchors.bottomMargin: Theme.barFloating ? 5 : 3
                 anchors.horizontalCenter: parent.horizontalCenter
                 height: 2
                 radius: 1
@@ -62,7 +63,7 @@ RowLayout {
             // Área atual: a mesma linha, em cima do número
             Rectangle {
                 anchors.top: parent.top
-                anchors.topMargin: 3
+                anchors.topMargin: Theme.barFloating ? 5 : 3
                 anchors.horizontalCenter: parent.horizontalCenter
                 height: 2
                 radius: 1

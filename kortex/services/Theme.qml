@@ -39,6 +39,10 @@ Singleton {
     // Espessura da borda: só valores inteiros, de 0 (sem borda) a 5 px; um valor fracionário antigo é arredondado
     readonly property int border: Math.max(0, Math.min(5, Math.round(Settings.data.borderWidth)))
     readonly property bool barBottom: Settings.data.barPosition === "bottom"
+    // Barra flutuante: centralizada, do tamanho do conteúdo, a `gap` px da borda e com o raio e a
+    // borda dos painéis. `barReserved` é o espaço da borda da tela até o fim da barra.
+    readonly property bool barFloating: Settings.data.barStyle === "floating"
+    readonly property int barReserved: barHeight + (barFloating ? gap : 0)
 
     // Primeira família da lista que está instalada (o Qt só escolhe uma família por vez)
     function firstInstalled(names, fallback) {

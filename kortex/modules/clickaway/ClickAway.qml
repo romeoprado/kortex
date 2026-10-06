@@ -19,8 +19,8 @@ Variants {
         screen: modelData
         visible: Popups.current !== ""
         anchors { top: true; bottom: true; left: true; right: true }
-        margins.top: Theme.barBottom ? 0 : Theme.barHeight
-        margins.bottom: Theme.barBottom ? Theme.barHeight : 0
+        margins.top: Theme.barBottom ? 0 : Theme.barReserved
+        margins.bottom: Theme.barBottom ? Theme.barReserved : 0
         color: "transparent"
         exclusionMode: ExclusionMode.Ignore
         WlrLayershell.layer: WlrLayer.Top
