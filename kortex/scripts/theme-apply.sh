@@ -60,6 +60,10 @@ bash "$(dirname "$0")/sddm-colors.sh" "$accent" "$bg" "$fg" "$muted" "$red" "$bg
 bash "$(dirname "$0")/kitty-theme.sh" "$name" "$dir" "$light" "$bg" "$bg_alt" "$bg_dark" "$fg" "$fg_bright" \
     "$accent" "$muted" "$selection" "$red" "$green" "$yellow" "$blue" "$magenta" "$cyan" || true
 
+# Monitor do sistema (btop): gera o tema "kortex" do btop e recarrega os btop abertos
+bash "$(dirname "$0")/btop-theme.sh" "$name" "$bg" "$bg_alt" "$fg" "$fg_bright" "$fg_dim" \
+    "$accent" "$muted" "$red" "$green" "$yellow" "$blue" "$magenta" "$cyan" || true
+
 # Firefox: grava as cores no perfil, se o firefox-setup.sh já o configurou (vale na próxima abertura dele)
 bash "$(dirname "$0")/firefox-theme.sh" || true
 
