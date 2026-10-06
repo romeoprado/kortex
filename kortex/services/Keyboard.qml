@@ -143,8 +143,12 @@ Singleton {
         if (pusher.running || _next === null) return
         const cfg = _next
         _next = null
+        // Cada keyword recompila o mapa de teclado na hora. Trocar o layout antes da variante deixaria,
+        // por um instante, a variante antiga presa ao layout novo (ao inverter "br,us" com ",alt-intl"
+        // sairia "br(alt-intl)") e o Hyprland mostraria "Invalid keyboard layout passed". Por isso as
+        // variantes são zeradas primeiro: sem variante, qualquer lista de layouts é válida.
         pusher.command = ["sh", "-c",
-            "hyprctl keyword input:kb_layout \"$1\"; hyprctl keyword input:kb_variant \"$2\"; hyprctl keyword input:kb_options \"$3\"",
+            "hyprctl keyword input:kb_variant \"\"; hyprctl keyword input:kb_layout \"$1\"; hyprctl keyword input:kb_variant \"$2\"; hyprctl keyword input:kb_options \"$3\"",
             "sh", cfg.layouts.map(l => l.layout).join(","), cfg.layouts.map(l => l.variant).join(","), cfg.options || ""]
         pusher.running = true
     }
