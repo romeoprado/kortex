@@ -10,6 +10,9 @@ BarButton {
 
     readonly property var bat: Energy.battery
     property int hoveredMode: -1   // modo sob o mouse (índice em Energy.profiles), para a etiqueta
+    // Etiqueta à direita do título: o modo sob o mouse ou, parado, o modo em uso (no acento, negrito)
+    readonly property int currentMode: Energy.profiles.findIndex(p => p.id === Energy.profile)
+    readonly property int tagIndex: hoveredMode >= 0 ? hoveredMode : currentMode
 
     // Largura da ficha da bateria: o rótulo mais comprido e um valor longo (data de fabricação) lado a lado,
     // mais o espaço entre eles (8) e as margens da ficha (12 + 12)
@@ -17,6 +20,15 @@ BarButton {
     readonly property real cardWidth: {
         void rowMetrics.font   // refaz a conta quando a fonte muda
         return rowMetrics.advanceWidth("Capacidade de fábrica") + rowMetrics.advanceWidth("00/00/0000") + 8 + 24
+    }
+
+    // Cabeçalho mais largo possível: ícone, "Energia" e o nome de modo mais comprido (em negrito)
+    FontMetrics { id: tagMetrics; font.family: Theme.font; font.pixelSize: Theme.textSmall; font.bold: true }
+    FontMetrics { id: titleMetrics; font.family: Theme.titleFont; font.pixelSize: Theme.textTitle; font.bold: true }
+    readonly property real headerWidth: {
+        void tagMetrics.font, titleMetrics.font   // refaz a conta quando a fonte muda
+        const tag = Energy.profilesAvailable ? Math.max(0, ...Energy.profiles.map(p => tagMetrics.advanceWidth(p.text))) + 20 + 8 : 0
+        return Theme.iconSize + 8 + 10 + titleMetrics.advanceWidth("Energia") + tag
     }
 
     // Linhas da ficha da bateria um ponto maiores que as do padrão
@@ -33,14 +45,48 @@ BarButton {
         popupId: "energy"
         screenName: root.screenName
         // Justo ao conteúdo: só os modos → a linha de botões; com bateria ou algum aviso (que quebra em
-        // várias linhas) → a linha mais comprida da ficha da bateria
-        panelWidth: Math.ceil(Energy.batteries.length > 0 || !Energy.profilesAvailable || Energy.degradation !== ""
-                              ? root.cardWidth : Math.max(Energy.profiles.length * 52 - 8, 150)) + padding * 2
+        // várias linhas) → a linha mais comprida da ficha da bateria; nunca menos que o cabeçalho
+        panelWidth: Math.ceil(Math.max(root.headerWidth,
+                              Energy.batteries.length > 0 || !Energy.profilesAvailable || Energy.degradation !== ""
+                              ? root.cardWidth : Math.max(Energy.profiles.length * 52 - 8, 150))) + padding * 2
 
-        PopupTitle { text: "Energia"; icon: Icons.bolt }
+        PopupTitle {
+            text: "Energia"
+            icon: Icons.bolt
 
-        // Modo de energia: um botão só com ícone por modo e, embaixo, uma etiqueta com o nome do modo
-        // em uso (no acento) ou do modo sob o mouse
+            // Etiqueta à direita do título: o modo em uso (acento, negrito) ou o modo sob o mouse.
+            // Guarda o último texto para sumir inteira (sem encolher antes de apagar).
+            Rectangle {
+                id: tag
+                readonly property bool inUse: root.hoveredMode < 0
+                property string shown: ""
+                implicitWidth: tagLabel.implicitWidth + 20
+                implicitHeight: tagLabel.implicitHeight + 6
+                radius: height / 2
+                color: Theme.bgAlt
+                opacity: Energy.profilesAvailable && root.tagIndex >= 0 ? 1 : 0
+                Behavior on opacity { NumberAnimation { duration: 120 } }
+                function sync() { if (root.tagIndex >= 0) shown = Energy.profiles[root.tagIndex].text }
+                Component.onCompleted: sync()
+                Connections {
+                    target: root
+                    function onTagIndexChanged() { tag.sync() }
+                }
+
+                Text {
+                    id: tagLabel
+                    anchors.centerIn: parent
+                    text: tag.shown
+                    color: tag.inUse ? Theme.accent : Theme.fg
+                    font.family: Theme.font
+                    font.pixelSize: Theme.textSmall
+                    font.bold: tag.inUse
+                }
+            }
+        }
+
+        // Modo de energia: um botão só com ícone por modo, os três dividindo a largura do painel;
+        // o nome do modo fica na etiqueta do cabeçalho
         RowLayout {
             visible: Energy.profilesAvailable
             Layout.fillWidth: true
@@ -53,6 +99,7 @@ BarButton {
                     required property var modelData
                     required property int index
 
+                    Layout.fillWidth: true
                     icon: modelData.icon
                     selected: Energy.profile === modelData.id
                     onClicked: Energy.setProfile(modelData.id)
@@ -62,16 +109,6 @@ BarButton {
                     }
                 }
             }
-        }
-
-        ButtonTag {
-            visible: Energy.profilesAvailable
-            Layout.fillWidth: true
-            readonly property int current: Energy.profiles.findIndex(p => p.id === Energy.profile)
-            index: root.hoveredMode >= 0 ? root.hoveredMode : current
-            text: index >= 0 ? Energy.profiles[index].text : ""
-            textColor: root.hoveredMode >= 0 ? Theme.fg : Theme.accent
-            bold: root.hoveredMode < 0
         }
 
         Text {
