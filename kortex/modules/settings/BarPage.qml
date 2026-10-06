@@ -32,6 +32,15 @@ SettingsPage {
     }
 
     SettingRow {
+        title: "Borda da barra flutuante"
+        dimmed: !Theme.barFloating
+        Toggle {
+            checked: Settings.data.barBorder
+            onToggled: v => Settings.data.barBorder = v
+        }
+    }
+
+    SettingRow {
         title: "Posição da barra"
         Segmented {
             current: Settings.data.barPosition

@@ -54,6 +54,7 @@ Singleton {
             // Barra
             property string barPosition: "top"      // "top" | "bottom"
             property string barStyle: "full"        // "full" (de ponta a ponta, colada à borda) | "floating" (centralizada, solta e arredondada)
+            property bool barBorder: true           // borda na barra flutuante (a espessura é a dos painéis)
             property string barSize: "normal"       // "compact" (24 px) | "normal" (30 px, o padrão) | "comfortable" (36 px)
             property int workspaceCount: 5          // 1…10
             property var barItems: ({})             // { stats: false, ... }: item ausente = visível
@@ -131,7 +132,7 @@ Singleton {
     function resetAppearance() {
         applyBatch([
             ["mainFont", ""], ["titleFont", ""], ["fontSize", 12], ["radius", 6], ["borderWidth", 2],
-            ["hyprSyncAppearance", false], ["terminalOpacity", 85], ["terminalBlur", true], ["barPosition", "top"], ["barStyle", "full"], ["barSize", "normal"],
+            ["hyprSyncAppearance", false], ["terminalOpacity", 85], ["terminalBlur", true], ["barPosition", "top"], ["barStyle", "full"], ["barBorder", true], ["barSize", "normal"],
             ["animations", true], ["animIntensity", "elegant"], ["animSpeed", "normal"], ["animWindows", "popin"],
             ["animWorkspaces", "horizontal"],
             ["workspaceCount", 5],

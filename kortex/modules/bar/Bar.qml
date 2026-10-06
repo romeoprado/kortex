@@ -13,17 +13,19 @@ import qs.widgets
 // Dois estilos (Configurações › Barra › Estilo da barra):
 //  Inteira (padrão): de ponta a ponta, colada à borda da tela.
 //  Flutuante: solta da borda e das laterais (a Theme.gap px), centralizada, só da largura do
-//    conteúdo e com o raio e a borda dos painéis. A largura é simétrica (o lado maior vale para
-//    os dois), para o relógio continuar no centro da tela.
+//    conteúdo e com o raio e a borda dos painéis (a borda pode ser desligada). A largura é
+//    simétrica (o lado maior vale para os dois), para o relógio continuar no centro da tela.
 PanelWindow {
     id: bar
 
     required property ShellScreen modelData
     readonly property string screenName: modelData ? modelData.name : ""
     readonly property bool floating: Theme.barFloating
+    // borda da barra flutuante: a dos painéis, ou nenhuma (Configurações › Barra › Borda da barra flutuante)
+    readonly property int frameBorder: Settings.data.barBorder ? Theme.border : 0
 
     // folga entre os grupos e a ponta da barra, e entre os grupos e o relógio (estilo flutuante)
-    readonly property int inset: floating ? Math.max(4, Math.round(Theme.radius / 2)) + Theme.border : 4
+    readonly property int inset: floating ? Math.max(4, Math.round(Theme.radius / 2)) + frameBorder : 4
     readonly property int groupGap: 16
     readonly property real contentWidth: 2 * (Math.max(leftGroup.implicitWidth, rightGroup.implicitWidth) + inset + groupGap)
                                          + centerGroup.implicitWidth
@@ -45,6 +47,7 @@ PanelWindow {
     GradientFrame {
         anchors.fill: parent
         visible: bar.floating
+        borderWidth: bar.frameBorder
         Behavior on color { ColorAnimation { duration: 300 } }
     }
 
