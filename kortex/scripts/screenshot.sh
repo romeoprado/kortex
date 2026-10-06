@@ -54,7 +54,9 @@ capture)
         grim -g "$geom" "$out" || exit 2 ;;
     area)
         command -v slurp >/dev/null || { echo "O slurp não está instalado." >&2; exit 2; }
-        geom="$(slurp -d "${sl[@]}")" || exit 1
+        # </dev/null: sem entrada fechada o slurp espera retângulos nela e nunca aparece (o shell
+        # deixa a entrada do processo aberta)
+        geom="$(slurp -d "${sl[@]}" </dev/null)" || exit 1
         [ -n "$geom" ] || exit 1
         grim -g "$geom" "$out" || exit 2 ;;
     *)
