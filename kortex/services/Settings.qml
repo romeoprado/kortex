@@ -58,6 +58,7 @@ Singleton {
             property string barSize: "normal"       // "compact" (24 px) | "normal" (30 px, o padrão) | "comfortable" (36 px)
             property int workspaceCount: 5          // 1…10
             property var barItems: ({})             // { stats: false, ... }: item ausente = visível
+            property var barLayout: ({})            // ordem dos itens: { left: [...], center: [...], right: [...] }; vazio = padrão
             property var powerActions: ({})         // { lock: false, ... }: botão ausente = visível
             property bool powerConfirm: true        // sair/reiniciar/desligar pedem um segundo clique
             property int toastSeconds: 6            // tempo dos avisos flutuantes
@@ -97,6 +98,41 @@ Singleton {
 
     // Itens da barra e botões de sessão: ausentes no mapa = visíveis
     function barItemVisible(id) { return (adapter.barItems || {})[id] !== false }
+
+    // Ordem dos itens da barra, por grupo (o lançador e as áreas de trabalho ficam fixos no começo
+    // da esquerda). A ordem gravada é conferida: ids desconhecidos ou repetidos saem e um item que
+    // falte volta ao fim do seu grupo padrão.
+    readonly property var barDefaultLayout: ({
+        left: ["stats"],
+        center: ["clock", "weather"],
+        right: ["keyboard", "bluetooth", "network", "audio", "display", "notifications", "energy", "power"]
+    })
+    function barLayout() {
+        const saved = adapter.barLayout || {}
+        const groups = ["left", "center", "right"]
+        const known = []
+        for (const g of groups) for (const id of barDefaultLayout[g]) known.push(id)
+        const seen = {}
+        const out = { left: [], center: [], right: [] }
+        for (const g of groups)
+            for (const id of (saved[g] || []))
+                if (known.includes(id) && !seen[id]) { seen[id] = true; out[g].push(id) }
+        for (const g of groups)
+            for (const id of barDefaultLayout[g])
+                if (!seen[id]) { seen[id] = true; out[g].push(id) }
+        return out
+    }
+    function barLayoutIsDefault() {
+        const cur = barLayout()
+        return ["left", "center", "right"].every(g => cur[g].join() === barDefaultLayout[g].join())
+    }
+    // Põe `id` no grupo `group`, na posição `index` da lista desse grupo já sem ele
+    function moveBarItem(id, group, index) {
+        const cur = barLayout()
+        for (const g of ["left", "center", "right"]) cur[g] = cur[g].filter(x => x !== id)
+        cur[group].splice(Math.max(0, Math.min(index, cur[group].length)), 0, id)
+        adapter.barLayout = cur
+    }
     function powerActionEnabled(id) { return (adapter.powerActions || {})[id] !== false }
 
     // Grava uma chave dentro de um mapa (barItems, powerActions), sem mexer nas outras
@@ -136,7 +172,7 @@ Singleton {
             ["animations", true], ["animIntensity", "elegant"], ["animSpeed", "normal"], ["animWindows", "popin"],
             ["animWorkspaces", "horizontal"],
             ["workspaceCount", 5],
-            ["barItems", ({})], ["powerActions", ({})], ["powerConfirm", true], ["toastSeconds", 6]
+            ["barItems", ({})], ["barLayout", ({})], ["powerActions", ({})], ["powerConfirm", true], ["toastSeconds", 6]
         ])
     }
 

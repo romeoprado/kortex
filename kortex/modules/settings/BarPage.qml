@@ -84,7 +84,19 @@ SettingsPage {
 
     SettingsSection { text: "Itens da Barra" }
 
-    // Na ordem da barra, da esquerda para a direita, lida coluna por coluna
+    // a ordem muda na própria barra: segurar um item e arrastar
+    SettingRow {
+        title: "Ordem dos itens"
+        dimmed: Settings.barLayoutIsDefault()
+        PlainButton {
+            icon: Icons.undo
+            text: "Restaurar ordem padrão"
+            enabled: !Settings.barLayoutIsDefault()
+            onClicked: Settings.data.barLayout = ({})
+        }
+    }
+
+    // Na ordem padrão da barra, da esquerda para a direita, lida coluna por coluna
     GridLayout {
         Layout.fillWidth: true
         flow: GridLayout.TopToBottom

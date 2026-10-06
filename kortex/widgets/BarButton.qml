@@ -30,8 +30,33 @@ MouseArea {
     implicitWidth: row.implicitWidth + 16
     implicitHeight: Theme.barHeight
     hoverEnabled: true
-    cursorShape: Qt.PointingHandCursor
+    cursorShape: reordering ? Qt.ClosedHandCursor : Qt.PointingHandCursor
     acceptedButtons: Qt.LeftButton | Qt.RightButton | Qt.MiddleButton
+
+    // Reordenar na barra: com `reorderId` (dado pela barra), segurar o botão esquerdo por 450 ms
+    // começa a arrastar; as posições (em coordenadas da janela) vão para a barra, que mostra onde
+    // o item vai cair, e soltar o grava. Depois de segurar, o clique não acontece. Sem `reorderId`
+    // (lançador), o tempo é tão longo que nunca dispara.
+    property string reorderId: ""
+    property bool reordering: false
+    signal reorderStarted(real x, real y)
+    signal reorderMoved(real x, real y)
+    signal reorderFinished(bool dropped)
+
+    pressAndHoldInterval: reorderId !== "" ? 450 : 1000000
+    onPressAndHold: mouse => {
+        if (reorderId === "" || mouse.button !== Qt.LeftButton) return
+        reordering = true
+        const p = mapToItem(null, mouse.x, mouse.y)
+        reorderStarted(p.x, p.y)
+    }
+    onPositionChanged: mouse => {
+        if (!reordering) return
+        const p = mapToItem(null, mouse.x, mouse.y)
+        reorderMoved(p.x, p.y)
+    }
+    onReleased: if (reordering) { reordering = false; reorderFinished(true) }
+    onCanceled: if (reordering) { reordering = false; reorderFinished(false) }
 
     Row {
         id: row
