@@ -29,7 +29,7 @@ Row {
         text: root.value + root.suffix
         color: Theme.fgBright
         font.family: Theme.font
-        font.pixelSize: Theme.fontSize + 1
+        font.pixelSize: Theme.textBody
         font.bold: true
     }
 

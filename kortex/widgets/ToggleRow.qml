@@ -16,7 +16,7 @@ RowLayout {
         text: root.text
         color: Theme.fg
         font.family: Theme.font
-        font.pixelSize: Theme.fontSize
+        font.pixelSize: Theme.textBody
         elide: Text.ElideRight
     }
 

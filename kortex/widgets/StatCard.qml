@@ -13,7 +13,7 @@ Rectangle {
     property real value: -1        // 0…1; negativo esconde a barra
     property bool alert: true
     property bool lowAlert: false
-    property int subtitleSize: Theme.fontSize - 1
+    property int subtitleSize: Theme.textSmall
     default property alias content: body.data
 
     Layout.fillWidth: true
@@ -44,7 +44,7 @@ Rectangle {
                 text: root.title
                 color: Theme.fgBright
                 font.family: Theme.titleFont
-                font.pixelSize: Theme.fontSize + 2
+                font.pixelSize: Theme.textLarge
                 font.bold: true
                 elide: Text.ElideRight
             }
@@ -53,7 +53,7 @@ Rectangle {
                 text: root.valueText
                 color: Theme.fgBright
                 font.family: Theme.font
-                font.pixelSize: Theme.fontSize + 4
+                font.pixelSize: Theme.textTitle
                 font.bold: true
             }
         }

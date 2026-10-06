@@ -50,10 +50,10 @@ BarButton {
 
         Text {
             Layout.fillWidth: true
-            text: root.nodeName(root.sink) || "Nenhuma saída de áudio"
+            text: root.sink ? "Saída: " + root.nodeName(root.sink) : "Nenhuma saída de áudio"
             color: Theme.fgDim
             font.family: Theme.font
-            font.pixelSize: Theme.fontSize - 1
+            font.pixelSize: Theme.textSmall
             elide: Text.ElideRight
         }
 
@@ -69,10 +69,10 @@ BarButton {
             visible: root.source !== null
             Layout.fillWidth: true
             Layout.topMargin: 4
-            text: root.nodeName(root.source)
+            text: "Entrada: " + root.nodeName(root.source)
             color: Theme.fgDim
             font.family: Theme.font
-            font.pixelSize: Theme.fontSize - 1
+            font.pixelSize: Theme.textSmall
             elide: Text.ElideRight
         }
 
@@ -101,7 +101,7 @@ BarButton {
             text: "Saída"
             color: Theme.fg
             font.family: Theme.font
-            font.pixelSize: Theme.fontSize
+            font.pixelSize: Theme.textBody
             font.bold: true
         }
 
@@ -122,7 +122,7 @@ BarButton {
                 Rectangle {
                     anchors.fill: parent
                     radius: 4
-                    color: dev.current ? Theme.selection : (dev.containsMouse ? Theme.bgAlt : "transparent")
+                    color: dev.current ? Theme.selectionTint : (dev.containsMouse ? Theme.bgAlt : "transparent")
                 }
 
                 RowLayout {
@@ -140,7 +140,7 @@ BarButton {
                         text: root.nodeName(dev.modelData)
                         color: dev.current ? Theme.fgBright : Theme.fg
                         font.family: Theme.font
-                        font.pixelSize: Theme.fontSize
+                        font.pixelSize: Theme.textBody
                         elide: Text.ElideRight
                     }
                 }

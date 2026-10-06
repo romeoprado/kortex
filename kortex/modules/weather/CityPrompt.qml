@@ -64,7 +64,7 @@ LazyLoader {
                     text: "Use \"Cidade, Estado\" para desempatar nomes repetidos. Vazio detecta pela sua conexão."
                     color: Theme.fgDim
                     font.family: Theme.font
-                    font.pixelSize: Theme.fontSize - 1
+                    font.pixelSize: Theme.textSmall
                     wrapMode: Text.Wrap
                 }
 

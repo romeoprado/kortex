@@ -18,7 +18,7 @@ SettingsPage {
             text: Theme.font
             color: Theme.fgBright
             font.family: Theme.font
-            font.pixelSize: Theme.fontSize
+            font.pixelSize: Theme.textBody
             elide: Text.ElideRight
         }
         PlainButton {
@@ -51,7 +51,7 @@ SettingsPage {
             text: Theme.titleFont
             color: Theme.fgBright
             font.family: Theme.titleFont
-            font.pixelSize: Theme.fontSize + 1
+            font.pixelSize: Theme.textBody
             font.bold: true
             elide: Text.ElideRight
         }

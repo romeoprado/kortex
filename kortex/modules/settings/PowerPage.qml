@@ -38,7 +38,7 @@ SettingsPage {
         text: "Com todos desligados, o painel de sessão mostra só um aviso."
         color: Theme.yellow
         font.family: Theme.font
-        font.pixelSize: Theme.fontSize - 1
+        font.pixelSize: Theme.textSmall
     }
 
     SettingsSection { text: "Segurança" }

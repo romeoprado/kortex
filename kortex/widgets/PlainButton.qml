@@ -12,7 +12,9 @@ MouseArea {
     property bool alignLeft: false
     property bool enabledLook: enabled
     property real iconShift: 0   // desloca o conteúdo na horizontal; corrige glifos que ficam fora do centro
-    readonly property color tone: highlighted ? Theme.bg
+    // Desativado, o destaque some: um botão principal apagado não pode parecer ativo (nem perigoso)
+    readonly property bool lit: highlighted && enabledLook
+    readonly property color tone: lit ? Theme.accentText
                                 : (danger && containsMouse) ? Theme.red
                                 : containsMouse ? Theme.fgBright : Theme.fg
 
@@ -24,14 +26,26 @@ MouseArea {
     hoverEnabled: true
     cursorShape: enabled ? Qt.PointingHandCursor : Qt.ArrowCursor
     opacity: enabledLook ? 1 : 0.5
+    // Teclado: Tab chega ao controle (contorno de foco) e Espaço ou Enter o aciona
+    activeFocusOnTab: enabled && visible
+    Keys.onPressed: event => {
+        if (event.key === Qt.Key_Space || event.key === Qt.Key_Return || event.key === Qt.Key_Enter) {
+            root.clicked(null)
+            event.accepted = true
+        }
+    }
+    Accessible.role: Accessible.Button
+    Accessible.name: root.text
+
+    FocusRing {}
 
     GradientBorder {
         anchors.fill: parent
         radius: Theme.radiusSmall
         borderWidth: 1
-        fill: root.highlighted ? Theme.accent : (root.containsMouse ? Theme.bgAlt : "transparent")
-        color: root.highlighted ? Theme.accent
-             : (root.danger && root.containsMouse) ? Theme.red : Theme.muted
+        fill: root.lit ? Theme.accent : (root.containsMouse ? Theme.bgAlt : "transparent")
+        color: root.lit ? Theme.accent
+             : (root.danger && root.containsMouse) ? Theme.red : Theme.outline
         Behavior on fill { ColorAnimation { duration: 100 } }
     }
 
@@ -63,7 +77,7 @@ MouseArea {
             text: root.text
             color: root.tone
             font.family: Theme.font
-            font.pixelSize: Theme.fontSize
+            font.pixelSize: Theme.textBody
         }
     }
 }

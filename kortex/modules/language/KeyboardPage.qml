@@ -38,7 +38,7 @@ RowLayout {
         Layout.topMargin: 6
         color: Theme.fgBright
         font.family: Theme.font
-        font.pixelSize: Theme.fontSize + 1
+        font.pixelSize: Theme.textBody
         font.bold: true
     }
 
@@ -46,7 +46,7 @@ RowLayout {
         Layout.fillWidth: true
         color: Theme.fgDim
         font.family: Theme.font
-        font.pixelSize: Theme.fontSize - 1
+        font.pixelSize: Theme.textSmall
         wrapMode: Text.Wrap
     }
 
@@ -71,7 +71,7 @@ RowLayout {
                 text: "Layouts Ativos"
                 color: Theme.fgBright
                 font.family: Theme.font
-                font.pixelSize: Theme.fontSize + 3
+                font.pixelSize: Theme.textLarge
                 font.bold: true
             }
 
@@ -93,8 +93,8 @@ RowLayout {
                         anchors.fill: parent
                         radius: row.radius
                         borderWidth: 1
-                        fill: row.isActive ? Theme.selection : (hover.containsMouse ? Theme.bgAlt : "transparent")
-                        color: row.isActive ? Theme.accent : Theme.muted
+                        fill: row.isActive ? Theme.selectionTint : (hover.containsMouse ? Theme.bgAlt : "transparent")
+                        color: row.isActive ? Theme.accent : Theme.outline
                     }
 
                     MouseArea {
@@ -116,7 +116,7 @@ RowLayout {
                             text: Keyboard.labelOf(row.modelData)
                             color: row.isActive ? Theme.fgBright : Theme.fgDim
                             font.family: Theme.font
-                            font.pixelSize: Theme.fontSize
+                            font.pixelSize: Theme.textBody
                             font.bold: true
                             elide: Text.ElideRight
                         }
@@ -126,7 +126,7 @@ RowLayout {
                             text: Keyboard.nameOf(row.modelData)
                             color: row.isActive ? Theme.fgBright : Theme.fg
                             font.family: Theme.font
-                            font.pixelSize: Theme.fontSize
+                            font.pixelSize: Theme.textBody
                             elide: Text.ElideRight
                         }
 
@@ -213,7 +213,7 @@ RowLayout {
             text: "Adicionar Layout"
             color: Theme.fgBright
             font.family: Theme.font
-            font.pixelSize: Theme.fontSize + 3
+            font.pixelSize: Theme.textLarge
             font.bold: true
         }
 
@@ -271,14 +271,14 @@ RowLayout {
                         text: item.modelData.name
                         color: Theme.fg
                         font.family: Theme.font
-                        font.pixelSize: Theme.fontSize
+                        font.pixelSize: Theme.textBody
                         elide: Text.ElideRight
                     }
                     Text {
                         text: item.modelData.code
                         color: Theme.fgDim
                         font.family: Theme.font
-                        font.pixelSize: Theme.fontSize - 1
+                        font.pixelSize: Theme.textSmall
                     }
                     Icon {
                         Layout.preferredWidth: 16
@@ -298,7 +298,7 @@ RowLayout {
                 : "Nenhum layout encontrado."
             color: Theme.fgDim
             font.family: Theme.font
-            font.pixelSize: Theme.fontSize
+            font.pixelSize: Theme.textBody
             wrapMode: Text.Wrap
         }
 

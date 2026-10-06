@@ -26,7 +26,7 @@ ColumnLayout {
             text: root.title
             color: Theme.fg
             font.family: Theme.font
-            font.pixelSize: Theme.fontSize
+            font.pixelSize: Theme.textBody
             elide: Text.ElideRight
         }
 
@@ -34,7 +34,7 @@ ColumnLayout {
             text: root.valueText
             color: Theme.fgBright
             font.family: Theme.font
-            font.pixelSize: Theme.fontSize
+            font.pixelSize: Theme.textBody
             font.bold: true
         }
     }

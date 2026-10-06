@@ -116,7 +116,7 @@ Rectangle {
                     text: root.notif?.appName || "Notificação"
                     color: Theme.fgDim
                     font.family: Theme.font
-                    font.pixelSize: Theme.fontSize - 1
+                    font.pixelSize: Theme.textSmall
                     elide: Text.ElideRight
                     Layout.fillWidth: true
                 }
@@ -124,7 +124,7 @@ Rectangle {
                     text: Notifs.timeOf(root.notif)
                     color: Theme.fgDim
                     font.family: Theme.font
-                    font.pixelSize: Theme.fontSize - 1
+                    font.pixelSize: Theme.textSmall
                 }
                 Icon {
                     text: Icons.close
@@ -147,7 +147,7 @@ Rectangle {
                 visible: text !== ""
                 color: Theme.fgBright
                 font.family: Theme.font
-                font.pixelSize: Theme.fontSize + 1
+                font.pixelSize: Theme.textBody
                 font.bold: true
                 wrapMode: Text.Wrap
                 maximumLineCount: 2
@@ -160,7 +160,7 @@ Rectangle {
                 visible: text !== ""
                 color: Theme.fg
                 font.family: Theme.font
-                font.pixelSize: Theme.fontSize
+                font.pixelSize: Theme.textBody
                 textFormat: Text.StyledText
                 wrapMode: Text.Wrap
                 maximumLineCount: 4

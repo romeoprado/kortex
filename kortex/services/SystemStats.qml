@@ -50,17 +50,17 @@ Singleton {
     // ── Formatação ──────────────────────────────────────────────────────
     function pct(v) { return Math.round(v * 100) + "%" }
 
-    // Por extenso: 5.1 GB · 232 GB · 1.8 TB
+    // Por extenso: 5,1 GB · 232 GB · 1,8 TB
     function sizeLong(gb) {
-        if (gb >= 1024) return (gb / 1024).toFixed(1) + " TB"
-        return (gb >= 100 ? Math.round(gb) : gb.toFixed(1)) + " GB"
+        if (gb >= 1024) return Theme.decimal(gb / 1024, 1) + " TB"
+        return (gb >= 100 ? Math.round(gb) : Theme.decimal(gb, 1)) + " GB"
     }
 
-    // "5.1 / 31.2 GB" (ou TB), na unidade do total
+    // "5,1 / 31,2 GB" (ou TB), na unidade do total
     function sizePair(used, total) {
         const tb = total >= 1024
         const d = tb ? 1024 : 1
-        return (used / d).toFixed(1) + " / " + (total / d).toFixed(1) + (tb ? " TB" : " GB")
+        return Theme.decimal(used / d, 1) + " / " + Theme.decimal(total / d, 1) + (tb ? " TB" : " GB")
     }
 
     // Resumo de uma GPU para o cabeçalho: uso quando a placa informa, senão a frequência
@@ -104,7 +104,7 @@ Singleton {
         }
         const last = lines.filter(l => l.length > 0).pop() || ""
         const la = last.split(" ")
-        if (la.length >= 3 && !isNaN(Number(la[0]))) load = la.slice(0, 3).join("  ")
+        if (la.length >= 3 && !isNaN(Number(la[0]))) load = la.slice(0, 3).map(v => v.replace(".", ",")).join(" ")
     }
 
     function parseGpus(text) {

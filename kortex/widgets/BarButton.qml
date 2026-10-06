@@ -56,7 +56,7 @@ MouseArea {
             text: root.label
             color: root.shownColor
             font.family: Theme.font
-            font.pixelSize: Theme.fontSize
+            font.pixelSize: Theme.textBody
             Behavior on color { ColorAnimation { duration: 120 } }
         }
     }

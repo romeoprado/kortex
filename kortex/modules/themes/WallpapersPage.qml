@@ -102,7 +102,7 @@ ColumnLayout {
                 fill: Theme.bgAlt
                 borderWidth: cell.isCurrent ? 3 : 1
                 color: cell.isCurrent ? Theme.accent
-                     : (cell.containsMouse || grid.currentIndex === cell.index) ? Theme.fg : Theme.muted
+                     : (cell.containsMouse || grid.currentIndex === cell.index) ? Theme.fg : Theme.outline
 
                 Image {
                     anchors.fill: parent
@@ -141,7 +141,7 @@ ColumnLayout {
                     text: "Excluir?"
                     color: Theme.bg
                     font.family: Theme.font
-                    font.pixelSize: Theme.fontSize
+                    font.pixelSize: Theme.textBody
                     font.bold: true
                 }
                 MouseArea {
@@ -163,7 +163,7 @@ ColumnLayout {
         text: "Nenhuma imagem encontrada. Coloque imagens em " + Settings.data.wallpaperDir + " ou instale um tema com a pasta backgrounds/."
         color: Theme.fgDim
         font.family: Theme.font
-        font.pixelSize: Theme.fontSize
+        font.pixelSize: Theme.textBody
         wrapMode: Text.Wrap
     }
 }

@@ -64,7 +64,7 @@ ColumnLayout {
             StatRow { label: "Temperatura"; value: gpuCard.g ? root.temp(gpuCard.g.temp) : ""; warn: gpuCard.g !== null && gpuCard.g.temp >= 85 }
             StatRow {
                 label: "Consumo"
-                value: gpuCard.g && gpuCard.g.power >= 0 ? gpuCard.g.power.toFixed(1) + " W" : ""
+                value: gpuCard.g && gpuCard.g.power >= 0 ? Theme.decimal(gpuCard.g.power, 1) + " W" : ""
             }
             StatRow {
                 label: "Memória de vídeo"
@@ -93,7 +93,7 @@ ColumnLayout {
                     alert: sum.alert
 
                     StatRow { label: "Temperatura"; value: root.temp(modelData.temp) }
-                    StatRow { label: "Consumo"; value: modelData.power >= 0 ? modelData.power.toFixed(1) + " W" : "" }
+                    StatRow { label: "Consumo"; value: modelData.power >= 0 ? Theme.decimal(modelData.power, 1) + " W" : "" }
                     StatRow { label: "Uso"; value: modelData.util < 0 ? "não informado pelo driver" : "" }
                 }
             }

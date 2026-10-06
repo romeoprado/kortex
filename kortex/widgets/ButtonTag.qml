@@ -52,7 +52,7 @@ Item {
             text: root._text
             color: root._textColor
             font.family: Theme.font
-            font.pixelSize: Theme.fontSize - 1
+            font.pixelSize: Theme.textSmall
             font.bold: root._bold
         }
     }

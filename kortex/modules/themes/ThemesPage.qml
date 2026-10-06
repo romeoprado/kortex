@@ -38,7 +38,7 @@ ColumnLayout {
             radius: Theme.radiusSmall
             borderWidth: 1
             fill: chip.on ? Theme.accent : Qt.alpha(Theme.bg, 0.85)
-            color: chip.on ? Theme.accent : chip.containsMouse ? Theme.fg : Theme.muted
+            color: chip.on ? Theme.accent : chip.containsMouse ? Theme.fg : Theme.outline
         }
 
         Row {
@@ -51,22 +51,22 @@ ColumnLayout {
                 anchors.verticalCenter: parent.verticalCenter
                 text: chip.icon
                 size: Theme.fontSize
-                color: chip.on ? Theme.bg : Theme.fg
+                color: chip.on ? Theme.accentText : Theme.fg
             }
             Text {
                 visible: chip.text !== ""
                 anchors.verticalCenter: parent.verticalCenter
                 text: chip.text
-                color: chip.on ? Theme.bg : Theme.fg
+                color: chip.on ? Theme.accentText : Theme.fg
                 font.family: Theme.font
-                font.pixelSize: Theme.fontSize - 1
+                font.pixelSize: Theme.textSmall
             }
             Icon {
                 visible: chip.trailingIcon !== ""
                 anchors.verticalCenter: parent.verticalCenter
                 text: chip.trailingIcon
                 size: Theme.fontSize
-                color: chip.on ? Theme.bg : Theme.fgDim
+                color: chip.on ? Theme.accentText : Theme.fgDim
             }
         }
     }
@@ -116,7 +116,7 @@ ColumnLayout {
             radius: Theme.radiusSmall
             borderWidth: 1
             fill: Theme.bg
-            color: Theme.muted
+            color: Theme.outline
 
             Column {
                 id: stylesColumn
@@ -150,9 +150,9 @@ ColumnLayout {
                             anchors.leftMargin: 10
                             anchors.verticalCenter: parent.verticalCenter
                             text: styleRow.modelData.label
-                            color: styleRow.current ? Theme.bg : Theme.fg
+                            color: styleRow.current ? Theme.accentText : Theme.fg
                             font.family: Theme.font
-                            font.pixelSize: Theme.fontSize
+                            font.pixelSize: Theme.textBody
                             font.bold: styleRow.current
                         }
                         Icon {
@@ -235,7 +235,7 @@ ColumnLayout {
                     fill: Theme.bgAlt
                     borderWidth: card.isCurrent ? 2 : 1
                     color: card.isCurrent ? Theme.accent
-                         : (area.containsMouse || grid.currentIndex === card.index) ? Theme.fg : Theme.muted
+                         : (area.containsMouse || grid.currentIndex === card.index) ? Theme.fg : Theme.outline
 
                     ColumnLayout {
                         anchors.fill: parent
@@ -326,7 +326,7 @@ ColumnLayout {
                                     text: Theme.prettyName(card.modelData.name)
                                     color: card.modelData.palette.fg
                                     font.family: Theme.font
-                                    font.pixelSize: Theme.fontSize + 2
+                                    font.pixelSize: Theme.textLarge
                                 }
 
                                 // As 16 cores do tema; o contorno fraco deixa ver as que são iguais ao fundo
@@ -390,7 +390,7 @@ ColumnLayout {
                                 text: Theme.prettyName(card.modelData.name)
                                 color: card.isCurrent ? Theme.accent : Theme.fgBright
                                 font.family: Theme.font
-                                font.pixelSize: Theme.fontSize
+                                font.pixelSize: Theme.textBody
                                 font.bold: card.isCurrent
                                 elide: Text.ElideRight
                             }
@@ -411,7 +411,6 @@ ColumnLayout {
                                 text: Icons.save
                                 color: saveArea.containsMouse ? Theme.accent : Theme.fgDim
                                 size: Theme.fontSize + 2
-                                opacity: area.containsMouse ? 1 : 0.5
 
                                 MouseArea {
                                     id: saveArea
@@ -429,7 +428,6 @@ ColumnLayout {
                                 text: Icons.edit
                                 color: renameArea.containsMouse ? Theme.accent : Theme.fgDim
                                 size: Theme.fontSize + 2
-                                opacity: area.containsMouse ? 1 : 0.5
 
                                 MouseArea {
                                     id: renameArea
@@ -445,7 +443,6 @@ ColumnLayout {
                                 visible: card.removable
                                 implicitWidth: card.confirming ? confirmText.implicitWidth : trashIcon.implicitWidth
                                 implicitHeight: Math.max(trashIcon.implicitHeight, confirmText.implicitHeight)
-                                opacity: (card.confirming || area.containsMouse) ? 1 : 0.5
 
                                 Icon {
                                     id: trashIcon
@@ -460,7 +457,7 @@ ColumnLayout {
                                     text: "Excluir?"
                                     color: Theme.red
                                     font.family: Theme.font
-                                    font.pixelSize: Theme.fontSize
+                                    font.pixelSize: Theme.textBody
                                     font.bold: true
                                 }
                                 MouseArea {
@@ -486,6 +483,6 @@ ColumnLayout {
         text: "Nenhum tema encontrado. Cole a URL de um tema acima para instalar."
         color: Theme.fgDim
         font.family: Theme.font
-        font.pixelSize: Theme.fontSize
+        font.pixelSize: Theme.textBody
     }
 }

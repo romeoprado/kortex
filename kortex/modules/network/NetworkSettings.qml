@@ -41,7 +41,7 @@ LazyLoader {
             Layout.fillWidth: true
             color: Theme.fg
             font.family: Theme.font
-            font.pixelSize: Theme.fontSize
+            font.pixelSize: Theme.textBody
         }
 
         component Caption: Text {
@@ -49,7 +49,7 @@ LazyLoader {
             Layout.topMargin: 2
             color: Theme.fgDim
             font.family: Theme.font
-            font.pixelSize: Theme.fontSize - 1
+            font.pixelSize: Theme.textSmall
         }
 
         component Section: Text {
@@ -57,7 +57,7 @@ LazyLoader {
             Layout.topMargin: 6
             color: Theme.fgBright
             font.family: Theme.font
-            font.pixelSize: Theme.fontSize + 1
+            font.pixelSize: Theme.textBody
             font.bold: true
         }
 
@@ -229,7 +229,7 @@ LazyLoader {
                             Rectangle {
                                 anchors.fill: parent
                                 radius: 4
-                                color: row.modelData.name === win.sel ? Theme.selection
+                                color: row.modelData.name === win.sel ? Theme.selectionTint
                                      : row.containsMouse ? Theme.bgAlt : "transparent"
                             }
 
@@ -248,7 +248,7 @@ LazyLoader {
                                     text: row.modelData.name
                                     color: row.modelData.name === win.sel ? Theme.fgBright : Theme.fg
                                     font.family: Theme.font
-                                    font.pixelSize: Theme.fontSize
+                                    font.pixelSize: Theme.textBody
                                     font.bold: row.modelData.active
                                     elide: Text.ElideRight
                                 }
@@ -269,7 +269,7 @@ LazyLoader {
                         text: "Nenhuma conexão salva."
                         color: Theme.fgDim
                         font.family: Theme.font
-                        font.pixelSize: Theme.fontSize
+                        font.pixelSize: Theme.textBody
                     }
 
                     PlainButton {
@@ -299,7 +299,7 @@ LazyLoader {
                         text: "Selecione uma conexão."
                         color: Theme.fgDim
                         font.family: Theme.font
-                        font.pixelSize: Theme.fontSize
+                        font.pixelSize: Theme.textBody
                     }
 
                     ColumnLayout {
@@ -321,7 +321,7 @@ LazyLoader {
                                     text: win.conn ? win.conn.name : ""
                                     color: Theme.fgBright
                                     font.family: Theme.font
-                                    font.pixelSize: Theme.fontSize + 4
+                                    font.pixelSize: Theme.textTitle
                                     font.bold: true
                                     elide: Text.ElideRight
                                 }
@@ -332,7 +332,7 @@ LazyLoader {
                                           + (win.conn.active ? " · conectado" + (win.conn.device ? " em " + win.conn.device : "") : " · desconectado")
                                     color: win.conn && win.conn.active ? Theme.green : Theme.fgDim
                                     font.family: Theme.font
-                                    font.pixelSize: Theme.fontSize - 1
+                                    font.pixelSize: Theme.textSmall
                                 }
                             }
 
@@ -367,7 +367,7 @@ LazyLoader {
                             visible: Network.error !== ""
                             text: Network.error
                             color: Theme.red
-                            font.pixelSize: Theme.fontSize - 1
+                            font.pixelSize: Theme.textSmall
                             wrapMode: Text.Wrap
                         }
 
@@ -375,7 +375,7 @@ LazyLoader {
                             visible: Network.detailsError !== ""
                             text: Network.detailsError
                             color: Theme.red
-                            font.pixelSize: Theme.fontSize - 1
+                            font.pixelSize: Theme.textSmall
                             wrapMode: Text.Wrap
                         }
 
@@ -397,7 +397,7 @@ LazyLoader {
                                     text: "Em uso agora"
                                     color: Theme.fgDim
                                     font.family: Theme.font
-                                    font.pixelSize: Theme.fontSize - 1
+                                    font.pixelSize: Theme.textSmall
                                 }
                                 Label { text: "IP:       " + (Network.live ? Network.live.ip || "—" : "") }
                                 Label { text: "Gateway:  " + (Network.live ? Network.live.gateway || "—" : "") }
@@ -451,7 +451,7 @@ LazyLoader {
                             visible: win.ipv4Method === "" && win.d !== null
                             text: "O método IPv4 “" + (win.d ? win.d.ipv4Method : "") + "” não é editável aqui."
                             color: Theme.fgDim
-                            font.pixelSize: Theme.fontSize - 1
+                            font.pixelSize: Theme.textSmall
                             wrapMode: Text.Wrap
                         }
 
@@ -513,7 +513,7 @@ LazyLoader {
                             visible: win.formError !== "" || Network.saveMessage !== ""
                             text: win.formError !== "" ? win.formError : Network.saveMessage
                             color: (win.formError !== "" || Network.saveState === "error") ? Theme.red : Theme.green
-                            font.pixelSize: Theme.fontSize - 1
+                            font.pixelSize: Theme.textSmall
                             wrapMode: Text.Wrap
                         }
 
@@ -525,7 +525,7 @@ LazyLoader {
                             Label {
                                 text: win.conn && win.conn.active ? "Aplicar reconecta esta rede; ela pode cair por instantes." : ""
                                 color: Theme.fgDim
-                                font.pixelSize: Theme.fontSize - 1
+                                font.pixelSize: Theme.textSmall
                                 wrapMode: Text.Wrap
                             }
 

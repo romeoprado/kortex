@@ -45,7 +45,7 @@ BarButton {
                 spacing: 2
                 Layout.fillWidth: true
                 Text {
-                    text: Weather.temp + "°C"
+                    text: Weather.temp + " °C"
                     color: Theme.fgBright
                     font.family: Theme.font
                     font.pixelSize: 24
@@ -55,7 +55,7 @@ BarButton {
                     text: Weather.desc
                     color: Theme.fg
                     font.family: Theme.font
-                    font.pixelSize: Theme.fontSize
+                    font.pixelSize: Theme.textBody
                 }
             }
         }
@@ -79,8 +79,8 @@ BarButton {
                     implicitHeight: stat.implicitHeight
                     Column {
                         id: stat
-                        Text { text: modelData.k; color: Theme.fgDim; font.family: Theme.font; font.pixelSize: Theme.fontSize - 1 }
-                        Text { text: modelData.v; color: Theme.fg; font.family: Theme.font; font.pixelSize: Theme.fontSize }
+                        Text { text: modelData.k; color: Theme.fgDim; font.family: Theme.font; font.pixelSize: Theme.textSmall }
+                        Text { text: modelData.v; color: Theme.fg; font.family: Theme.font; font.pixelSize: Theme.textBody }
                     }
                 }
             }
@@ -124,7 +124,7 @@ BarButton {
                                 : dayRow.day.toLocaleDateString(Qt.locale(), "ddd").replace(/\.$/, "") + " " + dayRow.day.getDate()
                             color: dayRow.index === 0 ? Theme.fgBright : Theme.fg
                             font.family: Theme.font
-                            font.pixelSize: Theme.fontSize
+                            font.pixelSize: Theme.textBody
                             font.bold: dayRow.index === 0
                         }
                         Icon {
@@ -138,7 +138,7 @@ BarButton {
                             text: dayRow.modelData.text
                             color: Theme.fgDim
                             font.family: Theme.font
-                            font.pixelSize: Theme.fontSize - 1
+                            font.pixelSize: Theme.textSmall
                             elide: Text.ElideRight
                         }
                         Row {
@@ -153,8 +153,8 @@ BarButton {
                                 text: dayRow.modelData.rain + "%"
                                 color: Theme.fgDim
                                 font.family: Theme.font
-                                font.pixelSize: Theme.fontSize - 1
-                                TextMetrics { id: rainWidth; font.family: Theme.font; font.pixelSize: Theme.fontSize - 1; text: "100%" }
+                                font.pixelSize: Theme.textSmall
+                                TextMetrics { id: rainWidth; font.family: Theme.font; font.pixelSize: Theme.textSmall; text: "100%" }
                             }
                             Icon {
                                 anchors.verticalCenter: parent.verticalCenter
@@ -169,7 +169,7 @@ BarButton {
                             text: dayRow.modelData.min + "°"
                             color: Theme.fgDim
                             font.family: Theme.font
-                            font.pixelSize: Theme.fontSize
+                            font.pixelSize: Theme.textBody
                         }
                         Text {
                             Layout.preferredWidth: 36
@@ -177,7 +177,7 @@ BarButton {
                             text: dayRow.modelData.max + "°"
                             color: Theme.fgBright
                             font.family: Theme.font
-                            font.pixelSize: Theme.fontSize
+                            font.pixelSize: Theme.textBody
                             font.bold: true
                         }
                     }
@@ -191,7 +191,7 @@ BarButton {
             text: Weather.error
             color: Theme.red
             font.family: Theme.font
-            font.pixelSize: Theme.fontSize - 1
+            font.pixelSize: Theme.textSmall
             wrapMode: Text.Wrap
         }
 

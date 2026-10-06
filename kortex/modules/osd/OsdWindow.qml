@@ -77,8 +77,8 @@ PanelWindow {
                 text: Math.round(win.value * 100) + "%"
                 color: win.dim ? Theme.fgDim : Theme.fg
                 font.family: Theme.font
-                font.pixelSize: Theme.fontSize
-                TextMetrics { id: pctMetrics; font.family: Theme.font; font.pixelSize: Theme.fontSize; text: "100%" }
+                font.pixelSize: Theme.textBody
+                TextMetrics { id: pctMetrics; font.family: Theme.font; font.pixelSize: Theme.textBody; text: "100%" }
             }
 
             // Caps Lock e Num Lock: nome e estado
@@ -88,7 +88,7 @@ PanelWindow {
                                             : "Num Lock " + (Osd.numLock ? "ativado" : "desativado"))
                 color: Theme.fg
                 font.family: Theme.font
-                font.pixelSize: Theme.fontSize
+                font.pixelSize: Theme.textBody
             }
         }
     }

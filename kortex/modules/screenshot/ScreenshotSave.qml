@@ -116,7 +116,7 @@ LazyLoader {
                     radius: Theme.radiusSmall
                     fill: Theme.bgDark
                     borderWidth: 1
-                    color: Theme.muted
+                    color: Theme.outline
 
                     ColumnLayout {
                         anchors.fill: parent
@@ -140,7 +140,7 @@ LazyLoader {
                                 text: Screenshot.displayPath(win.dir)
                                 color: Theme.fgBright
                                 font.family: Theme.font
-                                font.pixelSize: Theme.fontSize
+                                font.pixelSize: Theme.textBody
                                 font.bold: true
                                 elide: Text.ElideMiddle
                             }
@@ -205,7 +205,7 @@ LazyLoader {
                                     text: row.fileName
                                     color: row.containsMouse ? Theme.fgBright : Theme.fg
                                     font.family: Theme.font
-                                    font.pixelSize: Theme.fontSize
+                                    font.pixelSize: Theme.textBody
                                     elide: Text.ElideRight
                                 }
                             }
@@ -216,7 +216,7 @@ LazyLoader {
                                 text: "Nenhuma subpasta."
                                 color: Theme.fgDim
                                 font.family: Theme.font
-                                font.pixelSize: Theme.fontSize
+                                font.pixelSize: Theme.textBody
                             }
                         }
                     }
@@ -229,7 +229,7 @@ LazyLoader {
                         : Screenshot.conflict !== "" ? "Já existe \"" + Screenshot.conflict.split("/").pop() + "\" nesta pasta." : ""
                     color: Screenshot.error !== "" ? Theme.red : Theme.yellow
                     font.family: Theme.font
-                    font.pixelSize: Theme.fontSize
+                    font.pixelSize: Theme.textBody
                     wrapMode: Text.Wrap
                 }
 

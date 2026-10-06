@@ -12,7 +12,7 @@ SettingsPage {
         text: "Kortex 0.1 · Desenvolvido por R. Prado [contato@romeoprado.com.br]"
         color: Theme.fgBright
         font.family: Theme.font
-        font.pixelSize: Theme.fontSize + 1
+        font.pixelSize: Theme.textBody
         wrapMode: Text.Wrap
     }
 
@@ -38,7 +38,7 @@ SettingsPage {
                 text: modelData.url
                 color: Theme.accent
                 font.family: Theme.font
-                font.pixelSize: Theme.fontSize - 1
+                font.pixelSize: Theme.textSmall
             }
         }
     }

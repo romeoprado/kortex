@@ -40,7 +40,7 @@ RowLayout {
                 anchors.centerIn: parent
                 text: ws.wsId
                 font.family: Theme.font
-                font.pixelSize: Theme.fontSize
+                font.pixelSize: Theme.textBody
                 font.bold: ws.isActive
                 color: ws.isActive ? Theme.accent
                      : ws.containsMouse ? Theme.fgBright

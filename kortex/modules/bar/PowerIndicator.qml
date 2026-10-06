@@ -32,8 +32,8 @@ BarButton {
     readonly property string confirmText: "Clique novamente para confirmar."
     // Etiqueta: sob o botão da ação que pede confirmação ou, senão, da que está sob o mouse
     readonly property int tagIndex: actions.findIndex(a => a.id === (confirming !== "" ? confirming : hovered))
-    FontMetrics { id: tagMetrics; font.family: Theme.font; font.pixelSize: Theme.fontSize - 1 }
-    FontMetrics { id: tagBoldMetrics; font.family: Theme.font; font.pixelSize: Theme.fontSize - 1; font.bold: true }
+    FontMetrics { id: tagMetrics; font.family: Theme.font; font.pixelSize: Theme.textSmall }
+    FontMetrics { id: tagBoldMetrics; font.family: Theme.font; font.pixelSize: Theme.textSmall; font.bold: true }
     readonly property real longestLabel: {
         void tagMetrics.font, tagBoldMetrics.font   // refaz a conta quando a fonte muda
         return Math.max(0, ...actions.map(a => a.confirm ? tagBoldMetrics.advanceWidth(confirmText)
@@ -84,7 +84,7 @@ BarButton {
             text: "Nenhuma ação habilitada. Escolha em Configurações › Sessão."
             color: Theme.fgDim
             font.family: Theme.font
-            font.pixelSize: Theme.fontSize
+            font.pixelSize: Theme.textBody
         }
 
         // Um botão só com ícone por ação; embaixo, o nome da ação sob o mouse ou o pedido de confirmação
@@ -120,7 +120,7 @@ BarButton {
             index: root.tagIndex
             text: asking ? root.confirmText : root.tagIndex >= 0 ? root.actions[root.tagIndex].text : ""
             fill: asking ? Theme.red : Theme.bgAlt
-            textColor: asking ? Theme.bg : Theme.fg
+            textColor: asking ? Theme.redText : Theme.fg
             bold: asking
         }
     }

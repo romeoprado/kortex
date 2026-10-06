@@ -60,7 +60,7 @@ BarButton {
                 : "Nenhum dispositivo por perto."
             color: Theme.fgDim
             font.family: Theme.font
-            font.pixelSize: Theme.fontSize
+            font.pixelSize: Theme.textBody
             wrapMode: Text.Wrap
         }
 
@@ -121,7 +121,7 @@ BarButton {
                             text: row.modelData.name || row.modelData.address
                             color: row.modelData.connected ? Theme.fgBright : Theme.fg
                             font.family: Theme.font
-                            font.pixelSize: Theme.fontSize
+                            font.pixelSize: Theme.textBody
                             elide: Text.ElideRight
                         }
                         Text {
@@ -130,7 +130,7 @@ BarButton {
                                 : row.modelData.paired ? "Pareado" : "Clique para parear"
                             color: Theme.fgDim
                             font.family: Theme.font
-                            font.pixelSize: Theme.fontSize - 2
+                            font.pixelSize: Theme.textSmall
                         }
                     }
 
@@ -148,7 +148,7 @@ BarButton {
                             text: Math.round(row.modelData.battery * 100) + "%"
                             color: Theme.fgDim
                             font.family: Theme.font
-                            font.pixelSize: Theme.fontSize - 1
+                            font.pixelSize: Theme.textSmall
                         }
                     }
                 }
@@ -160,7 +160,7 @@ BarButton {
             text: "Botão direito sobre um pareado para esquecê-lo."
             color: Theme.fgDim
             font.family: Theme.font
-            font.pixelSize: Theme.fontSize - 2
+            font.pixelSize: Theme.textSmall
         }
     }
 }

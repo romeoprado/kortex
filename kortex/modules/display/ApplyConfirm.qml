@@ -65,7 +65,7 @@ LazyLoader {
                         : win.mon ? win.mon.name + " · " + Monitors.describe(win.mon) : Monitors.pendingName
                     color: Theme.fg
                     font.family: Theme.font
-                    font.pixelSize: Theme.fontSize
+                    font.pixelSize: Theme.textBody
                     wrapMode: Text.Wrap
                 }
 
@@ -79,7 +79,7 @@ LazyLoader {
                         text: "Voltando ao modo anterior em " + Monitors.secondsLeft + " s"
                         color: Theme.fgDim
                         font.family: Theme.font
-                        font.pixelSize: Theme.fontSize - 1
+                        font.pixelSize: Theme.textSmall
                     }
 
                     Rectangle {

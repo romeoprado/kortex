@@ -97,7 +97,7 @@ BarButton {
             text: "Controle de brilho indisponível."
             color: Theme.fgDim
             font.family: Theme.font
-            font.pixelSize: Theme.fontSize - 1
+            font.pixelSize: Theme.textSmall
             wrapMode: Text.Wrap
         }
 
@@ -110,7 +110,7 @@ BarButton {
                 text: "Luz Noturna"
                 color: Theme.fg
                 font.family: Theme.font
-                font.pixelSize: Theme.fontSize
+                font.pixelSize: Theme.textBody
             }
             Toggle {
                 checked: Settings.data.nightLight
@@ -135,7 +135,7 @@ BarButton {
             text: "Instale o hyprsunset para usar a luz noturna."
             color: Theme.red
             font.family: Theme.font
-            font.pixelSize: Theme.fontSize - 1
+            font.pixelSize: Theme.textSmall
             wrapMode: Text.Wrap
         }
 
@@ -150,7 +150,7 @@ BarButton {
                 Layout.fillWidth: true
                 color: Theme.fg
                 font.family: Theme.font
-                font.pixelSize: Theme.fontSize
+                font.pixelSize: Theme.textBody
             }
 
             Text {
@@ -158,7 +158,7 @@ BarButton {
                 text: root.mon ? root.mon.name + (root.mon.description ? " · " + root.mon.description : "") : ""
                 color: Theme.fgDim
                 font.family: Theme.font
-                font.pixelSize: Theme.fontSize - 1
+                font.pixelSize: Theme.textSmall
                 elide: Text.ElideRight
             }
 
@@ -171,14 +171,14 @@ BarButton {
 
             SectionLabel { text: "Taxa de Atualização" }
             Chips {
-                model: root.currentRes ? root.currentRes.rates.map(r => ({ label: Monitors.fmtNumber(r) + " Hz", value: r })) : []
+                model: root.currentRes ? root.currentRes.rates.map(r => ({ label: Monitors.fmtLabel(r) + " Hz", value: r })) : []
                 current: root.selRate
                 onPicked: rate => { root.selRate = rate; root.edited = true }
             }
 
             SectionLabel { text: "Escala" }
             Chips {
-                model: Monitors.scales.map(s => ({ label: Monitors.fmtNumber(s) + "×", value: s }))
+                model: Monitors.scales.map(s => ({ label: Monitors.fmtLabel(s) + "×", value: s }))
                 current: root.selScale
                 onPicked: scale => { root.selScale = scale; root.edited = true }
             }
@@ -191,7 +191,7 @@ BarButton {
                     : ""
                 color: Theme.fgDim
                 font.family: Theme.font
-                font.pixelSize: Theme.fontSize - 1
+                font.pixelSize: Theme.textSmall
             }
 
             PlainButton {

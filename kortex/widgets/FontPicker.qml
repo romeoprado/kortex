@@ -48,7 +48,7 @@ ColumnLayout {
         radius: Theme.radiusSmall
         fill: Theme.bgDark
         borderWidth: 1
-        color: Theme.muted
+        color: Theme.outline
 
         ListView {
             id: list
@@ -73,7 +73,7 @@ ColumnLayout {
                 Rectangle {
                     anchors.fill: parent
                     radius: 4
-                    color: item.chosen ? Theme.selection : item.containsMouse ? Theme.bgAlt : "transparent"
+                    color: item.chosen ? Theme.selectionTint : item.containsMouse ? Theme.bgAlt : "transparent"
                 }
 
                 Text {
@@ -84,7 +84,7 @@ ColumnLayout {
                     text: item.modelData
                     color: item.chosen ? Theme.accent : Theme.fgBright
                     font.family: item.modelData
-                    font.pixelSize: Theme.fontSize + 3
+                    font.pixelSize: Theme.textLarge
                     font.bold: item.chosen
                     elide: Text.ElideRight
                 }
@@ -97,7 +97,7 @@ ColumnLayout {
             text: "Nenhuma fonte encontrada."
             color: Theme.fgDim
             font.family: Theme.font
-            font.pixelSize: Theme.fontSize
+            font.pixelSize: Theme.textBody
         }
     }
 }

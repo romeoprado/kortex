@@ -21,7 +21,7 @@ MouseArea {
         radius: Theme.radiusSmall
         borderWidth: 1
         fill: root.highlighted ? Theme.accent : (root.containsMouse ? Theme.bgAlt : "transparent")
-        color: root.highlighted ? Theme.accent : Theme.muted
+        color: root.highlighted ? Theme.accent : Theme.outline
         Behavior on fill { ColorAnimation { duration: 100 } }
     }
 
@@ -44,9 +44,9 @@ MouseArea {
         Text {
             anchors.verticalCenter: parent.verticalCenter
             text: root.text
-            color: root.highlighted ? Theme.bg : (root.containsMouse ? Theme.fgBright : Theme.fg)
+            color: root.highlighted ? Theme.accentText : (root.containsMouse ? Theme.fgBright : Theme.fg)
             font.family: Theme.font
-            font.pixelSize: Theme.fontSize
+            font.pixelSize: Theme.textBody
         }
     }
 }

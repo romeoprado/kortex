@@ -40,7 +40,9 @@ Singleton {
 
     // [{ layout, variant, code, name, search, order }], em ordem alfabética
     property var catalog: []
-    property var _names: ({})   // "br(abnt2)" → "Portuguese (Brazil, ABNT2)"
+    property var _names: ({})   // "br(abnt2)" → "Português (Brasil, ABNT2)" (traduzido, se houver tradução)
+    property var _tr: ({})      // tradução oficial do xkeyboard-config: "Portuguese (Brazil)" → "Português (Brasil)"
+    property string _catalogText: ""
 
     readonly property var active: layouts[activeIndex] ?? layouts[0]
     readonly property string shortName: labelOf(active)
@@ -184,7 +186,24 @@ Singleton {
     // Lê o xkeyboard-config: seções "! layout" e "! variant" de evdev.lst
     //   "  br              Portuguese (Brazil)"
     //   "  abnt2           br: Portuguese (Brazil, ABNT2)"
+    // Saída do msgunfmt (.po): pares msgid/msgstr, com continuação em linhas que são só uma string
+    function _parseTranslations(text) {
+        const tr = {}
+        const unq = l => l.slice(l.indexOf('"') + 1, l.lastIndexOf('"')).replace(/\\"/g, '"').replace(/\\n/g, "")
+        let id = null, str = null, cur = ""
+        const flush = () => { if (id && str) tr[id] = str }
+        for (const line of text.split("\n")) {
+            if (line.startsWith("msgid ")) { flush(); id = unq(line); str = null; cur = "id" }
+            else if (line.startsWith("msgstr ")) { str = unq(line); cur = "str" }
+            else if (line.startsWith('"')) { if (cur === "id") id += unq(line); else if (cur === "str") str += unq(line) }
+        }
+        flush()
+        _tr = tr
+        if (_catalogText !== "") _parseCatalog(_catalogText)
+    }
+
     function _parseCatalog(text) {
+        _catalogText = text
         const out = []
         const names = {}
         let section = ""
@@ -206,9 +225,11 @@ Singleton {
             }
             if (layout === "custom") continue
             const code = variant ? layout + "(" + variant + ")" : layout
+            const original = name
+            name = _tr[original] || original
             names[code] = name
             out.push({ layout: layout, variant: variant, code: code, name: name,
-                       search: (name + " " + code).toLowerCase(), order: 0 })
+                       search: (name + " " + original + " " + code).toLowerCase(), order: 0 })
         }
         out.sort((a, b) => a.name.localeCompare(b.name))
         out.forEach((e, i) => e.order = i)
@@ -274,6 +295,17 @@ Singleton {
             root.systemFailed = code !== 0
             root.systemMessage = code === 0 ? "Gravado no sistema. Vale no console e na tela de login."
                 : sysErr.text.trim() || "Não foi possível gravar (código " + code + ")."
+        }
+    }
+
+    // Nomes dos layouts no idioma do sistema (pt_BR, depois pt), se a tradução estiver instalada
+    Process {
+        running: true
+        command: ["sh", "-c", "for l in \"$1\" \"${1%%_*}\"; do f=/usr/share/locale/$l/LC_MESSAGES/xkeyboard-config.mo; "
+                  + "[ -f \"$f\" ] && exec msgunfmt \"$f\"; done; exit 0", "sh", Qt.locale().name]
+        stdout: StdioCollector {
+            id: trOut
+            onStreamFinished: if (trOut.text !== "") root._parseTranslations(trOut.text)
         }
     }
 

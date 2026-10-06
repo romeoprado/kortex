@@ -61,7 +61,7 @@ ColumnLayout {
                         text: root.text
                         color: root.clickable && hit.containsMouse ? Theme.accent : root.titleColor
                         font.family: Theme.titleFont
-                        font.pixelSize: Theme.fontSize + 5
+                        font.pixelSize: Theme.textTitle
                         font.bold: true
                         elide: Text.ElideRight
                     }
@@ -72,7 +72,7 @@ ColumnLayout {
                         text: root.subtitle
                         color: Theme.fgDim
                         font.family: Theme.font
-                        font.pixelSize: Theme.fontSize - 1
+                        font.pixelSize: Theme.textSmall
                         elide: Text.ElideRight
                     }
                 }

@@ -13,14 +13,14 @@ BarButton {
 
     // Largura da ficha da bateria: o rótulo mais comprido e um valor longo (data de fabricação) lado a lado,
     // mais o espaço entre eles (8) e as margens da ficha (12 + 12)
-    FontMetrics { id: rowMetrics; font.family: Theme.font; font.pixelSize: Theme.fontSize }
+    FontMetrics { id: rowMetrics; font.family: Theme.font; font.pixelSize: Theme.textBody }
     readonly property real cardWidth: {
         void rowMetrics.font   // refaz a conta quando a fonte muda
         return rowMetrics.advanceWidth("Capacidade de fábrica") + rowMetrics.advanceWidth("00/00/0000") + 8 + 24
     }
 
     // Linhas da ficha da bateria um ponto maiores que as do padrão
-    component InfoRow: StatRow { textSize: Theme.fontSize }
+    component InfoRow: StatRow { textSize: Theme.textBody }
 
     icon: Energy.batteryIcon(bat)
     color: Energy.isLow(bat) ? Theme.red : Theme.fg
@@ -80,7 +80,7 @@ BarButton {
             text: "Modo Desempenho limitado: " + Energy.degradation + "."
             color: Theme.yellow
             font.family: Theme.font
-            font.pixelSize: Theme.fontSize - 1
+            font.pixelSize: Theme.textSmall
             wrapMode: Text.WordWrap
         }
 
@@ -90,7 +90,7 @@ BarButton {
             text: "Modos de energia indisponíveis: instale o power‑profiles‑daemon."
             color: Theme.yellow
             font.family: Theme.font
-            font.pixelSize: Theme.fontSize - 1
+            font.pixelSize: Theme.textSmall
             wrapMode: Text.WordWrap
         }
 
@@ -110,7 +110,7 @@ BarButton {
                 valueText: b.percent + "%"
                 value: b.percent / 100
                 lowAlert: true
-                subtitleSize: Theme.fontSize
+                subtitleSize: Theme.textBody
 
                 InfoRow {
                     label: b.status === "Charging" ? "Tempo até completar" : "Tempo restante"
@@ -118,19 +118,19 @@ BarButton {
                 }
                 InfoRow {
                     label: b.status === "Charging" ? "Potência de carga" : "Consumo"
-                    value: (b.status === "Charging" || b.status === "Discharging") && b.power >= 0.05 ? b.power.toFixed(1) + " W" : ""
+                    value: (b.status === "Charging" || b.status === "Discharging") && b.power >= 0.05 ? Theme.decimal(b.power, 1) + " W" : ""
                 }
                 InfoRow {
                     label: "Energia atual"
-                    value: b.energyNow >= 0 ? b.energyNow.toFixed(1) + " Wh" : ""
+                    value: b.energyNow >= 0 ? Theme.decimal(b.energyNow, 1) + " Wh" : ""
                 }
                 InfoRow {
                     label: "Capacidade atual"
-                    value: b.energyFull > 0 ? b.energyFull.toFixed(1) + " Wh" : ""
+                    value: b.energyFull > 0 ? Theme.decimal(b.energyFull, 1) + " Wh" : ""
                 }
                 InfoRow {
                     label: "Capacidade de fábrica"
-                    value: b.energyDesign > 0 ? b.energyDesign.toFixed(1) + " Wh" : ""
+                    value: b.energyDesign > 0 ? Theme.decimal(b.energyDesign, 1) + " Wh" : ""
                 }
                 InfoRow {
                     readonly property real health: b.energyFull > 0 && b.energyDesign > 0 ? b.energyFull / b.energyDesign : -1
@@ -144,11 +144,11 @@ BarButton {
                 }
                 InfoRow {
                     label: "Tensão"
-                    value: b.voltage > 0 ? b.voltage.toFixed(2) + " V" : ""
+                    value: b.voltage > 0 ? Theme.decimal(b.voltage, 2) + " V" : ""
                 }
                 InfoRow {
                     label: "Temperatura"
-                    value: b.temp >= 0 ? b.temp.toFixed(1) + " °C" : ""
+                    value: b.temp >= 0 ? Theme.decimal(b.temp, 1) + " °C" : ""
                     warn: b.temp >= 50
                 }
                 InfoRow { label: "Tecnologia"; value: b.technology }

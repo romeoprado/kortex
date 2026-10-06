@@ -27,7 +27,7 @@ ColumnLayout {
         Layout.fillWidth: true
         color: Theme.fgDim
         font.family: Theme.font
-        font.pixelSize: Theme.fontSize - 1
+        font.pixelSize: Theme.textSmall
         wrapMode: Text.Wrap
     }
 
@@ -39,7 +39,7 @@ ColumnLayout {
             text: "Idioma do sistema"
             color: Theme.fgBright
             font.family: Theme.font
-            font.pixelSize: Theme.fontSize + 3
+            font.pixelSize: Theme.textLarge
             font.bold: true
         }
         Text {
@@ -47,7 +47,7 @@ ColumnLayout {
             text: Language.currentName + "  ·  " + Language.current
             color: Theme.accent
             font.family: Theme.font
-            font.pixelSize: Theme.fontSize
+            font.pixelSize: Theme.textBody
             elide: Text.ElideRight
         }
     }
@@ -85,7 +85,7 @@ ColumnLayout {
             Rectangle {
                 anchors.fill: parent
                 radius: 4
-                color: item.chosen ? Theme.selection : item.containsMouse ? Theme.bgAlt : "transparent"
+                color: item.chosen ? Theme.selectionTint : item.containsMouse ? Theme.bgAlt : "transparent"
             }
 
             RowLayout {
@@ -99,7 +99,7 @@ ColumnLayout {
                     text: item.modelData.name
                     color: item.chosen ? Theme.fgBright : Theme.fg
                     font.family: Theme.font
-                    font.pixelSize: Theme.fontSize
+                    font.pixelSize: Theme.textBody
                     font.bold: item.modelData.current
                     elide: Text.ElideRight
                 }
@@ -107,7 +107,7 @@ ColumnLayout {
                     text: item.modelData.code
                     color: Theme.fgDim
                     font.family: Theme.font
-                    font.pixelSize: Theme.fontSize - 1
+                    font.pixelSize: Theme.textSmall
                 }
                 Text {
                     Layout.preferredWidth: 78
@@ -115,7 +115,7 @@ ColumnLayout {
                     text: item.modelData.current ? "em uso" : item.modelData.installed ? "instalado" : "a gerar"
                     color: item.modelData.current ? Theme.green : Theme.fgDim
                     font.family: Theme.font
-                    font.pixelSize: Theme.fontSize - 1
+                    font.pixelSize: Theme.textSmall
                 }
             }
         }
@@ -127,7 +127,7 @@ ColumnLayout {
         text: "Nenhum idioma encontrado."
         color: Theme.fgDim
         font.family: Theme.font
-        font.pixelSize: Theme.fontSize
+        font.pixelSize: Theme.textBody
     }
 
     Rectangle { Layout.fillWidth: true; implicitHeight: 1; color: Theme.muted }
@@ -168,7 +168,7 @@ ColumnLayout {
             text: "Relógio de 24 horas"
             color: Theme.fg
             font.family: Theme.font
-            font.pixelSize: Theme.fontSize
+            font.pixelSize: Theme.textBody
         }
         Toggle {
             checked: Settings.data.use24h

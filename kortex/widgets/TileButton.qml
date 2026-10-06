@@ -20,7 +20,7 @@ MouseArea {
     // Fundo do hover: um toque da cor do destaque sobre o bloco (não usa Theme.selection, que em
     // alguns temas é igual ao acento e apagaria o texto)
     readonly property color hoverFill: Qt.tint(Theme.bgAlt, Qt.alpha(hue, 0.18))
-    readonly property color tone: asking || selected ? Theme.bg : containsMouse ? hue : Theme.fg
+    readonly property color tone: asking ? Theme.redText : selected ? Theme.accentText : containsMouse ? hue : Theme.fg
     readonly property bool iconOnly: text === ""
 
     implicitWidth: iconOnly ? 44 : 0
@@ -31,6 +31,18 @@ MouseArea {
     Behavior on scale { NumberAnimation { duration: 90; easing.type: Easing.OutCubic } }
 
     onAskingChanged: if (asking) drain.restart(); else drain.stop()
+    // Teclado: Tab chega ao controle (contorno de foco) e Espaço ou Enter o aciona
+    activeFocusOnTab: enabled && visible
+    Keys.onPressed: event => {
+        if (event.key === Qt.Key_Space || event.key === Qt.Key_Return || event.key === Qt.Key_Enter) {
+            root.clicked(null)
+            event.accepted = true
+        }
+    }
+    Accessible.role: Accessible.Button
+    Accessible.name: root.text
+
+    FocusRing { baseRadius: Theme.radius }
 
     GradientBorder {
         anchors.fill: parent
@@ -61,7 +73,7 @@ MouseArea {
             text: root.asking ? "Confirmar" : root.text
             color: root.tone
             font.family: Theme.font
-            font.pixelSize: Theme.fontSize
+            font.pixelSize: Theme.textBody
             font.bold: root.asking || root.selected
             Behavior on color { ColorAnimation { duration: 120 } }
         }
@@ -77,7 +89,7 @@ MouseArea {
         }
         height: 3
         radius: 1.5
-        color: Theme.bg
+        color: Theme.redText
         opacity: 0.55
         width: 0
 

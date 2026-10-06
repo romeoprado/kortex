@@ -99,7 +99,7 @@ BarButton {
                             text: info.c ? info.c.name || info.c.device : ""
                             color: Theme.fgBright
                             font.family: Theme.font
-                            font.pixelSize: Theme.fontSize
+                            font.pixelSize: Theme.textBody
                             font.bold: true
                             elide: Text.ElideRight
                         }
@@ -108,7 +108,7 @@ BarButton {
                             text: info.c ? info.c.device + " · " + (info.wifi ? "Wi-Fi" : "Cabo") : ""
                             color: Theme.fgDim
                             font.family: Theme.font
-                            font.pixelSize: Theme.fontSize - 2
+                            font.pixelSize: Theme.textSmall
                             elide: Text.ElideRight
                         }
                     }
@@ -126,7 +126,7 @@ BarButton {
                             text: root.net ? root.net.signal + "%" : ""
                             color: Theme.accent
                             font.family: Theme.font
-                            font.pixelSize: Theme.fontSize - 2
+                            font.pixelSize: Theme.textSmall
                             font.bold: true
                         }
                     }
@@ -180,7 +180,7 @@ BarButton {
                                         text: tileBox.modelData.label
                                         color: Theme.fgDim
                                         font.family: Theme.font
-                                        font.pixelSize: Theme.fontSize - 2
+                                        font.pixelSize: Theme.textSmall
                                     }
                                 }
                                 Text {
@@ -188,7 +188,7 @@ BarButton {
                                     text: tileBox.modelData.value || "—"
                                     color: Theme.fg
                                     font.family: Theme.font
-                                    font.pixelSize: Theme.fontSize - 1
+                                    font.pixelSize: Theme.textSmall
                                     wrapMode: Text.Wrap
                                 }
                             }
@@ -223,14 +223,14 @@ BarButton {
                     text: "Cabo: " + Network.wiredName
                     color: Theme.fg
                     font.family: Theme.font
-                    font.pixelSize: Theme.fontSize
+                    font.pixelSize: Theme.textBody
                     elide: Text.ElideRight
                 }
                 Text {
                     text: "Configurar"
                     color: Theme.fgDim
                     font.family: Theme.font
-                    font.pixelSize: Theme.fontSize - 1
+                    font.pixelSize: Theme.textSmall
                 }
             }
         }
@@ -242,7 +242,7 @@ BarButton {
             text: !Network.wifiEnabled ? "Wi-Fi desligado." : "Nenhuma rede encontrada ainda."
             color: Theme.fgDim
             font.family: Theme.font
-            font.pixelSize: Theme.fontSize
+            font.pixelSize: Theme.textBody
             wrapMode: Text.Wrap
         }
 
@@ -277,10 +277,10 @@ BarButton {
                     else Network.connect(n.ssid, "")
                 }
 
-                // Rede conectada: fundo no acento e tudo em Theme.bg por cima, como os chips selecionados
+                // Rede conectada: fundo no acento e tudo em Theme.accentText por cima, como os chips selecionados
                 // (Theme.selection não serve: em alguns temas é igual ao acento e apagava o ícone e o texto)
-                readonly property color onRow: modelData.active ? Theme.bg : Theme.fg
-                readonly property color onRowDim: modelData.active ? Theme.bg : Theme.fgDim
+                readonly property color onRow: modelData.active ? Theme.accentText : Theme.fg
+                readonly property color onRowDim: modelData.active ? Theme.accentText : Theme.fgDim
 
                 Rectangle {
                     anchors.fill: parent
@@ -304,7 +304,7 @@ BarButton {
                         text: row.modelData.ssid
                         color: row.onRow
                         font.family: Theme.font
-                        font.pixelSize: Theme.fontSize
+                        font.pixelSize: Theme.textBody
                         font.bold: row.modelData.active
                         elide: Text.ElideRight
                     }
@@ -314,7 +314,7 @@ BarButton {
                             : row.modelData.signal + "%"
                         color: row.onRowDim
                         font.family: Theme.font
-                        font.pixelSize: Theme.fontSize - 1
+                        font.pixelSize: Theme.textSmall
                     }
                     // Cadeado fechado com senha, aberto sem senha (rede sem proteção)
                     Icon {
@@ -332,7 +332,7 @@ BarButton {
             text: Network.error
             color: Theme.red
             font.family: Theme.font
-            font.pixelSize: Theme.fontSize - 1
+            font.pixelSize: Theme.textSmall
             wrapMode: Text.Wrap
         }
 

@@ -24,7 +24,9 @@ LazyLoader {
             const cw = Math.floor(w / Math.max(1, Math.floor(w / 240)))
             return Math.round(cw * 0.5625) + 44
         }
-        panelHeight: Math.min(36 + 32 + 14 + 34 + 12 + 2 * themeRowHeight, (win.screen?.height ?? 800) - 120)
+        // A linha da pasta (34 + 12) só existe na aba Papéis de Parede: na aba Temas ela não sobra embaixo
+        panelHeight: Math.min(36 + 32 + 14 + (Popups.pickerTab === "wallpapers" ? 34 + 12 : 0) + 2 * themeRowHeight,
+                              (win.screen?.height ?? 800) - 120)
         onDismissed: close()
 
         function close() { Popups.themePickerOpen = false }
@@ -71,7 +73,7 @@ LazyLoader {
                         text: Theme.status
                         color: Theme.fgDim
                         font.family: Theme.font
-                        font.pixelSize: Theme.fontSize
+                        font.pixelSize: Theme.textBody
                         elide: Text.ElideRight
                     }
 

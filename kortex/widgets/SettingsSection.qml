@@ -16,7 +16,7 @@ ColumnLayout {
         text: root.text
         color: Theme.accent
         font.family: Theme.titleFont
-        font.pixelSize: Theme.fontSize + 2
+        font.pixelSize: Theme.textLarge
         font.bold: true
     }
 

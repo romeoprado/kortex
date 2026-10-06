@@ -12,7 +12,7 @@ SettingsPage {
     SettingsSection { text: "Notificações" }
 
     SettingRow {
-        title: "Não perturbe"
+        title: "Não Perturbe"
         Toggle {
             checked: Settings.data.dnd
             onToggled: v => Settings.data.dnd = v

@@ -103,7 +103,7 @@ LazyLoader {
                     text: win.busy ? "Conectando…" : Network.error
                     color: win.busy ? Theme.fgDim : Theme.red
                     font.family: Theme.font
-                    font.pixelSize: Theme.fontSize - 1
+                    font.pixelSize: Theme.textSmall
                     wrapMode: Text.Wrap
                 }
 

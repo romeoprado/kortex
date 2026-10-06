@@ -33,7 +33,7 @@ BarButton {
                 text: "Não Perturbe"
                 color: Theme.fgDim
                 font.family: Theme.font
-                font.pixelSize: Theme.fontSize - 1
+                font.pixelSize: Theme.textSmall
             }
             Toggle {
                 checked: Settings.data.dnd
@@ -50,7 +50,7 @@ BarButton {
             text: "Sem notificações."
             color: Theme.fgDim
             font.family: Theme.font
-            font.pixelSize: Theme.fontSize
+            font.pixelSize: Theme.textBody
         }
 
         ListView {

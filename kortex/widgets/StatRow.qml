@@ -9,14 +9,16 @@ RowLayout {
     property string label: ""
     property string value: ""
     property bool warn: false
-    property int textSize: Theme.fontSize - 1
+    property int textSize: Theme.textSmall
 
     Layout.fillWidth: true
     visible: value !== ""
     spacing: 8
 
+    // O rótulo nunca é cortado; se faltar espaço, quem encolhe é o valor
     Text {
         Layout.fillWidth: true
+        Layout.minimumWidth: implicitWidth
         text: root.label
         color: Theme.fgDim
         font.family: Theme.font
@@ -25,6 +27,10 @@ RowLayout {
     }
 
     Text {
+        Layout.minimumWidth: 0
+        Layout.preferredWidth: implicitWidth
+        horizontalAlignment: Text.AlignRight
+        elide: Text.ElideRight
         text: root.value
         color: root.warn ? Theme.red : Theme.fg
         font.family: Theme.font

@@ -28,7 +28,7 @@ Rectangle {
         anchors.fill: parent
         radius: root.radius
         borderWidth: 1
-        color: input.activeFocus ? Theme.accent : Theme.muted
+        color: input.activeFocus ? Theme.accent : Theme.outline
         fill: Theme.bgDark
     }
 
@@ -50,10 +50,10 @@ Rectangle {
         anchors.rightMargin: 10
         verticalAlignment: TextInput.AlignVCenter
         color: Theme.fgBright
-        selectionColor: Theme.selection
-        selectedTextColor: Theme.fgBright
+        selectionColor: Theme.accent
+        selectedTextColor: Theme.accentText
         font.family: Theme.font
-        font.pixelSize: Theme.fontSize + 1
+        font.pixelSize: Theme.textBody
         clip: true
         KeyNavigation.tab: root.tabTo ? root.tabTo.input : null
         onActiveFocusChanged: if (activeFocus) root.focused()

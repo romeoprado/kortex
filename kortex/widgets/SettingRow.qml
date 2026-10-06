@@ -26,7 +26,7 @@ RowLayout {
             text: root.title
             color: Theme.fg
             font.family: Theme.font
-            font.pixelSize: Theme.fontSize + 1
+            font.pixelSize: Theme.textBody
             elide: Text.ElideRight
         }
 
@@ -36,7 +36,7 @@ RowLayout {
             text: root.description
             color: Theme.fgDim
             font.family: Theme.font
-            font.pixelSize: Theme.fontSize - 1
+            font.pixelSize: Theme.textSmall
             wrapMode: Text.Wrap
         }
     }

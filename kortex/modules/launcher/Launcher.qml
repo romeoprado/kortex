@@ -222,7 +222,7 @@ LazyLoader {
                         Rectangle {
                             anchors.fill: parent
                             radius: 4
-                            color: row.selected ? Theme.selection : "transparent"
+                            color: row.selected ? Theme.selectionTint : "transparent"
 
                             Rectangle {
                                 visible: row.selected
@@ -268,16 +268,18 @@ LazyLoader {
                                 text: row.modelData.name
                                 color: row.selected ? Theme.fgBright : Theme.fg
                                 font.family: Theme.font
-                                font.pixelSize: Theme.fontSize + 1
+                                font.pixelSize: Theme.textBody
                                 font.bold: row.selected
                                 elide: Text.ElideRight
                             }
 
-                            // Estrela: marca/desmarca o favorito. Só aparece na linha selecionada ou já favorita.
+                            // Estrela: marca/desmarca o favorito. Aparece na linha selecionada ou sob o mouse e, na
+                            // lista de todos os apps, nas favoritas (na lista só de favoritos todas seriam estrelas)
                             MouseArea {
                                 id: star
                                 readonly property bool fav: win.favs[row.modelData.id] === true
-                                visible: !row.modelData.isCommand && !row.modelData.isSettings && (fav || row.selected || row.containsMouse)
+                                visible: !row.modelData.isCommand && !row.modelData.isSettings
+                                         && ((fav && !Settings.data.launcherFavoritesOnly) || row.selected || row.containsMouse)
                                 Layout.preferredWidth: 24
                                 Layout.preferredHeight: 28
                                 hoverEnabled: true
@@ -307,7 +309,7 @@ LazyLoader {
                         : "Nenhum favorito ainda. Clique na estrela ao lado da busca (ou Ctrl+F) para ver todos os aplicativos e marque os seus."
                     color: Theme.fgDim
                     font.family: Theme.font
-                    font.pixelSize: Theme.fontSize
+                    font.pixelSize: Theme.textBody
                 }
 
                 Text {
@@ -316,7 +318,7 @@ LazyLoader {
                     text: (Settings.data.launcherFavoritesOnly ? "Ctrl+F todos os apps" : "Ctrl+F só favoritos") + " · Ctrl+D marcar"
                     color: Theme.fgDim
                     font.family: Theme.font
-                    font.pixelSize: Theme.fontSize - 1
+                    font.pixelSize: Theme.textSmall
                     elide: Text.ElideRight
                 }
             }

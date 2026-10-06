@@ -41,18 +41,17 @@ ColumnLayout {
             return s.charAt(0).toUpperCase() + s.slice(1) + " " + root.year
         }
 
-        Icon {
-            text: Icons.left
-            color: prev.containsMouse ? Theme.accent : Theme.fgDim
-            size: Math.round((Theme.fontSize + 6) * root.size)
-            MouseArea { id: prev; anchors.fill: parent; anchors.margins: -6; hoverEnabled: true; cursorShape: Qt.PointingHandCursor; onClicked: root.shift(-1) }
+        // Mês anterior e seguinte: botões com contorno, como os controles dos outros cabeçalhos
+        PlainButton {
+            icon: Icons.left
+            implicitWidth: 34
+            onClicked: root.shift(-1)
         }
 
-        Icon {
-            text: Icons.right
-            color: next.containsMouse ? Theme.accent : Theme.fgDim
-            size: Math.round((Theme.fontSize + 6) * root.size)
-            MouseArea { id: next; anchors.fill: parent; anchors.margins: -6; hoverEnabled: true; cursorShape: Qt.PointingHandCursor; onClicked: root.shift(1) }
+        PlainButton {
+            icon: Icons.right
+            implicitWidth: 34
+            onClicked: root.shift(1)
         }
     }
 
@@ -65,7 +64,7 @@ ColumnLayout {
             text: shortName.replace(/\.$/, "")
             color: Theme.fgDim
             font.family: Theme.font
-            font.pixelSize: Math.round((Theme.fontSize + 1) * root.size)
+            font.pixelSize: Math.round((Theme.textBody) * root.size)
         }
     }
 
@@ -121,9 +120,9 @@ ColumnLayout {
                     anchors.centerIn: parent
                     text: cell.model.day
                     font.family: Theme.font
-                    font.pixelSize: Math.round((Theme.fontSize + 3) * root.size)
+                    font.pixelSize: Math.round((Theme.textLarge) * root.size)
                     font.bold: cell.model.today
-                    color: cell.model.today ? Theme.bg
+                    color: cell.model.today ? Theme.accentText
                          : cell.model.month === grid.month ? Theme.fg : Theme.muted
                 }
 

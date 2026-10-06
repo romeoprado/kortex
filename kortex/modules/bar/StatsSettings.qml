@@ -11,7 +11,7 @@ ColumnLayout {
         Layout.fillWidth: true
         color: Theme.fgDim
         font.family: Theme.font
-        font.pixelSize: Theme.fontSize - 1
+        font.pixelSize: Theme.textSmall
         wrapMode: Text.Wrap
     }
 

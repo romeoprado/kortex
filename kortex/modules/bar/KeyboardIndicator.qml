@@ -54,7 +54,7 @@ BarButton {
             text: "Somente um layout ativo."
             color: Theme.fgDim
             font.family: Theme.font
-            font.pixelSize: Theme.fontSize - 1
+            font.pixelSize: Theme.textSmall
             wrapMode: Text.Wrap
         }
 
@@ -65,7 +65,7 @@ BarButton {
             text: "Idioma do Sistema: " + Language.currentName
             color: Theme.fgDim
             font.family: Theme.font
-            font.pixelSize: Theme.fontSize - 1
+            font.pixelSize: Theme.textSmall
             elide: Text.ElideRight
         }
 

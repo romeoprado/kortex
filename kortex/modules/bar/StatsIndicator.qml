@@ -56,7 +56,7 @@ BarButton {
                 TextMetrics {
                     id: digits
                     font.family: Theme.font
-                    font.pixelSize: Theme.fontSize
+                    font.pixelSize: Theme.textBody
                     text: "000"
                 }
 
@@ -75,7 +75,7 @@ BarButton {
                     text: modelData.text
                     color: parent.tone
                     font.family: Theme.font
-                    font.pixelSize: Theme.fontSize
+                    font.pixelSize: Theme.textBody
                     Behavior on color { ColorAnimation { duration: 120 } }
                 }
             }

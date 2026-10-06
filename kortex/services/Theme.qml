@@ -25,6 +25,11 @@ Singleton {
     readonly property string titleFont: firstInstalled([Settings.data.titleFont, "Iosevka Fixed SmBd Ex", "Noto Sans", "Liberation Sans"], "sans-serif")
     readonly property int fontSize: Math.max(10, Math.min(16, Settings.data.fontSize))
     readonly property int iconSize: fontSize + 2
+    // Escala de texto: quatro tamanhos, todos derivados do tamanho escolhido nas Configurações
+    readonly property int textSmall: fontSize - 1   // legendas, rótulos secundários, horários
+    readonly property int textBody: fontSize        // texto comum, campos, linhas de lista
+    readonly property int textLarge: fontSize + 2   // destaques, títulos de seção e de cartão
+    readonly property int textTitle: fontSize + 5   // títulos dos painéis e números grandes
     // Altura da barra: compacta 24 px, padrão 30 px ou confortável 36 px; nunca menor que a fonte pede
     readonly property int barHeight: Math.max(fontSize + 12, Settings.data.barSize === "compact" ? 24
                                                           : Settings.data.barSize === "comfortable" ? 36 : 30)
@@ -56,6 +61,14 @@ Singleton {
     property color green: "#8b8b8b"
     property color yellow: "#a0a0a0"
     property bool light: false
+    // Derivadas para a interface (setPalette), com contraste mínimo garantido sobre o fundo, sem mudar o
+    // arquivo do tema nem o que vai para outros programas (Kitty, Hyprland, SDDM):
+    property color outline: "#7a7a7a"      // contorno de botões, campos e cartões (≥ 3:1 sobre o fundo)
+    property color accentText: "#ffffff"   // texto e ícones sobre fundo no acento (≥ 4,5:1, ou o melhor possível)
+    property color redText: "#ffffff"      // texto e ícones sobre fundo vermelho (confirmações)
+    // Fundo da linha escolhida numa lista (dispositivo em uso, fonte, layout, app selecionado): o cartão com
+    // um toque do acento. Theme.selection não serve: em alguns temas é igual ao acento e apaga o conteúdo.
+    readonly property color selectionTint: Qt.tint(bgAlt, Qt.alpha(accent, 0.22))
 
     // ── Catálogo ────────────────────────────────────────────────────────
     property var themes: []
@@ -398,12 +411,64 @@ Singleton {
         }
     }
 
+    // Cores da interface. Algumas são ajustadas para ficarem legíveis (WCAG: texto 4,5:1, contornos 3:1):
+    // texto apagado e cores de aviso clareiam ou escurecem só o necessário; o texto sobre o acento e sobre
+    // o vermelho é a cor que mais contrasta. O tema em si (e o que vai para outros programas) não muda.
     function setPalette(p) {
         bg = p.bg; bgAlt = p.bgAlt; bgDark = p.bgDark
-        fg = p.fg; fgBright = p.fgBright; fgDim = p.fgDim
-        accent = p.accent; accent2 = p.accent2; muted = p.muted; selection = p.selection
-        red = p.red; green = p.green; yellow = p.yellow
+        fg = p.fg; fgBright = p.fgBright
+        fgDim = legible(p.fgDim, [p.bg, p.bgAlt, p.bgDark], 4.5)
+        accent = legible(p.accent, [p.bg], 4.5)
+        accent2 = p.accent2; muted = p.muted; selection = p.selection
+        outline = legible(p.muted, [p.bg, p.bgDark], 3)
+        red = legible(p.red, [p.bg], 4.5)
+        green = legible(p.green, [p.bg], 4.5)
+        yellow = legible(p.yellow, [p.bg], 4.5)
+        accentText = textOn(accent, [p.bg, p.fgBright])
+        redText = textOn(red, [p.bg, p.fgBright])
         light = p.light
+    }
+
+    // Número com casas decimais no formato brasileiro: decimal(46.25, 1) → "46,3"
+    function decimal(v, digits) {
+        return Number(v).toFixed(digits).replace(".", ",")
+    }
+
+    // Luminância relativa e razão de contraste (WCAG 2)
+    function luminance(c) {
+        c = hex(c)
+        let l = 0
+        const w = [0.2126, 0.7152, 0.0722]
+        for (let i = 0; i < 3; i++) {
+            const v = parseInt(c.substr(1 + 2 * i, 2), 16) / 255
+            l += w[i] * (v <= 0.03928 ? v / 12.92 : Math.pow((v + 0.055) / 1.055, 2.4))
+        }
+        return l
+    }
+    function contrast(a, b) {
+        const x = luminance(a), y = luminance(b)
+        return (Math.max(x, y) + 0.05) / (Math.min(x, y) + 0.05)
+    }
+
+    // A cor, levada aos poucos para o branco (fundos escuros) ou o preto (claros) até contrastar o mínimo
+    // com todos os fundos dados. Já legível, fica como está.
+    function legible(c, backs, min) {
+        c = hex(c)
+        const ok = x => backs.every(b => contrast(x, b) >= min)
+        if (ok(c)) return c
+        const target = luminance(backs[0]) < 0.4 ? "#ffffff" : "#000000"
+        for (let t = 0.05; t < 1; t += 0.05) {
+            const m = mix(c, target, t)
+            if (ok(m)) return m
+        }
+        return target
+    }
+
+    // Texto sobre um fundo colorido: a primeira das cores do tema que chega a 4,5:1; se nenhuma chega,
+    // preto ou branco, o que contrastar mais
+    function textOn(fill, prefs) {
+        for (const c of prefs) if (contrast(c, fill) >= 4.5) return hex(c)
+        return contrast("#000000", fill) >= contrast("#ffffff", fill) ? "#000000" : "#ffffff"
     }
 
     function runHook(t) {

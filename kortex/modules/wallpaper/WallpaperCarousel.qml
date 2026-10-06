@@ -223,7 +223,7 @@ LazyLoader {
                     radius: Theme.radius
                     fill: Theme.bgAlt
                     borderWidth: card.isCurrent ? 3 : 1
-                    color: card.isCurrent ? Theme.accent : hover.containsMouse ? Theme.fg : Theme.muted
+                    color: card.isCurrent ? Theme.accent : hover.containsMouse ? Theme.fg : Theme.outline
 
                     Image {
                         anchors.fill: parent
@@ -254,7 +254,7 @@ LazyLoader {
                             text: "Em uso"
                             color: Theme.fg
                             font.family: Theme.font
-                            font.pixelSize: Theme.fontSize - 1
+                            font.pixelSize: Theme.textSmall
                         }
                     }
                 }
@@ -290,7 +290,7 @@ LazyLoader {
                     : win.selected.split("/").pop() + "   ·   " + (view.currentIndex + 1) + " / " + win.list.length
                 color: Theme.fgBright
                 font.family: Theme.font
-                font.pixelSize: Theme.fontSize + 1
+                font.pixelSize: Theme.textBody
                 font.bold: win.list.length > 0
                 elide: Text.ElideMiddle
             }
@@ -302,7 +302,7 @@ LazyLoader {
                     : "Enter: aplicar   ·   Esc: cancelar"
                 color: Theme.fgDim
                 font.family: Theme.font
-                font.pixelSize: Theme.fontSize - 1
+                font.pixelSize: Theme.textSmall
             }
         }
     }

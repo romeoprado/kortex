@@ -73,11 +73,16 @@ Singleton {
     }
 
     function describe(m) {
-        return m.width + "×" + m.height + " @ " + fmtNumber(m.refresh) + " Hz · escala " + fmtNumber(m.scale)
+        return m.width + "×" + m.height + " @ " + fmtLabel(m.refresh) + " Hz · escala " + fmtLabel(m.scale)
     }
 
     function fmtNumber(n) {
         return String(Number(Number(n).toFixed(2)))
+    }
+
+    // Para mostrar na tela, com vírgula (o fmtNumber, com ponto, é o que vai para o Hyprland)
+    function fmtLabel(n) {
+        return fmtNumber(n).replace(".", ",")
     }
 
     // ── Internos ────────────────────────────────────────────────────────
