@@ -64,10 +64,12 @@ Item {
             PathArc { x: r; y: 0; radiusX: r; radiusY: r }
         }
 
+        // Sem borda (0 px) o anel não é pintado: com os dois contornos iguais ele seria vazio, mas a
+        // suavização das curvas deixaria uma franja na cor da borda nos arcos dos cantos.
         ShapePath {
             strokeWidth: -1
             fillRule: ShapePath.OddEvenFill
-            fillColor: root.color
+            fillColor: root.b > 0 ? root.color : "transparent"
 
             // contorno externo
             startX: r; startY: 0
