@@ -714,6 +714,10 @@ bindl  = , XF86AudioPlay, exec, playerctl play-pause
 bindl  = , XF86AudioNext, exec, playerctl next
 bindl  = , XF86AudioPrev, exec, playerctl previous
 
+# -------------------------------------------------------------- janelas ----
+# Abrem flutuantes: Calculadora, Discos, HyprMod, Visualizador de Imagens e Controle de Volume
+windowrule = float on, match:class ^(org\.gnome\.Calculator|org\.gnome\.DiskUtility|io\.github\.bluemancz\.hyprmod|org\.gnome\.Loupe|org\.pulseaudio\.pavucontrol)\$
+
 # --------------------------------------------------------- do usuário ----
 source = $HYPR/user.conf
 CONF

@@ -106,7 +106,12 @@ bind = SUPER, W, exec, $browser
 
 # Opcional: alternar o layout do teclado (a barra também faz isso com o clique do meio)
 bind = SUPER, K, exec, $kortex keyboard next
+
+# Abrem como janela flutuante: Calculadora, Discos, HyprMod, Visualizador de Imagens e Controle de Volume
+windowrule = float on, match:class ^(org\.gnome\.Calculator|org\.gnome\.DiskUtility|io\.github\.bluemancz\.hyprmod|org\.gnome\.Loupe|org\.pulseaudio\.pavucontrol)$
 ```
+
+O `hyprland.conf` que o `arch-setup.sh` cria já traz essa regra de janelas flutuantes (seção *janelas*). Para incluir outro programa, acrescente a classe dele (veja com `hyprctl clients`) numa regra igual no `user.conf`.
 
 Se um arquivo carregado depois (como o de uma ferramenta gráfica de configuração do Hyprland) redefine um desses atalhos, o dele prevalece: o `SUPER+E` pode continuar abrindo um explorador fixo, por exemplo.
 
