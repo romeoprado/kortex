@@ -12,7 +12,8 @@ import Quickshell.Hyprland
 //  • animações de abrir e fechar os painéis, do próprio Hyprland: as janelas do Kortex (lançador,
 //    temas, Configurações, rede, cidade, idioma, confirmação de tela, OSD, captura de tela) surgem crescendo do centro
 //    (popin a 92%) e os painéis da barra (popups) esmaecem; as demais camadas e popups de qualquer
-//    programa ficam com a mesma velocidade (sem isto herdariam a global, ~800 ms).
+//    programa ficam com a mesma velocidade (sem isto herdariam a global, ~800 ms). A seleção do slurp
+//    (captura de tela) fica sem animação, para não sair na imagem.
 // Um "hyprctl reload" apaga o que foi aplicado em tempo de execução, então tudo é reaplicado
 // quando o Hyprland avisa que recarregou (configreloaded). Nada aqui grava no hyprland.conf.
 Singleton {
@@ -38,7 +39,9 @@ Singleton {
         "keyword animation fadePopupsIn,1,2,kortexOut",
         "keyword animation fadePopupsOut,1,1.5,kortexOut",
         "keyword layerrule animation popin 92%, match:namespace "
-            + "^kortex-(launcher|themes|settings|network-settings|network-prompt|city|language|display-confirm|osd|screenshot|screenshot-save)$"
+            + "^kortex-(launcher|themes|settings|network-settings|network-prompt|city|language|display-confirm|osd|screenshot|screenshot-save)$",
+        // a marcação do slurp (captura de tela) some na hora: com a animação de saída, o grim a pegaria
+        "keyword layerrule no_anim on, match:namespace ^selection$"
     ]
 
     function _key(n) { return n === 10 ? "0" : String(n) }
