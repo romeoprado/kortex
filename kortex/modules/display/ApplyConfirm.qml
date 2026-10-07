@@ -38,7 +38,7 @@ LazyLoader {
             implicitHeight: column.implicitHeight + 40
             color: Theme.bg
             radius: Theme.radius
-            borderColor: win.failed ? Theme.red : Theme.accent
+            borderColor: win.failed ? Theme.red : Theme.borderColor
             focus: true
 
             Keys.onReturnPressed: win.accept()

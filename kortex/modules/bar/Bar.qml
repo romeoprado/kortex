@@ -12,7 +12,7 @@ import qs.widgets
 //
 // Dois estilos (Configurações › Barra › Estilo da barra):
 //  Inteira (padrão): de ponta a ponta, colada à borda da tela.
-//  Flutuante: solta da borda e das laterais (a Theme.gap px), centralizada, só da largura do
+//  Flutuante: solta da borda e das laterais (a ~Theme.gap px, ver Theme.barMargin), centralizada, só da largura do
 //    conteúdo e com o raio e a borda dos painéis (a borda pode ser desligada). Sem seções: o
 //    lançador, as áreas de trabalho e todos os itens numa fileira só, com ordem própria
 //    (Settings.barFloatingLayout); a fileira da esquerda recebe tudo e as outras ficam vazias.
@@ -32,9 +32,13 @@ PanelWindow {
     screen: modelData
     // sem âncoras laterais, o Hyprland centraliza a camada
     anchors { top: !Theme.barBottom; bottom: Theme.barBottom; left: !floating; right: !floating }
-    margins.top: floating && !Theme.barBottom ? Theme.gap : 0
-    margins.bottom: floating && Theme.barBottom ? Theme.gap : 0
-    implicitWidth: floating ? Theme.snapUp(Math.min(contentWidth, (modelData ? modelData.width : 1920) - 2 * Theme.gap), devicePixelRatio) : 0
+    readonly property int edgeGap: Theme.barMargin(devicePixelRatio)
+    margins.top: Theme.barBottom ? 0 : edgeGap
+    margins.bottom: Theme.barBottom ? edgeGap : 0
+    // Largura em passos de 2× o da escala (10 px a 1.6): centralizada pelo Hyprland, a barra começa
+    // num pixel físico inteiro (com meio passo de sobra ela cairia entre pixels e borraria)
+    readonly property int widthStep: 2 * Theme.snapStep(devicePixelRatio)
+    implicitWidth: floating ? Math.ceil(Math.min(contentWidth, (modelData ? modelData.width : 1920) - 2 * edgeGap) / widthStep - 0.000001) * widthStep : 0
     implicitHeight: Theme.barHeight
     color: floating ? "transparent" : Theme.bg
     WlrLayershell.namespace: "kortex-bar"

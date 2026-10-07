@@ -38,10 +38,12 @@ Singleton {
     // Espessura da borda: só valores inteiros, de 0 (sem borda) a 5 px; um valor fracionário antigo é arredondado
     readonly property int border: Math.max(0, Math.min(5, Math.round(Settings.data.borderWidth)))
     readonly property bool barBottom: Settings.data.barPosition === "bottom"
-    // Barra flutuante: centralizada, do tamanho do conteúdo, a `gap` px da borda e com o raio e a
-    // borda dos painéis. `barReserved` é o espaço da borda da tela até o fim da barra.
+    // Barra flutuante: centralizada, do tamanho do conteúdo, a ~`gap` px da borda e com o raio e a
+    // borda dos painéis. A distância da borda é levada a um número inteiro de pixels físicos (a 1.6,
+    // 10 em vez de 8): o Hyprland não arredonda a posição das camadas, e a barra a 12,8 pixels
+    // físicos sairia com a borda e o texto borrados.
     readonly property bool barFloating: Settings.data.barStyle === "floating"
-    readonly property int barReserved: barHeight + (barFloating ? gap : 0)
+    function barMargin(dpr) { return barFloating ? snapUp(gap, dpr) : 0 }
 
     // Primeira família da lista que está instalada (o Qt só escolhe uma família por vez)
     function firstInstalled(names, fallback) {
@@ -57,6 +59,9 @@ Singleton {
     property color fgBright: "#ffffff"
     property color fgDim: "#9c9c9c"
     property color accent: "#686868"
+    // borda da barra, dos painéis e dos avisos: o acento do tema como ele é, sem o ajuste de contraste,
+    // a mesma cor da borda das janelas no Hyprland
+    property color borderColor: "#686868"
     property color accent2: "#393939"   // segunda cor do contorno em degradê do hyprlock e do SDDM: o acento, mais escuro
     property color muted: "#525252"
     property color selection: "#686868"
@@ -422,6 +427,7 @@ Singleton {
         fg = p.fg; fgBright = p.fgBright
         fgDim = legible(p.fgDim, [p.bg, p.bgAlt, p.bgDark], 4.5)
         accent = legible(p.accent, [p.bg], 4.5)
+        borderColor = p.accent
         accent2 = p.accent2; muted = p.muted; selection = p.selection
         outline = legible(p.muted, [p.bg, p.bgDark], 3)
         red = legible(p.red, [p.bg], 4.5)

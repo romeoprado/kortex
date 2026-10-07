@@ -15,10 +15,14 @@ Item {
     property real borderWidth: Theme.border
     property color color: Theme.accent
     property color fill: "transparent"
+    // false: `borderWidth` em pixels da TELA (1 é sempre 1 pixel; caixas finas: campos, botões,
+    // cartões). true: em pixels LÓGICOS, como o Hyprland conta a borda das janelas (a 1.6, 2 viram
+    // 3 pixels); é o caso das molduras da barra, dos painéis e dos avisos, para ficarem iguais às janelas.
+    property bool scaled: false
 
-    // Tudo em pixels FÍSICOS inteiros. A espessura (`borderWidth`) é contada em pixels da TELA, não
-    // lógicos: 1 é sempre 1 pixel, 2 são 2 pixels, com qualquer escala (a 1.6, 1 px lógico daria 1,6
-    // px físico e, caindo entre pixels, um cheio e dois esmaecidos). As bordas do anel também são
+    // Tudo em pixels FÍSICOS inteiros: a espessura vira um número inteiro de pixels da tela (sem
+    // `scaled`, a 1.6, 1 px lógico daria 1,6 px físico e, caindo entre pixels, um cheio e dois
+    // esmaecidos; com `scaled`, 2 × 1.6 = 3,2 vira 3, como no Hyprland). As bordas do anel também são
     // levadas à grade de pixels DA JANELA: a origem vem da soma de x/y de todos os ancestrais (a
     // leitura na expressão registra a dependência, então o anel se realinha quando algo se move).
     // Ficam aqui, no objeto raiz, porque os elementos do caminho só enxergam as propriedades dele.
@@ -37,7 +41,7 @@ Item {
     readonly property real h: Math.round((origin.y + height) * dpr) / dpr - origin.y - snapY
     readonly property real r: Math.max(0, Math.min(radius, w / 2, h / 2))
     readonly property real b: borderWidth > 0
-        ? Math.min(Math.max(1, Math.round(borderWidth)) / dpr, w / 2, h / 2)
+        ? Math.min(Math.max(1, Math.round(scaled ? borderWidth * dpr : borderWidth)) / dpr, w / 2, h / 2)
         : 0
     readonly property real ri: Math.max(0, r - b)   // raio do contorno interno
 

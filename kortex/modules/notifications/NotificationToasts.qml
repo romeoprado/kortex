@@ -16,7 +16,9 @@ PanelWindow {
     // Deslocamento, escala, curvas e durações vêm de Motion (Configurações › Animações).
     visible: Notifs.toasts.length > 0 || heldHeight > 0
     anchors { top: true; right: true }
-    margins { top: Theme.gap; right: Theme.gap }
+    // distância da borda (e da barra) num número inteiro de pixels físicos (a 1.6, 10 em vez de 8):
+    // o Hyprland não arredonda a posição das camadas, e o aviso cairia entre pixels, borrado
+    margins { top: Theme.snapUp(Theme.gap, devicePixelRatio); right: Theme.snapUp(Theme.gap, devicePixelRatio) }
     exclusionMode: ExclusionMode.Normal
     exclusiveZone: 0
     implicitWidth: Theme.snapUp(380, devicePixelRatio)

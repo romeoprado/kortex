@@ -37,7 +37,8 @@ Rectangle {
         radius: root.radius
         fill: root.toast ? Theme.bg : Theme.bgAlt
         borderWidth: root.toast ? Theme.border : 1
-        color: root.toast ? (root.critical ? Theme.red : Theme.accent) : Theme.muted
+        scaled: root.toast
+        color: root.toast ? (root.critical ? Theme.red : Theme.borderColor) : Theme.muted
     }
 
     // Fecha: aviso do Kortex (Notifs.flash) só sai da tela; notificação de app é descartada

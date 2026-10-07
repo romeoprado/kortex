@@ -21,7 +21,7 @@ Variants {
 
         // espaço da barra neste monitor (coordenadas da camada, que ocupa a tela toda)
         readonly property real barWidth: Theme.barFloating ? (Popups.barWidths[modelData.name] ?? 0) : width
-        readonly property real barY: Theme.barBottom ? height - Theme.barReserved : Theme.barReserved - Theme.barHeight
+        readonly property real barY: Theme.barBottom ? height - Theme.barHeight - Theme.barMargin(devicePixelRatio) : Theme.barMargin(devicePixelRatio)
 
         screen: modelData
         visible: Popups.current !== ""
