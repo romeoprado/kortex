@@ -27,8 +27,11 @@ RowLayout {
             // com janela aberta (a área atual, mesmo vazia, também consta na lista do Hyprland)
             readonly property bool occupied: Hyprland.workspaces.values.some(w => w.id === wsId && w.toplevels.values.length > 0)
 
+            // Na flutuante, cada área é uma bolinha: a atual no acento, as com janela num fundo
+            // discreto. A largura é fixa; só o fundo muda.
+            readonly property bool pill: Theme.barFloating
             Layout.fillHeight: true
-            implicitWidth: 24
+            implicitWidth: pill ? 26 : 24
             hoverEnabled: true
             cursorShape: Qt.PointingHandCursor
             // clicar aqui também fecha o popup aberto, como no resto da barra (este MouseArea cobre o
@@ -36,25 +39,38 @@ RowLayout {
             onPressed: Popups.dismiss()
             onClicked: Hyprland.dispatch("workspace " + wsId)
 
+            Rectangle {
+                visible: ws.pill
+                anchors.centerIn: parent
+                width: parent.width - 4
+                height: Math.round(Theme.barHeight * 0.6)
+                radius: height / 2
+                color: ws.isActive ? Theme.accent
+                     : ws.containsMouse ? Qt.tint(Theme.bgAlt, Qt.alpha(Theme.accent, 0.35))
+                     : ws.occupied ? Theme.bgAlt : "transparent"
+                Behavior on color { ColorAnimation { duration: 230 } }
+            }
+
             Text {
                 anchors.centerIn: parent
                 text: ws.wsId
                 font.family: Theme.font
                 font.pixelSize: Theme.textBody
                 font.bold: ws.isActive
-                color: ws.isActive ? Theme.accent
+                color: ws.pill && ws.isActive ? Theme.accentText
+                     : ws.isActive ? Theme.accent
                      : ws.containsMouse ? Theme.fgBright
                      : ws.occupied ? Theme.fg : Theme.fgDim
             }
 
-            // Área com janela aberta: linha embaixo do número (na barra flutuante, um pouco mais
-            // para dentro, para não encostar no contorno)
+            // Barra inteira — área com janela aberta: linha embaixo do número
             Rectangle {
                 anchors.bottom: parent.bottom
-                anchors.bottomMargin: Theme.barFloating ? 5 : 3
+                anchors.bottomMargin: 3
                 anchors.horizontalCenter: parent.horizontalCenter
                 height: 2
                 radius: 1
+                visible: !ws.pill
                 width: ws.occupied ? 14 : 0
                 color: Theme.accent
                 Behavior on width { NumberAnimation { duration: 160; easing.type: Easing.OutCubic } }
@@ -63,10 +79,11 @@ RowLayout {
             // Área atual: a mesma linha, em cima do número
             Rectangle {
                 anchors.top: parent.top
-                anchors.topMargin: Theme.barFloating ? 5 : 3
+                anchors.topMargin: 3
                 anchors.horizontalCenter: parent.horizontalCenter
                 height: 2
                 radius: 1
+                visible: !ws.pill
                 width: ws.isActive ? 14 : 0
                 color: Theme.accent
                 Behavior on width { NumberAnimation { duration: 160; easing.type: Easing.OutCubic } }

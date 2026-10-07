@@ -107,9 +107,9 @@ Singleton {
     // da esquerda). A ordem gravada é conferida: ids desconhecidos ou repetidos saem e um item que
     // falte volta ao fim do seu grupo padrão.
     readonly property var barDefaultLayout: ({
-        left: ["stats"],
+        left: ["stats", "updates"],
         center: ["clock", "weather"],
-        right: ["keyboard", "bluetooth", "network", "audio", "display", "notifications", "energy", "power"]
+        right: ["media", "tray", "keyboard", "bluetooth", "network", "audio", "display", "notifications", "energy", "power"]
     })
     function barLayout() {
         const saved = adapter.barLayout || {}

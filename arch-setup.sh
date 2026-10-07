@@ -272,8 +272,8 @@ PKGS=(
     # Tela, capturas, gravação de tela, área de transferência
     brightnessctl grim slurp gpu-screen-recorder wl-clipboard
 
-    # Aplicativos básicos
-    "$TERMINAL_APP" nautilus gvfs firefox btop pciutils
+    # Aplicativos básicos (pacman-contrib: checkupdates, para o item Atualizações da barra)
+    "$TERMINAL_APP" nautilus gvfs firefox btop pciutils pacman-contrib
 
     # Ícones dos apps: o icons.theme de cada tema do Kortex escolhe uma variante do Yaru (vem do AUR)
     yaru-icon-theme

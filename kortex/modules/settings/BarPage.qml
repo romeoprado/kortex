@@ -9,7 +9,10 @@ SettingsPage {
 
     readonly property var items: [
         { id: "stats", text: "Recursos" },
+        { id: "updates", text: "Atualizações" },
         { id: "weather", text: "Clima" },
+        { id: "media", text: "Mídia" },
+        { id: "tray", text: "Bandeja" },
         { id: "keyboard", text: "Teclado" },
         { id: "bluetooth", text: "Bluetooth" },
         { id: "network", text: "Rede" },

@@ -24,6 +24,8 @@ MouseArea {
         font: glyph.font
         text: glyph.text
     }
+    // false: o item some da barra mesmo ligado nas Configurações (ex.: mídia sem nada tocando)
+    property bool present: true
     property string iconFamily: Icons.family   // o logo do Arch vem de outra fonte
     readonly property color shownColor: containsMouse || active ? Theme.accent : color
 

@@ -98,6 +98,14 @@ Singleton {
     readonly property string chart: "bar_chart"
     readonly property string sliders: "tune"
     readonly property string animation: "animation"
+    // Mídia tocando (barra e painel)
+    readonly property string music: "music_note"
+    readonly property string play: "play_arrow"
+    readonly property string pause: "pause"
+    readonly property string skipNext: "skip_next"
+    readonly property string skipPrevious: "skip_previous"
+    readonly property string updates: "deployed_code_update"   // atualizações pendentes do sistema
+    readonly property string tray: "apps"                       // bandeja (Configurações)
     readonly property string apps: "apps"
     readonly property string font: "text_fields"
     readonly property string bars: "menu"

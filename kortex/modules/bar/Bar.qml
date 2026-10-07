@@ -6,9 +6,9 @@ import qs.services
 import qs.widgets
 
 // Barra superior (uma por monitor)
-//  esquerda: lançador · áreas de trabalho · CPU/RAM
+//  esquerda: lançador · áreas de trabalho · CPU/RAM · atualizações
 //  centro:   relógio/calendário · clima
-//  direita:  teclado · bluetooth · wi-fi · som · tela · notificações · energia · sessão
+//  direita:  mídia · bandeja · teclado · bluetooth · wi-fi · som · tela · notificações · energia · sessão
 //
 // Dois estilos (Configurações › Barra › Estilo da barra):
 //  Inteira (padrão): de ponta a ponta, colada à borda da tela.
@@ -75,7 +75,7 @@ PanelWindow {
     readonly property var components: ({
         stats: cStats, clock: cClock, weather: cWeather, keyboard: cKeyboard, bluetooth: cBluetooth,
         network: cNetwork, audio: cAudio, display: cDisplay, notifications: cNotifications,
-        energy: cEnergy, power: cPower
+        energy: cEnergy, power: cPower, updates: cUpdates, media: cMedia, tray: cTray
     })
     Component { id: cStats; StatsIndicator { screenName: bar.screenName } }
     Component { id: cClock; ClockIndicator { screenName: bar.screenName } }
@@ -88,6 +88,9 @@ PanelWindow {
     Component { id: cNotifications; NotificationIndicator { screenName: bar.screenName } }
     Component { id: cEnergy; EnergyIndicator { screenName: bar.screenName } }
     Component { id: cPower; PowerIndicator { screenName: bar.screenName } }
+    Component { id: cUpdates; UpdatesIndicator { screenName: bar.screenName } }
+    Component { id: cMedia; MediaIndicator { screenName: bar.screenName } }
+    Component { id: cTray; TrayIndicator { screenName: bar.screenName } }
 
     // um item da barra; a visibilidade vem das Configurações (o relógio não se esconde)
     Component {
@@ -97,7 +100,7 @@ PanelWindow {
             required property string modelData
             readonly property string itemId: modelData
             Layout.fillHeight: true
-            visible: itemId === "clock" || Settings.barItemVisible(itemId)
+            visible: (itemId === "clock" || Settings.barItemVisible(itemId)) && (item ? item.present : true)
             sourceComponent: bar.components[itemId] ?? null
             // o item arrastado fica apagado no lugar de origem até ser solto
             opacity: bar.dragId === itemId ? 0.3 : 1
