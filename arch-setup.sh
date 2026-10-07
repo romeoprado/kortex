@@ -255,7 +255,7 @@ PKGS=(
     xdg-utils xdg-user-dirs qt5-wayland qt6-wayland
 
     # Quickshell e módulos Qt usados pelo Kortex
-    qt6-declarative qt6-svg qt6-imageformats qt6-5compat
+    qt6-declarative qt6-svg qt6-imageformats
 
     # Fontes
     ttf-jetbrains-mono-nerd ttc-iosevka noto-fonts noto-fonts-emoji
