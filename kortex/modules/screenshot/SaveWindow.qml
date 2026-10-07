@@ -1,6 +1,5 @@
 import QtQuick
 import QtQuick.Layouts
-import Qt.labs.folderlistmodel
 import Quickshell
 import Quickshell.Io
 import qs.services
@@ -35,18 +34,29 @@ OverlayPanel {
 
     onDirChanged: {
         tool.conflict = ""
-        dirCheck.running = false
-        dirCheck.running = true
+        lister.running = false
+        lister.running = true
     }
 
-    // Pasta que ainda não existe (é criada ao salvar): o FolderListModel mostraria outra no lugar
+    // Subpastas da pasta atual (sem as ocultas), em ordem alfabética. Pelo find e não pelo
+    // FolderListModel do Qt, que corta o caminho num "#" e, numa pasta que não existe, lista outra.
+    // Código 3 = a pasta ainda não existe (é criada ao salvar).
     property bool dirExists: true
+    property var subdirs: []
     Process {
-        id: dirCheck
-        command: ["test", "-d", win.dir]
+        id: lister
+        command: ["sh", "-c", '[ -d "$1" ] || exit 3; find "$1" -mindepth 1 -maxdepth 1 ! -name ".*" \\( -type d -o -xtype d \\) -printf "%f\\n" 2>/dev/null | sort -f',
+                  "sh", win.dir]
         running: true
-        onExited: code => win.dirExists = code === 0
+        stdout: StdioCollector {
+            onStreamFinished: win.subdirs = text.split("\n").filter(n => n !== "")
+        }
+        onExited: code => {
+            win.dirExists = code !== 3
+            if (code === 3) win.subdirs = []
+        }
     }
+    function child(name) { return (win.dir === "/" ? "" : win.dir) + "/" + name }
     onFormatChanged: tool.conflict = ""
 
     Component.onCompleted: {
@@ -202,19 +212,13 @@ OverlayPanel {
                         boundsBehavior: Flickable.StopAtBounds
                         spacing: 1
 
-                        model: FolderListModel {
-                            id: folders
-                            folder: win.dirExists ? Theme.url(win.dir) : ""
-                            showFiles: false
-                            showHidden: false
-                            showDotAndDotDot: false
-                            sortCaseSensitive: false
-                        }
+                        model: win.subdirs
 
                         delegate: MouseArea {
                             id: row
-                            required property string fileName
-                            required property string filePath
+                            required property string modelData
+                            readonly property string fileName: modelData
+                            readonly property string filePath: win.child(modelData)
 
                             width: ListView.view.width
                             height: 30
