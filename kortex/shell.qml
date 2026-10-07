@@ -44,6 +44,8 @@ ShellRoot {
     OsdWindow {}
     ScreenshotMenu {}
     ScreenshotSave {}
+    RecordMenu {}
+    RecordSave {}
 
     // Atalhos via IPC (use no hyprland.conf):
     //   qs -c kortex ipc call launcher toggle
@@ -51,6 +53,7 @@ ShellRoot {
     //   qs -c kortex ipc call keyboard next | prev | set <posição> | settings | language
     //   qs -c kortex ipc call settings toggle | open <appearance|bar|apps|power|general|about>
     //   qs -c kortex ipc call screenshot toggle
+    //   qs -c kortex ipc call record toggle
     IpcHandler {
         target: "launcher"
         function toggle(): void { Popups.toggleLauncher() }
@@ -94,6 +97,12 @@ ShellRoot {
     IpcHandler {
         target: "screenshot"
         function toggle(): void { Screenshot.toggle() }
+    }
+
+    // Gravação de tela (SHIFT+Print): abre o menu ou, gravando, para
+    IpcHandler {
+        target: "record"
+        function toggle(): void { ScreenRecord.toggle() }
     }
 
     IpcHandler {

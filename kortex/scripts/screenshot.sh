@@ -8,8 +8,12 @@
 #   screenshot.sh save <arquivo.png> <destino> <png|jpeg> [force]
 #       Grava o destino (PNG copiado, JPEG com o cjpeg, qualidade 90) e cria a pasta se faltar.
 #       Código 3 = o destino já existe (sem "force"), 2 = erro (uma linha em stderr).
-#   screenshot.sh dirs
+#   screenshot.sh pick <window|area> [acento] [fundo]
+#       Só a escolha (para a gravação de tela, scripts/screenrecord.sh): imprime "X,Y LxA" em
+#       coordenadas lógicas. Código 1 = cancelado, 2 = erro.
+#   screenshot.sh dirs [video]
 #       Pastas de atalho, uma por linha: "rótulo<TAB>caminho" (Capturas e Pasta Pessoal sempre; as outras se existirem).
+#       Com "video", Gravações (Screencasts na pasta de vídeos) e Vídeos no lugar de Capturas e Imagens.
 set -u
 cmd="${1:-}"
 
@@ -54,22 +58,16 @@ user_dir() {   # pasta do xdg-user-dirs (ou o padrão em inglês)
     [ -n "$val" ] && [ "$val" != "$HOME/" ] && printf '%s' "$val" || printf '%s' "$HOME/$fallback"
 }
 
-case "$cmd" in
-capture)
-    mode="${2:-}"; monitor="${3:-}"; out="${4:-}"
-    accent="${5:-}"; bg="${6:-}"
-    [ -n "$out" ] || { echo "Uso: screenshot.sh capture <modo> <monitor> <arquivo>" >&2; exit 2; }
-    command -v grim >/dev/null || { echo "O grim não está instalado." >&2; exit 2; }
-    mkdir -p "$(dirname "$out")"
+# Escolha de janela ou área com o slurp (cores do tema): põe "X,Y LxA" em $geom ou sai
+# (1 = cancelado, 2 = erro)
+pick() {
+    local mode="$1" accent="$2" bg="$3" boxes rects
+    command -v slurp >/dev/null || { echo "O slurp não está instalado." >&2; exit 2; }
     # Cores do slurp: fundo do tema esmaecendo a tela, contorno no acento
-    sl=(-b "$(hexa "$bg" 66 '#00000066')" -c "$(hexa "$accent" ff '#ffffffff')"
+    local sl=(-b "$(hexa "$bg" 66 '#00000066')" -c "$(hexa "$accent" ff '#ffffffff')"
         -s "$(hexa "$accent" 22 '#ffffff22')" -B "$(hexa "$accent" 18 '#ffffff18')" -w 2)
-
     case "$mode" in
-    screen)
-        if [ -n "$monitor" ]; then grab -o "$monitor" "$out"; else grab "$out"; fi || exit 2 ;;
     window)
-        command -v slurp >/dev/null || { echo "O slurp não está instalado." >&2; exit 2; }
         # Janelas visíveis (áreas de trabalho em exibição em cada monitor), da usada por último para
         # a mais antiga, para a de cima ganhar onde elas se sobrepõem
         boxes="$(hyprctl -j monitors 2>/dev/null | jq -r '[.[] | .activeWorkspace.id, .specialWorkspace.id] | map(select(. != 0)) | @json' 2>/dev/null)"
@@ -79,21 +77,32 @@ capture)
             | sort_by(.focusHistoryID) | .[]
             | "\(.at[0]),\(.at[1]) \(.size[0])x\(.size[1])"')"
         [ -n "$rects" ] || { echo "Nenhuma janela aberta." >&2; exit 2; }
-        geom="$(printf '%s\n' "$rects" | slurp -r "${sl[@]}")" || exit 1
-        [ -n "$geom" ] || exit 1
-        sleep 0.1   # um quadro sem a marcação do slurp (o HyprSync também tira a animação de saída dela)
-        grab -g "$geom" "$out" || exit 2 ;;
+        geom="$(printf '%s\n' "$rects" | slurp -r "${sl[@]}")" || exit 1 ;;
     area)
-        command -v slurp >/dev/null || { echo "O slurp não está instalado." >&2; exit 2; }
         # </dev/null: sem entrada fechada o slurp espera retângulos nela e nunca aparece (o shell
         # deixa a entrada do processo aberta)
-        geom="$(slurp -d "${sl[@]}" </dev/null)" || exit 1
-        [ -n "$geom" ] || exit 1
-        sleep 0.1
-        grab -g "$geom" "$out" || exit 2 ;;
+        geom="$(slurp -d "${sl[@]}" </dev/null)" || exit 1 ;;
     *)
         echo "Modo desconhecido: $mode" >&2; exit 2 ;;
     esac
+    [ -n "$geom" ] || exit 1
+    sleep 0.1   # um quadro sem a marcação do slurp (o HyprSync também tira a animação de saída dela)
+}
+
+case "$cmd" in
+capture)
+    mode="${2:-}"; monitor="${3:-}"; out="${4:-}"
+    accent="${5:-}"; bg="${6:-}"
+    [ -n "$out" ] || { echo "Uso: screenshot.sh capture <modo> <monitor> <arquivo>" >&2; exit 2; }
+    command -v grim >/dev/null || { echo "O grim não está instalado." >&2; exit 2; }
+    mkdir -p "$(dirname "$out")"
+
+    if [ "$mode" = screen ]; then
+        if [ -n "$monitor" ]; then grab -o "$monitor" "$out"; else grab "$out"; fi || exit 2
+    else
+        pick "$mode" "$accent" "$bg"
+        grab -g "$geom" "$out" || exit 2
+    fi
 
     # Tamanho em pixels, do cabeçalho do PNG (bytes 16–23: largura e altura, big-endian)
     od -An -tu1 -j16 -N8 "$out" 2>/dev/null |
@@ -119,17 +128,29 @@ save)
     mv -f "$tmp" "$dest" || { rm -f "$tmp"; echo "Falha ao gravar o arquivo." >&2; exit 2; }
     ;;
 
+pick)
+    pick "${2:-}" "${3:-}" "${4:-}"
+    printf '%s\n' "$geom"
+    ;;
+
 dirs)
-    # Capturas: a mesma pasta do atalho antigo do Print e do arch-setup.sh (ao lado de Wallpapers)
-    printf 'Capturas\t%s\n' "$HOME/Pictures/Screenshots"
-    pics="$(user_dir PICTURES Pictures)"
-    [ -d "$pics" ] && printf 'Imagens\t%s\n' "$pics"
+    if [ "${2:-}" = video ]; then
+        # Gravações: Screencasts dentro da pasta de vídeos (a do xdg-user-dirs), como no GNOME
+        d="$(user_dir VIDEOS Videos)"
+        printf 'Gravações\t%s\n' "$d/Screencasts"
+        [ -d "$d" ] && printf 'Vídeos\t%s\n' "$d"
+    else
+        # Capturas: a mesma pasta do atalho antigo do Print e do arch-setup.sh (ao lado de Wallpapers)
+        printf 'Capturas\t%s\n' "$HOME/Pictures/Screenshots"
+        pics="$(user_dir PICTURES Pictures)"
+        [ -d "$pics" ] && printf 'Imagens\t%s\n' "$pics"
+    fi
     d="$(user_dir DESKTOP Desktop)";   [ -d "$d" ] && printf 'Área de Trabalho\t%s\n' "$d"
     d="$(user_dir DOWNLOAD Downloads)"; [ -d "$d" ] && printf 'Downloads\t%s\n' "$d"
     printf 'Pasta Pessoal\t%s\n' "$HOME"
     ;;
 
 *)
-    echo "Uso: screenshot.sh capture|save|dirs …" >&2; exit 2 ;;
+    echo "Uso: screenshot.sh capture|save|pick|dirs …" >&2; exit 2 ;;
 esac
 exit 0

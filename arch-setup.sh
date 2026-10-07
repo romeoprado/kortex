@@ -269,8 +269,8 @@ PKGS=(
     # Rede e Bluetooth
     networkmanager nm-connection-editor bluez bluez-utils
 
-    # Tela, capturas, área de transferência
-    brightnessctl grim slurp wl-clipboard
+    # Tela, capturas, gravação de tela, área de transferência
+    brightnessctl grim slurp gpu-screen-recorder wl-clipboard
 
     # Aplicativos básicos
     "$TERMINAL_APP" nautilus gvfs firefox btop pciutils
@@ -702,6 +702,8 @@ bindm = SUPER, mouse:273, resizewindow
 
 # Captura de tela do Kortex: tela inteira, janela ou área; depois escolhe nome, formato e pasta
 bind = , Print, exec, \$kortex screenshot toggle
+# Gravação de tela (áudio e vídeo): o mesmo menu, com o áudio; repetir o atalho para a gravação
+bind = SHIFT, Print, exec, \$kortex record toggle
 
 # Teclas de mídia
 bindel = , XF86AudioRaiseVolume, exec, wpctl set-volume -l 1 @DEFAULT_AUDIO_SINK@ 5%+

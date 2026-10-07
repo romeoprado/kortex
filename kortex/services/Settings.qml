@@ -67,6 +67,10 @@ Singleton {
             property string weatherCity: ""   // vazio = detecta pela rede
             property string screenshotDir: ""      // última pasta em que uma captura foi salva; vazio = ~/Pictures/Screenshots
             property string screenshotFormat: "png"   // último formato usado: "png" | "jpeg"
+            property string recordDir: ""          // última pasta em que uma gravação foi salva; vazio = Screencasts na pasta de vídeos
+            property string recordFormat: "mp4"    // último formato usado: "mp4" | "mkv"
+            property bool recordSystemAudio: true  // gravação de tela: som do computador
+            property bool recordMicrophone: false  // gravação de tela: microfone (com o som do sistema, misturados)
 
             // Widget Recursos: o que aparece na barra
             property bool statsCpu: true

@@ -9,6 +9,7 @@ for dep in nmcli brightnessctl hyprsunset curl bluetoothctl xdg-mime grim slurp 
     command -v "$dep" >/dev/null || echo "Aviso: '$dep' não encontrado (alguns widgets ficarão limitados)."
 done
 command -v powerprofilesctl >/dev/null || echo "Aviso: 'power-profiles-daemon' não encontrado (sem ele o widget Energia só mostra a bateria). Instale com: sudo pacman -S power-profiles-daemon && sudo systemctl enable --now power-profiles-daemon"
+command -v gpu-screen-recorder >/dev/null || echo "Aviso: 'gpu-screen-recorder' não encontrado (sem ele a gravação de tela, SHIFT+Print, não funciona). Instale com: sudo pacman -S gpu-screen-recorder"
 command -v matugen >/dev/null || echo "Aviso: 'matugen' não encontrado (sem ele o tema Matugen não gera cores do papel de parede). Instale com: sudo pacman -S matugen"
 [ -d /usr/share/icons/Yaru ] || [ -d "${XDG_DATA_HOME:-$HOME/.local/share}/icons/Yaru" ] || echo "Aviso: ícones Yaru não encontrados (sem eles os temas não trocam os ícones dos apps). Instale com: yay -S yaru-icon-theme"
 # A saída do fc-list é capturada antes do grep: com "set -o pipefail", "fc-list | grep -q" acusa falha

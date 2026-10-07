@@ -122,6 +122,8 @@ PanelWindow {
         Workspaces { shellScreen: bar.modelData }
         Rectangle { id: fixedEnd; Layout.alignment: Qt.AlignVCenter; Layout.rightMargin: 6; width: 4; height: 4; color: Theme.muted }
         Repeater { id: leftItems; model: bar.floating ? bar.floatingOrder : bar.layout.left; delegate: slotDelegate }
+        // gravando: no fim da fileira da flutuante (na inteira, no começo da direita)
+        RecordIndicator { visible: bar.floating && ScreenRecord.recording }
     }
 
     RowLayout {
@@ -137,6 +139,7 @@ PanelWindow {
         anchors { right: parent.right; top: parent.top; bottom: parent.bottom; rightMargin: bar.inset }
         spacing: 0
 
+        RecordIndicator { visible: !bar.floating && ScreenRecord.recording }
         Repeater { id: rightItems; model: bar.floating ? [] : bar.layout.right; delegate: slotDelegate }
     }
 

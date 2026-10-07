@@ -12,6 +12,7 @@ MouseArea {
     property bool active: false
     property real iconScale: 1.0
     property bool iconFilled: false   // ícone preenchido (ex.: sino com notificações)
+    property bool tabular: false      // algarismos de largura fixa (o tempo da gravação não sacode a barra)
     // Distância VISÍVEL entre o desenho do ícone e o texto: o espaço real desconta a sobra do
     // glifo (a sobra vazia à direita do desenho, que muda de ícone para ícone), então sino, bateria,
     // teclado, clima e Recursos ficam iguais
@@ -82,6 +83,7 @@ MouseArea {
             color: root.shownColor
             font.family: Theme.font
             font.pixelSize: Theme.textBody
+            font.features: root.tabular ? { "tnum": 1 } : {}
             Behavior on color { ColorAnimation { duration: 120 } }
         }
     }

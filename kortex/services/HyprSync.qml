@@ -34,7 +34,7 @@ Singleton {
     readonly property var _layerRules: [
         // janelas do Kortex crescem do centro; a barra e o carrossel deslizam da borda em que estão
         "keyword layerrule animation popin 90%, match:namespace "
-            + "^kortex-(launcher|themes|settings|network-settings|network-prompt|city|language|display-confirm|osd|screenshot|screenshot-save)$",
+            + "^kortex-(launcher|themes|settings|network-settings|network-prompt|city|language|display-confirm|osd|screenshot|screenshot-save|record|record-save)$",
         "keyword layerrule animation slide, match:namespace ^kortex-(bar|wallpaper-carousel)$",
         // os avisos e a camada de clique fora se animam sozinhos (Qt) ou não precisam
         "keyword layerrule no_anim on, match:namespace ^kortex-(notifications|clickaway)$",

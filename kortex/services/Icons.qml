@@ -87,6 +87,10 @@ Singleton {
     readonly property string shotScreen: "fullscreen"              // captura: tela inteira
     readonly property string shotWindow: "select_window"           // captura: janela
     readonly property string shotArea: "highlight_alt"             // captura: área
+    readonly property string record: "screen_record"               // gravação de tela (título e avisos)
+    readonly property string recording: "radio_button_checked"     // gravando (barra; clique para parar)
+    readonly property string systemAudio: "volume_up"              // gravação: som do sistema
+    readonly property string microphone: "mic"                     // gravação: microfone
     readonly property string cog: "settings"
     readonly property string terminal: "terminal"
     readonly property string display: "monitor"
