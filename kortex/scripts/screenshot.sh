@@ -145,8 +145,6 @@ dirs)
         pics="$(user_dir PICTURES Pictures)"
         [ -d "$pics" ] && printf 'Imagens\t%s\n' "$pics"
     fi
-    d="$(user_dir DESKTOP Desktop)";   [ -d "$d" ] && printf 'Área de Trabalho\t%s\n' "$d"
-    d="$(user_dir DOWNLOAD Downloads)"; [ -d "$d" ] && printf 'Downloads\t%s\n' "$d"
     printf 'Pasta Pessoal\t%s\n' "$HOME"
     ;;
 
