@@ -71,11 +71,9 @@ Rectangle {
         onClicked: mouse => {
             const n = root.notif
             if (!n) return
-            if (mouse.button === Qt.LeftButton) {
-                const def = root.actionsOf(n).find(a => a.identifier === "default")
-                if (def) def.invoke()
-            }
-            root.close()
+            const def = mouse.button === Qt.LeftButton ? root.actionsOf(n).find(a => a.identifier === "default") : null
+            if (def) Notifs.invoke(n, def)
+            else root.close()
         }
     }
 
@@ -179,10 +177,7 @@ Rectangle {
                         required property var modelData
                         implicitHeight: 26
                         text: modelData.text
-                        onClicked: {
-                            modelData.invoke()
-                            root.close()
-                        }
+                        onClicked: Notifs.invoke(root.notif, modelData)
                     }
                 }
             }

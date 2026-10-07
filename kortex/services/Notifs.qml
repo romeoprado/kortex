@@ -30,6 +30,14 @@ Singleton {
         toasts = [n].concat(toasts.filter(x => x.kortexKey !== key)).slice(0, 5)
     }
 
+    // Ação de uma notificação: o invoke() do Quickshell já fecha (e destrói) a que não é residente, e
+    // o cartão que chamou pode ser destruído junto — por isso a ordem fica aqui, fora do cartão
+    function invoke(n, action) {
+        const resident = n.resident
+        action.invoke()
+        if (resident) n.dismiss()
+    }
+
     function clearAll() {
         const all = server.trackedNotifications.values.slice()
         for (const n of all) n.dismiss()
