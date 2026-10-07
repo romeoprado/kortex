@@ -9,7 +9,7 @@ SettingsPage {
 
     Text {
         Layout.fillWidth: true
-        text: "Kortex 0.1 · Desenvolvido por R. Prado [contato@romeoprado.com.br]"
+        text: "Kortex 0.2 · Desenvolvido por R. Prado [contato@romeoprado.com.br]"
         color: Theme.fgBright
         font.family: Theme.font
         font.pixelSize: Theme.textBody

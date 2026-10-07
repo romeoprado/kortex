@@ -8,6 +8,8 @@ import Quickshell.Hyprland
 //  • atalhos SUPER+6…0 (e SUPER+SHIFT+…) para as áreas de trabalho além da quinta, quando a barra
 //    mostra mais de cinco. Os atalhos 1–5 já vêm do hyprland.conf.
 //  • espessura da borda e raio dos cantos das janelas, quando "aplicar às janelas" está ligado.
+//  • cores da borda das janelas depois de um reload (o theme-apply.sh as aplica ao trocar de tema;
+//    o reload volta às do hyprland.conf, com a borda inativa opaca).
 //  • atalhos do Caps Lock e do Num Lock que avisam o OSD (bindn: não consomem a tecla).
 //  • as animações do Hyprland (Configurações › Animações, ver services/Motion.qml): janelas, áreas
 //    de trabalho, camadas e popups, reaplicadas a cada mudança. As janelas do Kortex (lançador,
@@ -29,6 +31,7 @@ Singleton {
     property bool _wasSyncing: false
     property bool _osdBound: false   // atalhos do OSD já criados (um reload do Hyprland os apaga)
     property bool _animsSet: false   // regras de camada já aplicadas (se repetiriam a cada vez)
+    property bool _colorsLost: false // um reload devolveu as cores de borda do hyprland.conf
 
     // Regras das camadas do Kortex (as curvas e velocidades vêm de Motion, ver services/Motion.qml)
     readonly property var _layerRules: [
@@ -69,6 +72,12 @@ Singleton {
             _animsSet = true
         }
         cmds.push(...Motion.hyprlandCommands)
+        // as mesmas cores que o theme-apply.sh aplica a cada troca de tema
+        if (_colorsLost && Settings.data.hyprBorders) {
+            cmds.push("keyword general:col.active_border rgb(" + Theme.hex(Theme.borderColor).slice(1) + ")")
+            cmds.push("keyword general:col.inactive_border rgba(" + Theme.hex(Theme.muted).slice(1) + "aa)")
+        }
+        _colorsLost = false
         if (syncWindows) {
             cmds.push("keyword general:border_size " + windowBorder)
             cmds.push("keyword decoration:rounding " + windowRounding)
@@ -100,6 +109,7 @@ Singleton {
                 root._bound = []
                 root._osdBound = false
                 root._animsSet = false
+                root._colorsLost = true
                 settle.restart()
             }
         }

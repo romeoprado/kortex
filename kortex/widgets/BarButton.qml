@@ -24,6 +24,15 @@ MouseArea {
         font: glyph.font
         text: glyph.text
     }
+    // Roda do mouse em passos inteiros (positivo = para cima): cada dente da roda vale 120, e o
+    // touchpad manda muitos movimentos pequenos, que só viram um passo ao somarem 120
+    property real _wheelAcc: 0
+    function wheelSteps(wheel) {
+        _wheelAcc += wheel.angleDelta.y
+        const n = Math.trunc(_wheelAcc / 120)
+        _wheelAcc -= n * 120
+        return n
+    }
     // false: o item some da barra mesmo ligado nas Configurações (ex.: mídia sem nada tocando)
     property bool present: true
     property string iconFamily: Icons.family   // o logo do Arch vem de outra fonte

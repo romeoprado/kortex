@@ -80,8 +80,14 @@ Item {
                 onPressed: mouse => root.moved(valueAt(mouse.x))
                 onPositionChanged: mouse => { if (pressed) root.moved(valueAt(mouse.x)) }
                 onReleased: mouse => root.committed(valueAt(mouse.x))
+                // um passo por dente da roda (120); os movimentos pequenos do touchpad se somam até lá
+                property real wheelAcc: 0
                 onWheel: wheel => {
-                    const v = root.clamp(root.value + (wheel.angleDelta.y > 0 ? root.step : -root.step))
+                    wheelAcc += wheel.angleDelta.y
+                    const n = Math.trunc(wheelAcc / 120)
+                    if (n === 0) return
+                    wheelAcc -= n * 120
+                    const v = root.clamp(root.value + n * root.step)
                     root.moved(v)
                     root.committed(v)
                 }

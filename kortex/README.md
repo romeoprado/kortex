@@ -1,6 +1,6 @@
 # Kortex
 
-Shell para **Hyprland** feito em **Quickshell**. Versão **0.1**.
+Shell para **Hyprland** feito em **Quickshell**. Versão **0.2**.
 
 Inclui barra superior, lançador estilo Rofi, central de notificações, controles de teclado e idioma, Bluetooth, Wi‑Fi, som e tela, energia (modo de energia e bateria), menu de sessão, calendário, previsão do tempo, estatísticas de hardware, mídia tocando, bandeja, atualizações pendentes, captura e gravação de tela e um seletor de temas e papéis de parede. O tema também chega ao Kitty, ao btop, ao Firefox, à tela de login e aos apps do GNOME.
 
@@ -24,13 +24,13 @@ Se você já tem Hyprland configurado, pule para as seções 1 e 2.
 
 ```bash
 # Repositórios oficiais
-sudo pacman -S --needed qt6-declarative qt6-svg qt6-imageformats qt6-wayland ttf-jetbrains-mono-nerd ttc-iosevka \
+sudo pacman -S --needed quickshell qt6-declarative qt6-svg qt6-imageformats qt6-wayland ttf-jetbrains-mono-nerd ttc-iosevka \
     networkmanager bluez bluez-utils pipewire wireplumber pipewire-pulse \
     brightnessctl hyprsunset curl pavucontrol btop pciutils xdg-utils power-profiles-daemon grim slurp jq \
     gpu-screen-recorder pacman-contrib
 
-# AUR (com yay ou paru)
-yay -S quickshell-git     # ou: quickshell
+# Opcional, no lugar do quickshell: a versão em desenvolvimento, do AUR (com yay ou paru)
+yay -S quickshell-git
 ```
 
 Serviços necessários:
@@ -146,7 +146,7 @@ Se um arquivo carregado depois (como o de uma ferramenta gráfica de configuraç
 - *Teclado*: adicione layouts buscando por nome ou código (ex.: `portuguese`, `br`, `dvorak`; `Enter` adiciona o primeiro resultado), reordene, remova (até 4, limite do XKB) e escolha o atalho para alternar (Alt+Shift, Ctrl+Shift, Alt+Espaço ou Caps Lock; Super+Espaço não entra porque o Hyprland o usa para o lançador). Um campo de teste ajuda a conferir o resultado. As mudanças valem na hora, ficam em `settings.json` e são reaplicadas quando o shell inicia e quando o Hyprland recarrega a configuração, então prevalecem sobre o `kb_layout` do `hyprland.conf`. Esses layouts valem na sessão do Hyprland; *Gravar no Sistema* (`localectl set-x11-keymap`) estende a escolha ao console (TTY) e à tela de login e pede a senha de administrador. Os nomes dos layouts vêm do xkeyboard-config, em inglês.
 - *Idioma*: mostra o idioma do sistema (`LANG` em `/etc/locale.conf`) e lista os idiomas do `/etc/locale.gen`. Um idioma já gerado é definido com `localectl set-locale`; um que ainda não foi gerado é habilitado no `locale.gen`, gerado com `locale-gen` e definido, tudo num só passo com a senha pedida pelo polkit (`hyprpolkitagent`). Só vale a partir do próximo login. A aba também tem a opção de relógio de 24 horas.
 
-**Tela.** O painel do ícone de monitor (amarelo com a luz noturna ligada) controla brilho, luz noturna e, para o monitor daquela barra, **resolução**, **taxa de atualização** e **escala** (1×, 1.25×, 1.6×; edite `Monitors.scales` em `services/Monitors.qml` para outros valores). Escolha e clique em *Aplicar*: a nova configuração fica em teste por 15 s e volta sozinha ao modo anterior se você não confirmar (`Enter` mantém, `Esc` reverte), o que evita ficar preso numa tela preta. Só o que foi confirmado é gravado em `~/.local/state/kortex/monitors.conf`, que o Hyprland carrega (veja o `source` na seção 3), então vale também após reload e relogin.
+**Tela.** O painel do ícone de monitor (amarelo com a luz noturna ligada) controla brilho, luz noturna e, para o monitor daquela barra, **resolução**, **taxa de atualização** e **escala** (1×, 1,25×, 1,6×; edite `Monitors.scales` em `services/Monitors.qml` para outros valores). Escolha e clique em *Aplicar*: a nova configuração fica em teste por 15 s e volta sozinha ao modo anterior se você não confirmar (`Enter` mantém, `Esc` reverte), o que evita ficar preso numa tela preta. Só o que foi confirmado é gravado em `~/.local/state/kortex/monitors.conf`, que o Hyprland carrega (veja o `source` na seção 3), então vale também após reload e relogin.
 
 **Rede.** O painel do ícone de rede mostra, logo abaixo do título, um cartão com a conexão em uso (no topo, o nome da rede, a interface e, no Wi‑Fi, o sinal; embaixo, os dados **recebidos** e **enviados** na sessão dessa conexão, atualizados a cada segundo, um bloco para IP (sem o prefixo de rede), gateway, DNS e MAC, e outro de largura inteira para o IPv6 quando há um endereço global; com cabo e Wi‑Fi ao mesmo tempo, vale a que tem o gateway, e o cabo em caso de empate) e depois lista as redes Wi‑Fi, com um cadeado fechado nas que pedem senha e aberto nas abertas (clique conecta; numa rede nova pede a senha numa janela própria e só fecha se conectar; se falhar, mostra o motivo). *Configurações de Rede*, o clique direito no ícone ou o clique na linha do cabo abrem o **editor de conexões**, que substitui o `nm-connection-editor`: escolha uma conexão salva (Wi‑Fi ou cabo) e edite conectar automaticamente, senha do Wi‑Fi, IPv4 (DHCP ou manual, com endereço, máscara ou prefixo e gateway), servidores DNS e IPv6. `Tab` troca de campo, `Enter` aplica, `Esc` fecha. *Aplicar* reconecta a rede se ela estiver ativa. As entradas são validadas antes de chegar ao NetworkManager. Rede que não responde em 30 s falha com mensagem em vez de travar. Dá para *Conectar*, *Desconectar* e *Esquecer* (pede confirmação) por lá. A sessão começa quando a conexão é ativada (trocar de rede ou reconectar começa outra) e não zera se o shell reiniciar; a conexão feita no boot, antes do login, conta desde que a interface subiu. O ponto de partida de cada sessão fica em `~/.local/state/kortex/network-sessions.json`.
 
@@ -155,6 +155,8 @@ Se um arquivo carregado depois (como o de uma ferramenta gráfica de configuraç
 **Temas.** Temas embutidos: Gilmour, Hendrix, Knopfler, Morello (o padrão), Santana, Van Halen, Vaughan e Matugen (cores geradas do papel de parede; veja abaixo). Os temas que você salva do Matugen ficam em `~/.local/share/kortex/themes/`. No seletor, o Matugen vem sempre primeiro e os demais em ordem alfabética; cada cartão mostra o nome do tema e as suas 16 cores em duas linhas de oito: fundo, fundo alternativo, fundo escuro, texto, texto forte, texto fraco, acento e acento 2; depois apagado, seleção, vermelho, verde, amarelo, azul, magenta e ciano (as que o tema não define aparecem como o Kortex as calcula). O cartão do Matugen mostra as mesmas 16 cores por cima do papel de parede.
 
 **Formato dos temas.** Todo tema é uma pasta com dois arquivos e uma pasta: `colors.toml` (as cores: `accent`, `foreground`, `background`, `cursor`, `selection_foreground`, `selection_background` e `color0` a `color15`; também valem chaves como `muted`, `selection`, `dark_background`, `lighter_background`, `bright_foreground`, `red` ou `blue`, e um tema claro leva `mode = "light"`), `icons.theme` (uma linha com o nome do tema de ícones, como `Yaru-blue`) e `backgrounds/` (os papéis de parede). Os temas embutidos, o Matugen e os temas salvos dele já vêm com o `icons.theme`, que o Kortex escolhe pela variante do **Yaru** com a tonalidade mais próxima do acento (a versão `-dark` em tema escuro); o mesmo vale para uma pasta de tema sem esse arquivo. Ao aplicar um tema, o tema de ícones vai para os apps GTK (`gsettings` e o `gtk-icon-theme-name` dos `settings.ini` do GTK 3 e 4 que existirem), se estiver instalado (pacote `yaru-icon-theme`, do AUR, que o `arch-setup.sh` instala); se não estiver, os ícones atuais ficam.
+
+Por segurança, **nada dentro do tema é executado**: só são lidos o `colors.toml`, o nome no `icons.theme` e as imagens de `backgrounds/`.
 
 **Contraste garantido.** Na interface do Kortex, algumas cores do tema são ajustadas só o necessário para ficarem legíveis (regras de contraste WCAG): o texto apagado chega a 4,5:1 sobre o fundo e os cartões; o vermelho, o verde e o amarelo, a 4,5:1 sobre o fundo; o contorno de botões, campos e cartões, a 3:1; e o acento, a 4,5:1 sobre o fundo (no Morello e no Vaughan ele fica um pouco mais claro). O texto sobre o acento (botões e opções escolhidas) e sobre o vermelho (confirmações) é a cor do tema que mais contrasta, ou preto ou branco. A linha escolhida de uma lista (dispositivo de som em uso, fonte, layout, aplicativo selecionado) tem o fundo do cartão com um toque do acento. Nada disso muda o arquivo do tema nem as cores que vão para o Kitty, o Hyprland, a tela de bloqueio e a de login. Os números usam vírgula decimal (`46,3 W`, `1,25×`) e os nomes dos layouts de teclado vêm traduzidos (a tradução oficial do `xkeyboard-config`, lida com o `msgunfmt` do `gettext`).
 
@@ -173,8 +175,6 @@ Se um arquivo carregado depois (como o de uma ferramenta gráfica de configuraç
 **Animações.** O Kortex aplica ao vivo um conjunto próprio de animações do Hyprland (`services/Motion.qml` e `services/HyprSync.qml`, sem gravar no `hyprland.conf`, e de novo a cada recarga do Hyprland), com as mesmas curvas em tudo: o que entra chega depressa e assenta devagar, o que sai parte devagar e some depressa. No padrão (intensidade *Elegante*, velocidade *Normal*), as **janelas** abrem crescendo de 80% com um leve efeito de mola (cerca de 450 ms) e fecham encolhendo e esmaecendo, mais depressa; mover e redimensionar desliza suavemente, assim como a troca de cor da borda e o escurecimento das janelas inativas. As **áreas de trabalho** deslizam 20% esmaecendo, e a área especial vem de baixo. O lançador, o seletor de temas, as Configurações, as janelas de rede, cidade, idioma, confirmação de tela, captura e gravação de tela e o aviso de volume/brilho crescem do centro com a mesma mola; a barra e o carrossel de papéis de parede deslizam da borda em que estão. Os **painéis da barra** crescem a partir da barra, descendo e surgindo, e ao fechar recolhem em direção a ela; os **avisos** entram deslizando da direita, os que já estavam abrem espaço com suavidade e, ao sair (por tempo, clique ou fechados pelo app), deslizam de volta e esmaecem enquanto os de baixo sobem. Esses dois últimos são animados pelo próprio Kortex (Qt), porque o Hyprland só sabe esmaecer popups. As camadas e os popups de outros programas só esmaecem, na mesma velocidade. Intensidade, velocidade, estilos e o desligamento geral ficam em *Configurações › Animações* (veja acima). As curvas são Bézier: as molas do Hyprland só existem na configuração em Lua. Se você configurar animações no seu `hyprland.conf`, o Kortex as sobrescreve (com as animações desligadas no Kortex, o Hyprland também fica sem animações).
 
 **Cabeçalho dos painéis.** Os painéis da barra e as janelas de cidade do clima, rede (senha e conexões), confirmação de tela e captura de tela começam com o mesmo cabeçalho: um ícone (na cor de acento, sem fundo nem contorno, alinhado ao título principal e não à legenda), o título em fonte maior e numa fonte secundária, a Iosevka Fixed SmBd Ex (pacote `ttc-iosevka`, que o `arch-setup.sh` instala; troque pela chave `titleFont` do `settings.json`, e sem ela o Noto Sans assume), os controles à direita e um filete sólido embaixo, na cor de acento. O título, o ícone e os controles da direita ficam sempre à mesma distância da borda de cima (uma faixa de 38 px de referência), com ou sem legenda: a legenda fica embaixo e só aumenta a altura do painel. Quando há um estado útil, ele aparece numa segunda linha sob o título: o Bluetooth mostra *Desligado* ou quantos dispositivos estão conectados, a Rede mostra o estado (*Conectado*, *Desconectado* ou *Desligado*) e as Notificações avisam quando o *Não Perturbe* está ligado. O ícone do Clima é um pino de localização, o do painel Tela é um monitor, o do Som é um fone de ouvido (riscado no mudo) e o do painel Notificações fica preenchido quando há notificações e troca para o sino cortado no *Não Perturbe*.
-
-Por segurança, **nada dentro do tema é executado**: só são lidos o `colors.toml`, o nome no `icons.theme` e as imagens de `backgrounds/`.
 
 **Seletor rápido de papel de parede.** `SUPER+SHIFT+W`, um clique duplo no papel de parede da área de trabalho ou `qs -c kortex ipc call themes carousel` mostra embaixo um carrossel com as mesmas imagens da aba *Papéis de Parede* (do tema atual e da sua pasta), começando pela que está em uso (marcada *Em uso*). Se a área de trabalho atual tiver janelas, ele leva a uma área vazia do mesmo monitor, para ver o papel de parede de verdade, e volta à anterior ao fechar. As setas, a roda do mouse, arrastar ou clicar numa imagem trocam o papel de parede na hora, com um esmaecimento suave, como prévia; `Enter` ou um clique na imagem do centro aplica; `Esc` ou um clique fora do carrossel cancela e volta ao papel de parede anterior. Nada é gravado antes de aplicar; no tema Matugen, as cores só são geradas ao aplicar. O carrossel dá a volta: depois da última imagem vem a primeira.
 
@@ -286,7 +286,17 @@ A paleta vem das cores do tema: fundo, texto, seleção, cursor no acento, verme
 
 **Terminal translúcido e com desfoque.** O Kitty vem com o fundo a 85% de opacidade e com desfoque, igual em qualquer tema; mude em *Configurações › Aparência › Terminal* (opacidade de 30% a 100% e desfoque ligado ou desligado; vale na hora, inclusive nos Kitty abertos). A opacidade vai para o `~/.local/state/kortex/kitty-window.conf` (`background_opacity`), que o `kitty-theme.conf` inclui, então a linha `include` do `kitty.conf` é a mesma de antes. O desfoque é do Hyprland, não do Kitty: ele desfoca o que aparece por trás de qualquer janela translúcida (`decoration:blur:enabled`, ligado no `hyprland.conf` que o instalador cria). Desligar o desfoque grava uma regra `no_blur` para a classe `kitty` em `~/.local/state/kortex/hyprland-terminal.conf`, que o `hyprland.conf` carrega (`source`), e o Kortex manda o Hyprland recarregar a configuração para valer nas janelas abertas. Um `background_opacity` escrito no seu `kitty.conf` **depois** da linha `include` prevalece sobre o das Configurações; antes dela, o das Configurações vale. Só o Kitty é tratado.
 
-Outros terminais não são tocados automaticamente; use o gancho abaixo. Para abrir um comando no terminal, o shell usa `scripts/term.sh`, que já trata a diferença do Kitty (ele não tem `-e`: o comando vem direto depois das opções).
+Outros terminais não são tocados automaticamente; use o gancho do tema (abaixo). Para abrir um comando no terminal, o shell usa `scripts/term.sh`, que já trata a diferença do Kitty (ele não tem `-e`: o comando vem direto depois das opções).
+
+Se existir o executável `~/.config/kortex/hooks/theme-set`, ele é chamado com `<nome> <pasta-do-tema> <pasta-de-estado>`. Exemplo para o Alacritty (o Kitty já é tratado pelo shell):
+
+```bash
+#!/usr/bin/env bash
+# no alacritty.toml:  [general]  import = ["~/.config/alacritty/theme.toml"]
+. "$3/colors.sh"
+printf '[colors.primary]\nbackground = "%s"\nforeground = "%s"\n' "$KORTEX_BG" "$KORTEX_FG" \
+    > ~/.config/alacritty/theme.toml
+```
 
 **Monitor do sistema (btop).** O `btop` acompanha o tema: a cada troca, `scripts/btop-theme.sh` (chamado pelo `theme-apply.sh`) grava `~/.config/btop/themes/kortex.theme` com as cores do tema (texto, acento nos destaques, na linha selecionada e nos nomes dos processos, contornos na cor apagada, degradês de CPU e temperatura até o vermelho, memória em verde, azul, amarelo e vermelho, rede em ciano e magenta) e manda os `btop` abertos recarregarem (`SIGUSR2`), então eles mudam de cor na hora. O fundo fica vazio de propósito: o `btop` usa o do terminal, que já tem a cor do tema e a opacidade das Configurações. O tema `kortex` só é escolhido no `~/.config/btop/btop.conf` se nenhum outro foi (sem o arquivo, sem a linha `color_theme` ou com o `Default`); se você escolheu outro tema no menu do `btop`, ele é respeitado, e para voltar ao do Kortex basta escolher `kortex` lá. Não edite o `kortex.theme`, que é reescrito a cada troca: copie-o com outro nome e escolha a cópia.
 
@@ -314,21 +324,11 @@ fi
 # <<< kortex-autostart <<<
 ```
 
-Se existir o executável `~/.config/kortex/hooks/theme-set`, ele é chamado com `<nome> <pasta-do-tema> <pasta-de-estado>`. Exemplo para o Alacritty (o Kitty já é tratado pelo shell):
-
-```bash
-#!/usr/bin/env bash
-# no alacritty.toml:  [general]  import = ["~/.config/alacritty/theme.toml"]
-. "$3/colors.sh"
-printf '[colors.primary]\nbackground = "%s"\nforeground = "%s"\n' "$KORTEX_BG" "$KORTEX_FG" \
-    > ~/.config/alacritty/theme.toml
-```
-
 ## 7. Solução de problemas
 
 ```bash
 qs -c kortex log          # log da instância em execução
-qs -c kortex --no-duplicate
+qs -c kortex --no-duplicate   # inicia só se não houver outra instância rodando
 qs -c kortex kill; qs -c kortex  # reiniciar por completo
 ```
 
@@ -370,6 +370,7 @@ kortex/
 ├── modules/screenshot   menus e janelas de salvar da captura e da gravação de tela
 ├── modules/clickaway    camada que fecha os popups ao clicar fora
 ├── modules/notifications
+├── modules/osd          aviso rápido de volume, brilho, Caps Lock e Num Lock
 ├── modules/wallpaper
 ├── firefox/             CSS do Firefox (interface e páginas internas)
 ├── matugen/             modelo do Matugen (correspondência das cores Material com as do Kortex) e as cores fixas de cada modo

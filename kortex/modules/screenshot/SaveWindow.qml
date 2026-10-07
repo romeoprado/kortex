@@ -204,7 +204,7 @@ OverlayPanel {
 
                         model: FolderListModel {
                             id: folders
-                            folder: win.dirExists ? "file://" + win.dir : ""
+                            folder: win.dirExists ? Theme.url(win.dir) : ""
                             showFiles: false
                             showHidden: false
                             showDotAndDotDot: false

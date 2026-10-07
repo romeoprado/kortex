@@ -3,7 +3,7 @@ import QtQuick.Layouts
 import qs.services
 
 // Cabeçalho de painel: ícone (sem fundo nem contorno), título (e, se houver, uma linha de estado embaixo)
-// à esquerda, controles à direita e, por baixo, um filete que esmaece a partir do acento.
+// à esquerda, controles à direita e, por baixo, um filete na cor de acento.
 // O ícone se alinha ao título principal, não à legenda. Com clickable: true, clicar no título emite clicked().
 ColumnLayout {
     id: root

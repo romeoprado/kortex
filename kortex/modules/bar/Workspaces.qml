@@ -91,10 +91,16 @@ RowLayout {
         }
     }
 
+    // Um passo por dente da roda (120); os movimentos pequenos do touchpad se somam até lá
     WheelHandler {
+        property real acc: 0
         onWheel: event => {
+            acc += event.angleDelta.y
+            const n = Math.trunc(acc / 120)
+            if (n === 0) return
+            acc -= n * 120
             const cur = root.activeId > 0 && root.activeId <= root.count ? root.activeId : 1
-            const next = event.angleDelta.y > 0 ? ((cur + root.count - 2) % root.count) + 1 : (cur % root.count) + 1
+            const next = ((cur - 1 - n) % root.count + root.count) % root.count + 1
             Hyprland.dispatch("workspace " + next)
         }
     }

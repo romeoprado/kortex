@@ -49,11 +49,13 @@ ShellRoot {
 
     // Atalhos via IPC (use no hyprland.conf):
     //   qs -c kortex ipc call launcher toggle
-    //   qs -c kortex ipc call themes toggle | wallpapers | matugen | set <nome>
+    //   qs -c kortex ipc call themes toggle | wallpapers | matugen | set <nome> | randomWallpaper | carousel
+    //   qs -c kortex ipc call notifications clear | toggleDnd
     //   qs -c kortex ipc call keyboard next | prev | set <posição> | settings | language
-    //   qs -c kortex ipc call settings toggle | open <appearance|bar|apps|power|general|about>
+    //   qs -c kortex ipc call settings toggle | open <appearance|animations|bar|apps|power|general|about>
     //   qs -c kortex ipc call screenshot toggle
     //   qs -c kortex ipc call record toggle
+    //   qs -c kortex ipc call keepAwake toggle
     IpcHandler {
         target: "launcher"
         function toggle(): void { Popups.toggleLauncher() }

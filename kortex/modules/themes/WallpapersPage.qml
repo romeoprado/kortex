@@ -139,7 +139,7 @@ ColumnLayout {
                     anchors.centerIn: parent
                     visible: cell.confirming
                     text: "Excluir?"
-                    color: Theme.bg
+                    color: Theme.redText
                     font.family: Theme.font
                     font.pixelSize: Theme.textBody
                     font.bold: true
@@ -160,7 +160,7 @@ ColumnLayout {
         visible: Theme.wallpapers.length === 0
         Layout.fillWidth: true
         horizontalAlignment: Text.AlignHCenter
-        text: "Nenhuma imagem encontrada. Coloque imagens em " + Settings.data.wallpaperDir + " ou instale um tema com a pasta backgrounds/."
+        text: "Nenhuma imagem encontrada. Coloque imagens em " + Settings.data.wallpaperDir + "."
         color: Theme.fgDim
         font.family: Theme.font
         font.pixelSize: Theme.textBody

@@ -3,7 +3,7 @@ import QtQuick.Layouts
 import qs.services
 import qs.widgets
 
-// Tela "Exibição" do painel Recursos: o que aparece na barra e como os valores são mostrados.
+// Tela "Exibição" do painel Recursos: o que aparece na barra e qual armazenamento.
 ColumnLayout {
     id: root
 

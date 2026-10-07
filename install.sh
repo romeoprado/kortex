@@ -4,7 +4,7 @@ set -euo pipefail
 src="$(cd "$(dirname "$0")" && pwd)/kortex"
 dest="${XDG_CONFIG_HOME:-$HOME/.config}/quickshell/kortex"
 
-command -v qs >/dev/null || echo "Aviso: 'qs' (Quickshell) não encontrado. Instale com: yay -S quickshell-git"
+command -v qs >/dev/null || echo "Aviso: 'qs' (Quickshell) não encontrado. Instale com: sudo pacman -S quickshell"
 for dep in nmcli brightnessctl hyprsunset curl bluetoothctl xdg-mime grim slurp jq; do
     command -v "$dep" >/dev/null || echo "Aviso: '$dep' não encontrado (alguns widgets ficarão limitados)."
 done

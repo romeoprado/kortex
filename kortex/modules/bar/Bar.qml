@@ -5,7 +5,7 @@ import Quickshell.Wayland
 import qs.services
 import qs.widgets
 
-// Barra superior (uma por monitor)
+// Barra (uma por monitor, no topo ou no fundo da tela)
 //  esquerda: lançador · áreas de trabalho · CPU/RAM · atualizações
 //  centro:   relógio/calendário · clima
 //  direita:  mídia · bandeja · teclado · bluetooth · wi-fi · som · tela · notificações · energia · sessão

@@ -30,7 +30,10 @@ BarButton {
         else if (mouse.button === Qt.RightButton) Settings.shell(Settings.data.audioApp)
         else Popups.toggle("audio", screenName)
     }
-    onWheel: wheel => setVolume(volume + (wheel.angleDelta.y > 0 ? 0.05 : -0.05))
+    onWheel: wheel => {
+        const n = wheelSteps(wheel)
+        if (n !== 0) setVolume(volume + 0.05 * n)
+    }
 
     PwObjectTracker {
         objects: [root.sink, root.source].concat(root.sinks)

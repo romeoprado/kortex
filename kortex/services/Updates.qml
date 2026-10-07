@@ -41,6 +41,7 @@ Singleton {
     Process {
         id: proc
         command: ["checkupdates"]
+        // Só a lista que chegou substitui a anterior: num erro a saída vem vazia e a última lista fica
         stdout: StdioCollector {
             onStreamFinished: {
                 const out = []
@@ -49,7 +50,7 @@ Singleton {
                     const m = line.trim().match(/^(\S+)\s+(\S+)\s+->\s+(\S+)/)
                     if (m) out.push({ name: m[1], from: m[2], to: m[3] })
                 }
-                root.packages = out
+                if (out.length > 0) root.packages = out
             }
         }
         // 0 = há atualizações, 2 = nenhuma, 1 = erro (sem rede, etc.: mantém a última lista)

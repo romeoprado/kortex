@@ -155,7 +155,9 @@ Rectangle {
 
             Text {
                 Layout.fillWidth: true
-                text: root.notif?.body ?? ""
+                // sem <img>: a marcação aceita imagens de endereços da internet, e um aviso não deve
+                // fazer o Kortex baixar nada
+                text: (root.notif?.body ?? "").replace(/<img\b[^>]*>/gi, "")
                 visible: text !== ""
                 color: Theme.fg
                 font.family: Theme.font

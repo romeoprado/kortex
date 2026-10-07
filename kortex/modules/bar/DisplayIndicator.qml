@@ -64,7 +64,8 @@ BarButton {
         else Popups.toggle("display", screenName)
     }
     onWheel: wheel => {
-        if (Brightness.available) Brightness.setValue(Brightness.value + (wheel.angleDelta.y > 0 ? 0.05 : -0.05))
+        const n = wheelSteps(wheel)
+        if (n !== 0 && Brightness.available) Brightness.setValue(Brightness.value + 0.05 * n)
     }
 
     BarPopup {

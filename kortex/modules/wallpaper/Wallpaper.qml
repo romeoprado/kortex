@@ -59,8 +59,10 @@ Variants {
                 fillMode: Image.PreserveAspectCrop
                 asynchronous: true
                 cache: false
-                sourceSize.width: win.modelData.width
-                sourceSize.height: win.modelData.height
+                // em pixels da tela: o tamanho do monitor é lógico (a 1.6×, 1600 × 1000 num painel de
+                // 2560 × 1600), e a imagem decodificada nele sairia ampliada e borrada
+                sourceSize.width: Math.round(win.modelData.width * win.devicePixelRatio)
+                sourceSize.height: Math.round(win.modelData.height * win.devicePixelRatio)
                 opacity: 0
                 onStatusChanged: {
                     if (status === Image.Ready) {

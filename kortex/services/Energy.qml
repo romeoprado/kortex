@@ -51,7 +51,7 @@ Singleton {
         case "Charging": return "Carregando"
         case "Discharging": return "Na bateria"
         case "Full": return "Carga completa"
-        case "Not charging": return onAc ? "Na tomada, sem carregar." : "Sem carregar"
+        case "Not charging": return onAc ? "Na tomada, sem carregar" : "Sem carregar"
         default: return "Estado desconhecido"
         }
     }

@@ -162,7 +162,7 @@ ColumnLayout {
                             anchors.verticalCenter: parent.verticalCenter
                             text: Icons.check
                             size: Theme.fontSize + 1
-                            color: Theme.bg
+                            color: Theme.accentText
                         }
                     }
                 }
@@ -480,7 +480,7 @@ ColumnLayout {
         visible: page.shown.length === 0
         Layout.fillWidth: true
         horizontalAlignment: Text.AlignHCenter
-        text: "Nenhum tema encontrado. Cole a URL de um tema acima para instalar."
+        text: "Nenhum tema encontrado."
         color: Theme.fgDim
         font.family: Theme.font
         font.pixelSize: Theme.textBody

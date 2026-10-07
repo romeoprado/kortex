@@ -22,7 +22,15 @@ BarButton {
         if (mouse.button === Qt.LeftButton) Popups.toggle("media", screenName)
         else Media.toggle()
     }
-    onWheel: wheel => wheel.angleDelta.y > 0 ? Media.previous() : Media.next()
+    // uma faixa por vez: um deslizar longo no touchpad não pula várias
+    property real lastSkip: 0
+    onWheel: wheel => {
+        const n = wheelSteps(wheel)
+        if (n === 0 || Date.now() - lastSkip < 400) return
+        lastSkip = Date.now()
+        if (n > 0) Media.previous()
+        else Media.next()
+    }
 
     BarPopup {
         id: popup
