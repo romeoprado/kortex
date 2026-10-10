@@ -4,7 +4,7 @@ import QtQuick
 import Quickshell
 import Quickshell.Io
 
-// Brilho (brightnessctl) e luz noturna (hyprsunset)
+// Brilho (brightnessctl, pelo scripts/brightness.sh, que escolhe a luz de fundo da tela) e luz noturna (hyprsunset)
 Singleton {
     id: root
 
@@ -23,7 +23,7 @@ Singleton {
     function setValue(v) {
         v = Math.max(0.01, Math.min(1, v))
         value = v
-        Quickshell.execDetached(["brightnessctl", "-q", "-c", "backlight", "set", Math.round(v * 100) + "%"])
+        Quickshell.execDetached(["bash", Settings.scripts + "/brightness.sh", "-q", "set", Math.round(v * 100) + "%"])
     }
 
     function applyNightLight() {
@@ -34,7 +34,7 @@ Singleton {
 
     Process {
         id: getter
-        command: ["brightnessctl", "-m", "-c", "backlight"]
+        command: ["bash", Settings.scripts + "/brightness.sh", "-m"]
         stdout: StdioCollector {
             id: getterOut
             onStreamFinished: {
