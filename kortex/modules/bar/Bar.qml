@@ -39,7 +39,7 @@ PanelWindow {
     // num pixel físico inteiro (com meio passo de sobra ela cairia entre pixels e borraria)
     readonly property int widthStep: 2 * Theme.snapStep(devicePixelRatio)
     implicitWidth: floating ? Math.ceil(Math.min(contentWidth, (modelData ? modelData.width : 1920) - 2 * edgeGap) / widthStep - 0.000001) * widthStep : 0
-    implicitHeight: Theme.barHeight
+    implicitHeight: Theme.barHeightFor(devicePixelRatio)
     color: floating ? "transparent" : Theme.bg
     WlrLayershell.namespace: "kortex-bar"
     WlrLayershell.layer: WlrLayer.Top

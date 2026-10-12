@@ -21,7 +21,7 @@ Variants {
 
         // espaço da barra neste monitor (coordenadas da camada, que ocupa a tela toda)
         readonly property real barWidth: Theme.barFloating ? (Popups.barWidths[modelData.name] ?? 0) : width
-        readonly property real barY: Theme.barBottom ? height - Theme.barHeight - Theme.barMargin(devicePixelRatio) : Theme.barMargin(devicePixelRatio)
+        readonly property real barY: Theme.barBottom ? height - Theme.barHeightFor(devicePixelRatio) - Theme.barMargin(devicePixelRatio) : Theme.barMargin(devicePixelRatio)
 
         screen: modelData
         visible: Popups.current !== ""
@@ -39,7 +39,7 @@ Variants {
                 x: Math.round((layer.width - layer.barWidth) / 2)   // como o Hyprland centraliza
                 y: layer.barY
                 width: Math.ceil(layer.barWidth)
-                height: Theme.barHeight
+                height: Theme.barHeightFor(layer.devicePixelRatio)
             }
         }
 
