@@ -136,13 +136,25 @@ ColumnLayout {
         }
     }
 
-    PlainButton {
+    RowLayout {
         Layout.fillWidth: true
-        icon: Icons.terminal
-        text: "Monitor do Sistema"
-        onClicked: {
-            Popups.close()
-            Settings.runInTerminal(["btop"])
+        spacing: 8
+
+        PlainButton {
+            Layout.fillWidth: true
+            icon: Icons.processes
+            text: "Processos"
+            onClicked: Popups.toggleProcesses()
+        }
+
+        PlainButton {
+            Layout.fillWidth: true
+            icon: Icons.terminal
+            text: "Monitor do Sistema"
+            onClicked: {
+                Popups.close()
+                Settings.runInTerminal(["btop"])
+            }
         }
     }
 }

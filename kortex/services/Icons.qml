@@ -120,4 +120,11 @@ Singleton {
     readonly property string plus: "add"
     readonly property string up: "expand_less"
     readonly property string down: "expand_more"
+    // Gerenciador de Processos
+    readonly property string processes: "browse_activity"   // título, botão no painel Recursos
+    readonly property string background: "settings_applications"   // grupo sem janela (serviço de fundo)
+    readonly property string endTask: "cancel"                      // encerrar
+    readonly property string focusWindow: "open_in_new"             // ir para a janela do aplicativo
+    readonly property string sortUp: "arrow_upward"
+    readonly property string sortDown: "arrow_downward"
 }

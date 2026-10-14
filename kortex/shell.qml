@@ -21,6 +21,7 @@ import qs.modules.wallpaper
 import qs.modules.settings
 import qs.modules.osd
 import qs.modules.screenshot
+import qs.modules.processes
 
 ShellRoot {
     Wallpaper {}
@@ -46,6 +47,7 @@ ShellRoot {
     ScreenshotSave {}
     RecordMenu {}
     RecordSave {}
+    ProcessManager {}
 
     // Atalhos via IPC (use no hyprland.conf):
     //   qs -c kortex ipc call launcher toggle
@@ -55,6 +57,7 @@ ShellRoot {
     //   qs -c kortex ipc call settings toggle | open <appearance|animations|bar|apps|power|general|about>
     //   qs -c kortex ipc call screenshot toggle
     //   qs -c kortex ipc call record toggle
+    //   qs -c kortex ipc call processes toggle
     //   qs -c kortex ipc call keepAwake toggle
     IpcHandler {
         target: "launcher"
@@ -105,6 +108,12 @@ ShellRoot {
     IpcHandler {
         target: "record"
         function toggle(): void { ScreenRecord.toggle() }
+    }
+
+    // Gerenciador de Processos (sugestão de atalho: CTRL+SHIFT+Escape)
+    IpcHandler {
+        target: "processes"
+        function toggle(): void { Popups.toggleProcesses() }
     }
 
     IpcHandler {

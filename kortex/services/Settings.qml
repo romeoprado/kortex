@@ -97,6 +97,9 @@ Singleton {
             property var appUsage: ({})
             property var favoriteApps: []          // ids (.desktop) dos aplicativos favoritos
             property bool launcherFavoritesOnly: true    // o lançador abre listando só os favoritos
+
+            // Gerenciador de Processos
+            property string processSort: "cpu"     // ordem da lista: "cpu" | "mem" | "name"
         }
     }
 

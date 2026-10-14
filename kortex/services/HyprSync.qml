@@ -13,7 +13,7 @@ import Quickshell.Hyprland
 //  • atalhos do Caps Lock e do Num Lock que avisam o OSD (bindn: não consomem a tecla).
 //  • as animações do Hyprland (Configurações › Animações, ver services/Motion.qml): janelas, áreas
 //    de trabalho, camadas e popups, reaplicadas a cada mudança. As janelas do Kortex (lançador,
-//    temas, Configurações, rede, cidade, idioma, confirmação de tela, OSD, captura de tela) crescem
+//    temas, Configurações, rede, cidade, idioma, confirmação de tela, OSD, captura de tela, processos) crescem
 //    do centro, a barra e o carrossel deslizam da borda, e os avisos e os painéis da barra se movem
 //    pelo Qt. A seleção do slurp fica sem animação, para não sair na imagem.
 // Um "hyprctl reload" apaga o que foi aplicado em tempo de execução, então tudo é reaplicado
@@ -37,7 +37,7 @@ Singleton {
     readonly property var _layerRules: [
         // janelas do Kortex crescem do centro; a barra e o carrossel deslizam da borda em que estão
         "keyword layerrule animation popin 90%, match:namespace "
-            + "^kortex-(launcher|themes|settings|network-settings|network-prompt|city|language|display-confirm|osd|screenshot|screenshot-save|record|record-save)$",
+            + "^kortex-(launcher|themes|settings|network-settings|network-prompt|city|language|display-confirm|osd|screenshot|screenshot-save|record|record-save|processes)$",
         "keyword layerrule animation slide, match:namespace ^kortex-(bar|wallpaper-carousel)$",
         // os avisos e a camada de clique fora se animam sozinhos (Qt) ou não precisam
         "keyword layerrule no_anim on, match:namespace ^kortex-(notifications|clickaway)$",

@@ -27,6 +27,7 @@ Singleton {
     property bool wallpaperCarouselOpen: false   // seletor rápido de papel de parede (carrossel)
     property bool screenshotOpen: false          // menu da captura de tela (a janela de salvar segue Screenshot.pending)
     property bool recordOpen: false              // menu da gravação de tela (a janela de salvar segue ScreenRecord.pending)
+    property bool processesOpen: false           // Gerenciador de Processos
     property string settingsPage: "appearance"  // appearance | animations | bar | apps | power | general | about
     property string languageTab: "keyboard"    // "keyboard" | "language"
 
@@ -56,6 +57,7 @@ Singleton {
         wallpaperCarouselOpen = false
         screenshotOpen = false
         recordOpen = false
+        processesOpen = false
     }
 
     // Clique fora de tudo: fecha o popup da barra e as janelas
@@ -122,6 +124,13 @@ Singleton {
         close()
         _closeOverlays()
         recordOpen = true
+    }
+
+    function toggleProcesses() {
+        const wasOpen = processesOpen
+        close()
+        _closeOverlays()
+        processesOpen = !wasOpen
     }
 
     function openCityPrompt() {
