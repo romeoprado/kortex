@@ -857,7 +857,7 @@ esac
 step "Pronto!"
 EXTRA_NOTE=""
 if [[ " ${CHOSEN[*]} " == *" tailscale "* ]]; then
-    EXTRA_NOTE="  Tailscale: para entrar na sua rede, rode:  sudo tailscale up"$'\n'
+    EXTRA_NOTE="  Tailscale: para entrar na sua rede, rode:  sudo tailscale up --operator=$USER"$'\n'
 fi
 LOGIN_NOTE=""
 if [ "$LOGIN_MODE" = sddm ]; then

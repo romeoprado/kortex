@@ -127,4 +127,10 @@ Singleton {
     readonly property string focusWindow: "open_in_new"             // ir para a janela do aplicativo
     readonly property string sortUp: "arrow_upward"
     readonly property string sortDown: "arrow_downward"
+    // Tailscale (painel de rede)
+    readonly property string tailscale: "vpn_lock"
+    readonly property string computer: "desktop_windows"   // dispositivo da tailnet: computador ou servidor
+    readonly property string phone: "phone_iphone"         // dispositivo da tailnet: celular
+    readonly property string tablet: "tablet_mac"          // dispositivo da tailnet: tablet
+    readonly property string copy: "content_copy"
 }
