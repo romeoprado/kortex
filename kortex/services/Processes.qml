@@ -143,6 +143,16 @@ Singleton {
         return short
     }
 
+    // Título da janela sem o nome do aplicativo no fim ("Página — Mozilla Firefox" → "Página");
+    // vazio se não sobrar nada além do próprio nome
+    function _windowTitle(title, appName) {
+        const t = String(title || "").trim()
+        const name = String(appName || "").toLowerCase()
+        if (name === "" || t.toLowerCase() === name) return name === "" ? t : ""
+        const m = t.match(/^(.*\S)\s+[—–-]\s+([^—–-]+)$/)
+        return m && m[2].toLowerCase().includes(name) ? m[1] : t
+    }
+
     function parse(text) {
         const parts = text.split("\n--clients--\n")
         const lines = parts[0].split("\n")
@@ -216,12 +226,13 @@ Singleton {
             const win = windowOf[owner.pid]
             const entry = win ? DesktopEntries.heuristicLookup(win.class || win.initialClass || "") : null
             const essential = _essential.includes(owner.comm)
+            const appName = win ? (entry?.name || win.class || win.title || owner.name) : ""
             list.push({
                 key: String(owner.pid),
                 pid: owner.pid,
-                name: win ? (entry?.name || win.class || win.title || owner.name) : (_friendly[owner.name] || _friendly[owner.comm] || owner.name),
+                name: win ? appName : (_friendly[owner.name] || _friendly[owner.comm] || owner.name),
                 icon: win ? (entry?.icon || win.class || "") : "",
-                title: win && win.title !== (entry?.name || "") ? win.title : "",
+                title: win ? _windowTitle(win.title, appName) : "",
                 isApp: win !== undefined,
                 essential: essential,
                 cpu: procs.reduce((s, p) => s + p.cpu, 0),
