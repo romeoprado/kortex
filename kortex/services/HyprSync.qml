@@ -37,10 +37,10 @@ Singleton {
     readonly property var _layerRules: [
         // janelas do Kortex crescem do centro; a barra e o carrossel deslizam da borda em que estão
         "keyword layerrule animation popin 90%, match:namespace "
-            + "^kortex-(launcher|themes|settings|network-settings|network-prompt|city|language|display-confirm|osd|screenshot|screenshot-save|record|record-save|processes)$",
+            + "^kortex-(launcher|themes|settings|network-settings|network-prompt|city|language|display-confirm|screenshot|screenshot-save|record|record-save|processes)$",
         "keyword layerrule animation slide, match:namespace ^kortex-(bar|wallpaper-carousel)$",
-        // os avisos e a camada de clique fora se animam sozinhos (Qt) ou não precisam
-        "keyword layerrule no_anim on, match:namespace ^kortex-(notifications|clickaway)$",
+        // os avisos, o OSD e a camada de clique fora se animam sozinhos (Qt) ou não precisam
+        "keyword layerrule no_anim on, match:namespace ^kortex-(notifications|osd|clickaway)$",
         // a marcação do slurp (captura de tela) some na hora: com a animação de saída, o grim a pegaria
         "keyword layerrule no_anim on, match:namespace ^selection$"
     ]

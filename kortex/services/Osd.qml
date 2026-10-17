@@ -17,6 +17,7 @@ Singleton {
 
     property string kind: ""        // "volume" | "brightness" | "caps" | "num"
     property bool active: false     // à vista
+    property int pulse: 0           // conta cada mudança (o OSD dá um brilho a cada passo)
     property bool capsLock: false
     property bool numLock: false
 
@@ -34,6 +35,7 @@ Singleton {
         if (!_ready) return
         kind = k
         active = true
+        pulse++
         hide.restart()
     }
 
