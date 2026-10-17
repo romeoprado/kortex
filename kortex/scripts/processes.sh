@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
-# Processos do usuário para o Gerenciador de Processos (services/Processes.qml):
+# Processos do usuário para o Gerenciador de Processos (services/Processes.qml).
+#   processes.sh                              (sem argumentos)
+# Saída:
 #   cpu <total>                               jiffies de todas as CPUs desde o boot (1ª linha de /proc/stat)
 #   <pid> TAB <ppid> TAB <ticks> TAB <mem_kb> TAB <comm> TAB <linha de comando>
 #   ...
@@ -9,6 +11,8 @@
 # processos extras por item: tudo com comandos internos do bash.
 # Memória = residente menos a compartilhada (statm): a parte que é só do processo. Somar o RSS
 # contaria as bibliotecas várias vezes (o Firefox, com 20 processos, quase dobraria).
+# Sai sempre com 0: um processo que termina durante a leitura é pulado e, sem o Hyprland, a parte
+# das janelas fica vazia.
 
 read -r _ a b c d e f g h _ </proc/stat
 echo "cpu $((a + b + c + d + e + f + g + h))"
@@ -31,4 +35,4 @@ for dir in /proc/[0-9]*; do
 done
 
 echo "--clients--"
-hyprctl -j clients 2>/dev/null
+hyprctl -j clients 2>/dev/null || true
