@@ -1,6 +1,8 @@
 import QtQuick
 import qs.services
 
+// Interruptor. Não muda o próprio estado: emite toggled(novo valor), quem o usa grava a escolha e
+// checked acompanha a configuração. Tab chega a ele e Espaço ou Enter o aciona.
 MouseArea {
     id: root
     property bool checked: false

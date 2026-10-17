@@ -1,10 +1,12 @@
 import QtQuick
 import QtQuick.Layouts
-import Quickshell
 import Quickshell.Services.Pipewire
 import qs.services
 import qs.widgets
 
+// Som. O ícone muda no mudo. O clique abre o painel com o volume da saída e da entrada e a troca
+// de saída. Clique do meio liga o mudo, o direito abre o mixer (Settings.data.audioApp) e a roda
+// ajusta o volume.
 BarButton {
     id: root
     required property string screenName

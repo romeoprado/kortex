@@ -11,7 +11,7 @@ celsius() {
     v=$(cat "$1" 2>/dev/null) && [[ $v =~ ^[0-9]+$ ]] && echo $((v / 1000))
 }
 
-cpu= ram=
+cpu="" ram=""
 for h in /sys/class/hwmon/hwmon*; do
     case $(cat "$h/name" 2>/dev/null) in
     coretemp | k10temp | zenpower)

@@ -9,7 +9,7 @@ firefox_roots() {
 # Perfil padrão de cada pasta, um por linha (caminho absoluto): o do bloco [Install…] do profiles.ini,
 # senão o marcado Default=1, senão o primeiro. Só perfis que existem.
 firefox_profiles() {
-    local root ini p line path rel def_install="" def_flag="" first="" cur_rel="" cur_path="" cur_default=""
+    local root ini p line def_install="" def_flag="" first="" cur_rel="" cur_path="" cur_default=""
     while IFS= read -r root; do
         ini="$root/profiles.ini"; [ -f "$ini" ] || continue
         def_install=""; def_flag=""; first=""; cur_path=""; cur_rel=1; cur_default=0; local section=""

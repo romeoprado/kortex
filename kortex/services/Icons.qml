@@ -105,9 +105,7 @@ Singleton {
     readonly property string skipNext: "skip_next"
     readonly property string skipPrevious: "skip_previous"
     readonly property string updates: "deployed_code_update"   // atualizações pendentes do sistema
-    readonly property string tray: "apps"                       // bandeja (Configurações)
     readonly property string apps: "apps"
-    readonly property string font: "text_fields"
     readonly property string bars: "menu"
     readonly property string minus: "remove"
     readonly property string undo: "undo"

@@ -1,8 +1,6 @@
 import QtQuick
 import QtQuick.Layouts
 import Quickshell
-import Quickshell.Wayland
-import Quickshell.Hyprland
 import qs.services
 import qs.widgets
 
@@ -181,7 +179,6 @@ LazyLoader {
             interval: 3000
             onTriggered: win.confirmForget = false
         }
-
 
         GradientFrame {
             anchors.fill: parent

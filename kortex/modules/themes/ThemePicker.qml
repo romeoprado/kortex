@@ -1,8 +1,6 @@
 import QtQuick
 import QtQuick.Layouts
 import Quickshell
-import Quickshell.Wayland
-import Quickshell.Hyprland
 import qs.services
 import qs.widgets
 
@@ -36,7 +34,6 @@ LazyLoader {
             Theme.refresh()
             Theme.listWallpapers()
         }
-
 
         GradientFrame {
             anchors.fill: parent

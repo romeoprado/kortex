@@ -26,7 +26,8 @@ BarButton {
     FontMetrics { id: tagMetrics; font.family: Theme.font; font.pixelSize: Theme.textSmall; font.bold: true }
     FontMetrics { id: titleMetrics; font.family: Theme.titleFont; font.pixelSize: Theme.textTitle; font.bold: true }
     readonly property real headerWidth: {
-        void tagMetrics.font, titleMetrics.font   // refaz a conta quando a fonte muda
+        void tagMetrics.font   // refaz a conta quando a fonte muda
+        void titleMetrics.font
         const tag = Energy.profilesAvailable ? Math.max(0, ...Energy.profiles.map(p => tagMetrics.advanceWidth(p.text))) + 20 + 8 : 0
         return Theme.iconSize + 8 + 10 + titleMetrics.advanceWidth("Energia") + tag
     }

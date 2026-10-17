@@ -183,9 +183,6 @@ Singleton {
         }
     }
 
-    // Lê o xkeyboard-config: seções "! layout" e "! variant" de evdev.lst
-    //   "  br              Portuguese (Brazil)"
-    //   "  abnt2           br: Portuguese (Brazil, ABNT2)"
     // Saída do msgunfmt (.po): pares msgid/msgstr, com continuação em linhas que são só uma string
     function _parseTranslations(text) {
         const tr = {}
@@ -202,6 +199,10 @@ Singleton {
         if (_catalogText !== "") _parseCatalog(_catalogText)
     }
 
+    // Lê o xkeyboard-config: seções "! layout" e "! variant" de evdev.lst
+    //   "  br              Portuguese (Brazil)"
+    //   "  abnt2           br: Portuguese (Brazil, ABNT2)"
+    // O texto fica guardado para refazer os nomes quando a tradução chegar depois do catálogo.
     function _parseCatalog(text) {
         _catalogText = text
         const out = []

@@ -18,12 +18,6 @@ MouseArea {
     // teclado, clima e Recursos ficam iguais
     property real labelGap: 4
     readonly property real iconInkRight: Math.max(0, glyphInk.advanceWidth - glyphInk.tightBoundingRect.x - glyphInk.tightBoundingRect.width)
-
-    TextMetrics {
-        id: glyphInk
-        font: glyph.font
-        text: glyph.text
-    }
     // Roda do mouse em passos inteiros (positivo = para cima): cada dente da roda vale 120, e o
     // touchpad manda muitos movimentos pequenos, que só viram um passo ao somarem 120
     property real _wheelAcc: 0
@@ -69,6 +63,12 @@ MouseArea {
     }
     onReleased: if (reordering) { reordering = false; reorderFinished(true) }
     onCanceled: if (reordering) { reordering = false; reorderFinished(false) }
+
+    TextMetrics {
+        id: glyphInk
+        font: glyph.font
+        text: glyph.text
+    }
 
     Row {
         id: row

@@ -6,13 +6,13 @@
 
 # Temperatura do disco físico por trás de um dispositivo (partição, disco ou volume LVM/LUKS)
 disk_temp() {
-    local dev sys h
+    local dev sys h below
     dev=$(readlink -f "$1") || return
     sys=/sys/class/block/${dev##*/}
     [ -e "$sys" ] || return
-    # dm-crypt/LVM: desce até o primeiro dispositivo de baixo
-    while [ -d "$sys/slaves" ] && [ -n "$(ls -A "$sys/slaves" 2>/dev/null)" ]; do
-        sys=/sys/class/block/$(ls "$sys/slaves" | head -n1)
+    # dm-crypt/LVM: desce até o primeiro dispositivo de baixo (o glob vem em ordem alfabética)
+    while below=("$sys"/slaves/*); [ -e "${below[0]}" ]; do
+        sys=/sys/class/block/${below[0]##*/}
     done
     # partição: sobe para o disco que a contém
     if [ -e "$sys/partition" ]; then sys=$(dirname "$(readlink -f "$sys")"); fi

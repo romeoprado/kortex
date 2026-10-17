@@ -3,6 +3,10 @@ import QtQuick.Layouts
 import qs.services
 import qs.widgets
 
+// Aba Temas do seletor (ThemePicker). Um cartão por tema, com as 16 cores; o do Matugen mostra o
+// papel de parede em uso e os botões de modo e estilo. Clique ou Enter aplica. Clique direito,
+// lixeira ou Delete exclui (pede confirmação). F2 ou o lápis renomeia, e o disquete do Matugen
+// salva as cores atuais como tema novo. Esc fecha.
 ColumnLayout {
     id: page
     signal closeRequested()

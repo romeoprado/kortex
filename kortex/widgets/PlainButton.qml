@@ -1,7 +1,10 @@
 import QtQuick
-import QtQuick.Layouts
 import qs.services
 
+// Botão com contorno, com ícone, texto ou os dois. highlighted pinta o fundo no acento (botão
+// principal ou opção escolhida) e danger deixa vermelho ao passar o mouse. enabledLook separa a
+// aparência (ativo ou apagado) de enabled, para um botão que segue clicável. Tab chega a ele e
+// Espaço ou Enter o aciona.
 MouseArea {
     id: root
 

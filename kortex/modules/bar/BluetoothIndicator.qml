@@ -1,10 +1,12 @@
 import QtQuick
 import QtQuick.Layouts
-import Quickshell
 import Quickshell.Bluetooth
 import qs.services
 import qs.widgets
 
+// Bluetooth. O ícone fica no acento com algum dispositivo conectado. O clique abre o painel para
+// ligar, buscar e conectar. Nele, o clique conecta, desconecta ou pareia, e o direito esquece um
+// dispositivo pareado.
 BarButton {
     id: root
     required property string screenName

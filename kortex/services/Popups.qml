@@ -5,7 +5,8 @@ import Quickshell
 
 // Estado global de janelas: só um popup da barra aberto por vez.
 // Campos de texto não funcionam em popups da barra (PopupWindow não recebe o teclado do
-// Wayland); por isso lançador, temas, cidade do clima e rede têm janelas próprias (OverlayPanel).
+// Wayland); por isso o que precisa de teclado tem janela própria (OverlayPanel), aberta por uma
+// das flags abaixo. Abrir qualquer janela fecha as outras e o popup da barra.
 // Clicar fora fecha: os popups da barra usam a camada ClickAway e os overlays tratam o clique
 // no próprio fundo. (HyprlandFocusGrab não serve: não ativa para PopupWindow e, com teclado
 // exclusivo, nunca avisa do clique fora.)

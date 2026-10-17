@@ -84,9 +84,8 @@ Singleton {
     // Papel de parede em prévia (seletor rápido): o shell o desenha no lugar do salvo; "" = nenhum
     property string previewWallpaper: ""
     property string status: ""
-    // Para bindings. Dentro de handlers de mudança use themeByName(): quando onThemeChanged
-    // roda, esta propriedade ainda não foi reavaliada e devolveria o tema anterior.
-    readonly property var currentTheme: themeByName(Settings.data.theme)
+    // O tema em uso é sempre themeByName(Settings.data.theme). Não guarde o resultado numa
+    // propriedade: dentro de onThemeChanged ela ainda não teria sido reavaliada (tema anterior).
     readonly property string userThemesDir: Settings.dataDir + "/themes"
     readonly property string builtinThemesDir: Quickshell.shellDir + "/themes"
     property string _pendingApply: ""

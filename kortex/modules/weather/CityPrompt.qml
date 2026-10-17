@@ -1,8 +1,6 @@
 import QtQuick
 import QtQuick.Layouts
 import Quickshell
-import Quickshell.Wayland
-import Quickshell.Hyprland
 import qs.services
 import qs.widgets
 
@@ -28,7 +26,6 @@ LazyLoader {
         }
 
         Component.onCompleted: field.focusInput()
-
 
         GradientFrame {
             id: frame

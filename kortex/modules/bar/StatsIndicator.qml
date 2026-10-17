@@ -1,8 +1,10 @@
 import QtQuick
-import QtQuick.Layouts
 import qs.services
 import qs.widgets
 
+// Recursos. A barra mostra o uso de CPU, RAM, GPU, memória de vídeo e disco que Settings.data.stats*
+// liga, em vermelho acima de 90%. O clique abre o painel (StatsCards, e a engrenagem troca para
+// StatsSettings) e o clique direito abre o btop no terminal.
 BarButton {
     id: root
     required property string screenName

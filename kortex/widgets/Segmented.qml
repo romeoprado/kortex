@@ -1,6 +1,4 @@
 import QtQuick
-import QtQuick.Layouts
-import qs.services
 
 // Opções lado a lado; a atual fica em destaque.
 //   model: [{ label, value }]   current: valor selecionado   picked(value)

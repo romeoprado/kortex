@@ -334,7 +334,7 @@ qs -c kortex kill; qs -c kortex  # reiniciar por completo
 
 - **Palavras como `wifi` ou `settings` no lugar dos ícones:** os ícones são a fonte Material Symbols, carregada da pasta `fonts/` do Kortex. Confira se `~/.config/quickshell/kortex/fonts/MaterialSymbolsOutlined.ttf` existe (rode o `install.sh` de novo, se não existir) e **reinicie o shell por completo** (`qs -c kortex kill` e depois `qs -c kortex`): arquivos novos só são reconhecidos ao iniciar, não numa recarga. Um quadrado no botão do Arch (lançador) significa que falta `ttf-jetbrains-mono-nerd`: instale e rode `fc-cache -f`.
 - **O Firefox ou os apps do GNOME não mudaram de cor:** eles só leem as cores ao abrir, então feche e abra de novo. Se ainda assim não mudar, rode `bash ~/.config/quickshell/kortex/scripts/firefox-setup.sh` (o Firefox precisa ter sido aberto uma vez) ou `.../gnome-setup.sh`; ambos aceitam `--remove` para desfazer. O Firefox é configurado no perfil padrão; num perfil extra, passe a pasta dele: `firefox-setup.sh ~/.mozilla/firefox/<perfil>`.
-- **O tema Matugen diz que o Matugen não está instalado, ou as cores não mudam:** instale com `sudo pacman -S matugen` (o shell só percebe ao reabrir o seletor de temas). Para ver o motivo de uma falha, rode `bash ~/.config/quickshell/kortex/scripts/matugen-generate.sh <imagem> dark`: ele imprime a paleta ou uma linha com o erro.
+- **O tema Matugen diz que o Matugen não está instalado, ou as cores não mudam:** instale com `sudo pacman -S matugen` (o shell só percebe ao reabrir o seletor de temas). Para ver o motivo de uma falha, rode `bash ~/.config/quickshell/kortex/scripts/matugen-generate.sh <imagem> dark scheme-tonal-spot -` (o `-` no fim é o modo de prévia, que não grava nada): ele imprime a paleta ou uma linha com o erro.
 - **Excluir um papel de parede diz que não foi possível:** a exclusão usa a Lixeira (`gio trash`); se ela falhar (por exemplo, numa pasta sem lixeira disponível), o arquivo não é apagado.
 - **O terminal não ficou translúcido ou desfocado:** a opacidade precisa do `include` do `kitty-theme.conf` no `kitty.conf` (seção 4, *Terminal*) e de nenhum `background_opacity` depois dele; o desfoque precisa da linha `source = ~/.local/state/kortex/hyprland-terminal.conf` no `hyprland.conf` (o instalador já a põe) e de `decoration:blur:enabled` ligado no Hyprland. Ao desligar o desfoque, o Hyprland recarrega a configuração: se houver erro, `hyprctl configerrors` mostra.
 - **Brilho não aparece:** seu usuário precisa estar no grupo `video` (`sudo usermod -aG video $USER`) ou o monitor é externo sem suporte a DDC.
@@ -378,6 +378,10 @@ kortex/
 ├── scripts/             auxiliares em bash (inclui theme-apply.sh, icon-theme.sh, open-app.sh, apps-apply.sh, kitty-theme.sh, btop-theme.sh, terminal-apply.sh, firefox-setup.sh, firefox-theme.sh, gnome-setup.sh, gnome-theme.sh, matugen-generate.sh, screenshot.sh, screenrecord.sh, sddm-setup.sh e sddm-colors.sh)
 └── themes/              temas embutidos
 ```
+
+## Desenvolvimento
+
+Para mexer no código: a arquitetura, as convenções e como verificar uma mudança estão em `CLAUDE.md` e na pasta `docs/`, na raiz do repositório (elas não vão para a pasta instalada).
 
 ## Licença
 

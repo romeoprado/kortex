@@ -3,6 +3,9 @@ import QtQuick.Layouts
 import qs.services
 import qs.widgets
 
+// Aba Papéis de Parede do seletor (ThemePicker), com a pasta escolhida e a grade das imagens do
+// tema e da pasta. Clique ou Enter aplica. Clique direito, lixeira ou Delete move para a Lixeira
+// (pede confirmação). Esc fecha.
 ColumnLayout {
     id: page
     signal closeRequested()

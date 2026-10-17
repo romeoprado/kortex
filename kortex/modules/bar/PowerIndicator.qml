@@ -5,6 +5,9 @@ import Quickshell.Hyprland
 import qs.services
 import qs.widgets
 
+// Sessão. O clique abre o painel com bloquear, suspender, sair, reiniciar, UEFI e desligar (os
+// botões visíveis vêm de Settings.data.powerActions). Com Settings.data.powerConfirm, as ações
+// destrutivas pedem um segundo clique em até 3 s.
 BarButton {
     id: root
     required property string screenName
@@ -38,7 +41,9 @@ BarButton {
     FontMetrics { id: titleMetrics; font.family: Theme.titleFont; font.pixelSize: Theme.textTitle; font.bold: true }
     // Cabeçalho mais largo possível: ícone, "Sessão" e a maior etiqueta (nome de ação ou confirmação)
     readonly property real headerWidth: {
-        void tagMetrics.font, tagBoldMetrics.font, titleMetrics.font   // refaz a conta quando a fonte muda
+        void tagMetrics.font   // refaz a conta quando a fonte muda
+        void tagBoldMetrics.font
+        void titleMetrics.font
         const tag = Math.max(tagBoldMetrics.advanceWidth(confirmText), ...actions.map(a => tagMetrics.advanceWidth(a.text))) + 20
         return Theme.iconSize + 8 + 10 + titleMetrics.advanceWidth("Sessão") + 8 + tag
     }

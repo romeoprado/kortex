@@ -12,11 +12,13 @@ pick() {
     # Pela tonalidade (OKLCh) da cor das pastas de cada variante do Yaru: acento com cor nítida vai
     # para a variante de tonalidade mais próxima; acento quase cinza, para a Sage (fria) ou a
     # Wartybrown (quente), as duas variantes acinzentadas
+    # Só awk POSIX (sem o strtonum do gawk): o script também roda com mawk ou busybox
     name="$(awk -v c="$accent" '
+        function hex(s,   i, v) { s = tolower(s); v = 0; for (i = 1; i <= length(s); i++) v = v * 16 + index("0123456789abcdef", substr(s, i, 1)) - 1; return v }
         function lin(v) { v /= 255; return v <= 0.04045 ? v / 12.92 : ((v + 0.055) / 1.055) ^ 2.4 }
         function cbrt(x) { return x < 0 ? -((-x) ^ (1/3)) : x ^ (1/3) }
         function lch(h,   r, g, b, l, m, s, A, B) {
-            r = lin(strtonum("0x" substr(h, 1, 2))); g = lin(strtonum("0x" substr(h, 3, 2))); b = lin(strtonum("0x" substr(h, 5, 2)))
+            r = lin(hex(substr(h, 1, 2))); g = lin(hex(substr(h, 3, 2))); b = lin(hex(substr(h, 5, 2)))
             l = cbrt(0.4122214708*r + 0.5363325363*g + 0.0514459929*b)
             m = cbrt(0.2119034982*r + 0.6806995451*g + 0.1073969566*b)
             s = cbrt(0.0883024619*r + 0.2817188376*g + 0.6299787005*b)

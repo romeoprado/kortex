@@ -59,11 +59,11 @@ RowLayout {
         Layout.maximumWidth: 340
         Layout.fillHeight: true
         clip: true
-        contentHeight: left.implicitHeight + 8
+        contentHeight: activeColumn.implicitHeight + 8
         boundsBehavior: Flickable.StopAtBounds
 
         ColumnLayout {
-            id: left
+            id: activeColumn
             width: scroller.width - 12
             spacing: 8
 

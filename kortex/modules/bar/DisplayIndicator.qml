@@ -3,6 +3,10 @@ import QtQuick.Layouts
 import qs.services
 import qs.widgets
 
+// Tela. O ícone fica amarelo com a luz noturna ligada. O clique abre o painel com brilho, luz
+// noturna e a resolução, a taxa e a escala do monitor desta barra (Aplicar passa pela confirmação
+// de Monitors, em modules/display/ApplyConfirm.qml). Clique do meio liga a luz noturna e a roda
+// ajusta o brilho.
 BarButton {
     id: root
     required property string screenName

@@ -3,6 +3,8 @@ import QtQuick.Layouts
 import qs.services
 import qs.widgets
 
+// Notificações. O sino fica preenchido quando há alguma. O clique abre o histórico e o clique
+// direito liga ou desliga o Não Perturbe.
 BarButton {
     id: root
     required property string screenName
