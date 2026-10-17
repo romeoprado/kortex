@@ -5,9 +5,12 @@
 **Novidades**
 
 - **Pareamento Bluetooth pelo painel.** O Kortex agora tem um agente de pareamento (`scripts/bt-agent.py`, que precisa de `python-dbus` e `python-gobject`). Sem ele, o bluetoothd recusava mouses e fones com `No agent available`. Mouses e fones que você manda parear pelo painel são aceitos sozinhos; quando o dispositivo mostra um código, o painel abre para conferir e aceitar, e num teclado ele mostra o código para digitar. Um pedido que você não iniciou abre o painel e só é aceito com o seu clique. Se o pareamento falha, o dispositivo mostra *Falha ao parear* e deixa de ser marcado como confiável.
+- **Gerenciador de Processos** (`CTRL+SHIFT+Esc`, o botão *Processos* no painel Recursos ou `qs -c kortex ipc call processes toggle`). Mostra o que está rodando na sessão agrupado por aplicativo, com a CPU e a memória de cada grupo e os totais da máquina. Busca por nome, comando ou PID, ordena pelas colunas e funciona pelo teclado. *Encerrar* pede confirmação e, se o programa não fechar em 3 s, vira *Forçar*. O instalador acrescenta o atalho ao `hyprland.conf`.
+- **Tailscale no painel de rede.** Com o Tailscale instalado, uma seção mostra o estado, liga e desliga a conexão e lista os dispositivos da tailnet com o IP, que um clique copia. Sem o `--operator`, o Kortex pede a senha pelo polkit; o instalador passa a sugerir `sudo tailscale up --operator=$USER`.
 
 **Correções**
 
+- Na barra flutuante, os cantos arredondados ficavam pretos por alguns quadros ao passar o mouse nos itens (visto com NVIDIA e escala 1,25×). A camada da barra chegava ao Hyprland como opaca e ele não redesenhava o papel de parede sob os cantos. A altura da barra também passa a cair em pixels físicos inteiros.
 - O botão direito também esquece um dispositivo que ficou confiável sem chegar a parear.
 - A escolha automática do tema de ícones pelo acento (`scripts/icon-theme.sh pick`) dependia do gawk; com outro awk, o nome saía quebrado. Agora funciona com qualquer awk.
 - `icon-theme.sh` e `matugen-generate.sh` voltam a ser executáveis, como os outros scripts.
