@@ -18,7 +18,8 @@ kortex/              o shell em si, o que é copiado para ~/.config/quickshell/k
   services/          singletons (estado, leitura do sistema, processos)
   widgets/           componentes visuais reutilizáveis
   modules/<área>/    barra, janelas e painéis (módulos qs.modules.<área>)
-  scripts/           auxiliares em bash chamados pelo shell e pelo hyprland.conf
+  scripts/           auxiliares em bash chamados pelo shell e pelo hyprland.conf, e o bt-agent.py
+                     (agente de pareamento Bluetooth, em Python com python-dbus e python-gobject)
   themes/            temas embutidos (colors.toml + icons.theme)
   matugen/           modelo do Matugen e cores fixas de cada modo
   sddm/  firefox/    tema da tela de login e CSS do Firefox

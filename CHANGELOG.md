@@ -2,8 +2,13 @@
 
 ## Em desenvolvimento
 
+**Novidades**
+
+- **Pareamento Bluetooth pelo painel.** O Kortex agora tem um agente de pareamento (`scripts/bt-agent.py`, que precisa de `python-dbus` e `python-gobject`). Sem ele, o bluetoothd recusava mouses e fones com `No agent available`. Mouses e fones que você manda parear pelo painel são aceitos sozinhos; quando o dispositivo mostra um código, o painel abre para conferir e aceitar, e num teclado ele mostra o código para digitar. Um pedido que você não iniciou abre o painel e só é aceito com o seu clique. Se o pareamento falha, o dispositivo mostra *Falha ao parear* e deixa de ser marcado como confiável.
+
 **Correções**
 
+- O botão direito também esquece um dispositivo que ficou confiável sem chegar a parear.
 - A escolha automática do tema de ícones pelo acento (`scripts/icon-theme.sh pick`) dependia do gawk; com outro awk, o nome saía quebrado. Agora funciona com qualquer awk.
 - `icon-theme.sh` e `matugen-generate.sh` voltam a ser executáveis, como os outros scripts.
 

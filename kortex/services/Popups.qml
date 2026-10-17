@@ -75,6 +75,14 @@ Singleton {
         current = id
     }
 
+    // Abre sem alternar (pedido de pareamento do Bluetooth, por exemplo)
+    function open(id, screenName) {
+        if (current === id && screen === screenName) return
+        _closeOverlays()
+        screen = screenName
+        current = id
+    }
+
     function close(id) {
         if (id !== undefined && id !== current) return
         if (current === "") return

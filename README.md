@@ -25,7 +25,7 @@ Se você já tem Hyprland configurado, pule para as seções 1 e 2.
 ```bash
 # Repositórios oficiais
 sudo pacman -S --needed quickshell qt6-declarative qt6-svg qt6-imageformats qt6-wayland ttf-jetbrains-mono-nerd ttc-iosevka \
-    networkmanager bluez bluez-utils pipewire wireplumber pipewire-pulse \
+    networkmanager bluez bluez-utils python-dbus python-gobject pipewire wireplumber pipewire-pulse \
     brightnessctl hyprsunset curl pavucontrol btop pciutils xdg-utils power-profiles-daemon grim slurp jq \
     gpu-screen-recorder pacman-contrib
 
@@ -340,6 +340,7 @@ qs -c kortex kill; qs -c kortex  # reiniciar por completo
 - **Brilho não aparece:** seu usuário precisa estar no grupo `video` (`sudo usermod -aG video $USER`) ou o monitor é externo sem suporte a DDC.
 - **Notificações não chegam:** outro daemon (mako/dunst/swaync) ainda está rodando.
 - **Clima vazio ou com erro:** a previsão vem do Open-Meteo (`api.open-meteo.com`) e, no modo automático, a localização vem de `ipinfo.io`. Se a detecção falhar (VPN, rede restrita), defina a cidade no botão *Cidade* do clima. Para nomes repetidos use `Cidade, Estado` (estado/país em português).
+- **Um dispositivo Bluetooth não pareia (o painel volta para *Clique para parear* ou mostra *Falha ao parear*):** o pareamento passa pelo agente do Kortex (`scripts/bt-agent.py`, que precisa de `python-dbus` e `python-gobject`; sem eles, o painel avisa). Coloque o dispositivo em modo de pareamento e clique nele no painel: mouses e fones são aceitos sozinhos; quando o dispositivo mostra um código, o painel pede para conferir e aceitar, e num teclado ele mostra o código para digitar. Um pedido de pareamento que você não iniciou abre o painel e só é aceito com o seu clique. O motivo de uma falha aparece em `journalctl -u bluetooth -b` (`No agent available` = o agente não está rodando: confira `qs -c kortex log`).
 - **Não consigo digitar num campo dentro de um popup da barra:** popups não recebem o teclado do Wayland. Campos de texto ficam em janelas próprias (lançador, temas, cidade do clima, senha e configurações de rede, teclado e idioma).
 - **Definir o idioma ou gravar o teclado no sistema não faz nada:** essas ações precisam de um agente do polkit rodando para pedir a senha (`systemctl --user start hyprpolkitagent`). Sem ele, o comando falha e a janela mostra o motivo.
 - **O Hyprland acusou erro de teclado ou o layout ficou em `US`:** o `arch-setup.sh` grava o `kb_layout` e o `kb_variant` do bloco `input` do `hyprland.conf` a partir do layout X11 do `localectl` (se não houver, do `KEYMAP` do console) e só aceita códigos que existem no xkeyboard-config; um código desconhecido é ignorado, com aviso no resumo final, e o padrão é `us`. Corrija na janela de *Teclado* (vale já e se repete a cada início do shell) ou edite esse bloco `input`; para valer também no console e na tela de login, use *Gravar no Sistema* na mesma janela.
@@ -375,7 +376,7 @@ kortex/
 ├── firefox/             CSS do Firefox (interface e páginas internas)
 ├── matugen/             modelo do Matugen (correspondência das cores Material com as do Kortex) e as cores fixas de cada modo
 ├── sddm/                tema da tela de login (SDDM)
-├── scripts/             auxiliares em bash (inclui theme-apply.sh, icon-theme.sh, open-app.sh, apps-apply.sh, kitty-theme.sh, btop-theme.sh, terminal-apply.sh, firefox-setup.sh, firefox-theme.sh, gnome-setup.sh, gnome-theme.sh, matugen-generate.sh, screenshot.sh, screenrecord.sh, sddm-setup.sh e sddm-colors.sh)
+├── scripts/             auxiliares em bash e o agente de pareamento Bluetooth, bt-agent.py (inclui theme-apply.sh, icon-theme.sh, open-app.sh, apps-apply.sh, kitty-theme.sh, btop-theme.sh, terminal-apply.sh, firefox-setup.sh, firefox-theme.sh, gnome-setup.sh, gnome-theme.sh, matugen-generate.sh, screenshot.sh, screenrecord.sh, sddm-setup.sh e sddm-colors.sh)
 └── themes/              temas embutidos
 ```
 

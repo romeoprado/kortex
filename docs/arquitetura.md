@@ -6,7 +6,7 @@ Como as peças do shell se encaixam. O `CLAUDE.md` tem as regras de trabalho e a
 
 `kortex/shell.qml` é o ponto de entrada (`qs -c kortex`). Ele cria as camadas fixas (papel de parede, uma barra por monitor, a camada de clique fora, os avisos e o OSD), declara todas as janelas e define os atalhos IPC. As duas linhas `//@ pragma` do topo fixam o estilo básico do Qt Quick Controls (usado só pelo calendário) e escondem o aviso de recarga do Quickshell.
 
-Os singletons de `services/` só nascem no primeiro acesso. Por isso o `Component.onCompleted` do `shell.qml` lê uma propriedade de cada serviço que precisa rodar desde o começo (notificações, brilho, temas, teclado, HyprSync, terminal, aplicativos e energia). Os outros nascem quando a barra ou uma janela os usa.
+Os singletons de `services/` só nascem no primeiro acesso. Por isso o `Component.onCompleted` do `shell.qml` lê uma propriedade de cada serviço que precisa rodar desde o começo (notificações, brilho, temas, teclado, HyprSync, terminal, aplicativos e energia). Os outros nascem quando a barra ou uma janela os usa. O `BluetoothAgent` nasce de propósito só com o item Bluetooth da barra: é ali que os pedidos de pareamento aparecem, e sem ele o Kortex não se registra como agente no BlueZ.
 
 ## Janelas e camadas
 
@@ -69,6 +69,7 @@ Todo item é um `widgets/BarButton.qml`. Ele trata o realce, o espaço entre íc
 | `Apps` | terminal, explorador e navegador padrão | `DesktopEntries`, `xdg-mime`, `apps-apply.sh` |
 | `TerminalStyle` | opacidade e desfoque do Kitty | `terminal-apply.sh` |
 | `KeepAwake` | Manter Acordado (o `IdleInhibitor` fica na barra) | |
+| `BluetoothAgent` | agente de pareamento Bluetooth: aceita sozinho o que você pediu pelo painel e pergunta o resto | `bt-agent.py` (Python, `org.bluez.Agent1` no D-Bus do sistema), linhas JSON no stdout e respostas no stdin |
 | `Screenshot`, `ScreenRecord` | captura e gravação de tela | `screenshot.sh`, `screenrecord.sh`, `$XDG_RUNTIME_DIR/kortex` |
 
 Padrões que se repetem nos serviços:

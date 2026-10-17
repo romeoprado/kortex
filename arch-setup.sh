@@ -269,6 +269,8 @@ PKGS=(
 
     # Rede e Bluetooth
     networkmanager nm-connection-editor bluez bluez-utils
+    # Agente de pareamento Bluetooth do Kortex (scripts/bt-agent.py)
+    python-dbus python-gobject
 
     # Tela, capturas, gravação de tela, área de transferência
     brightnessctl grim slurp gpu-screen-recorder wl-clipboard
