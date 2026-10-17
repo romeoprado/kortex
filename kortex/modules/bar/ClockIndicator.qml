@@ -3,6 +3,8 @@ import Quickshell
 import qs.services
 import qs.widgets
 
+// Relógio. O clique abre o calendário e o clique do meio passa para o próximo formato do rótulo
+// (Settings.data.clockFormat, que vale para as barras de todos os monitores).
 BarButton {
     id: root
     required property string screenName

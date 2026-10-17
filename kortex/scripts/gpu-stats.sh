@@ -18,7 +18,7 @@ for card in /sys/class/drm/card*; do
     addr=${dev##*/}
     vendor=$(first "$dev/vendor")
     name=$(lspci -mm -s "$addr" 2>/dev/null | awk -F'"' '{print $6}' | sed 's/.*\[\(.*\)\]/\1/')
-    util= vu= vt= temp= power= freq= fmax= state=ok
+    util="" vu="" vt="" temp="" power="" freq="" fmax="" state=ok
     status=$(first "$dev/power/runtime_status")
 
     case $vendor in

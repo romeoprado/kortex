@@ -7,6 +7,7 @@
 what="${1:-}"; shift 2>/dev/null || true
 state="${XDG_STATE_HOME:-$HOME/.local/state}/kortex"
 KORTEX_TERMINAL=(); KORTEX_FILES=(); KORTEX_BROWSER=()
+# shellcheck source=/dev/null
 [ -f "$state/apps.sh" ] && . "$state/apps.sh"
 
 # Executa o primeiro argumento (com os demais) se ele existir; senão segue para a próxima opção

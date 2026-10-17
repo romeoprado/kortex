@@ -6,9 +6,9 @@ import qs.services
 Rectangle {
     id: root
 
-    property alias text: input.text
-    property alias input: input
-    property alias echoMode: input.echoMode
+    property alias text: textInput.text
+    property alias input: textInput
+    property alias echoMode: textInput.echoMode
     property string placeholder: ""
     property string icon: ""
     property var tabTo: null       // outro Field: Tab move o foco para ele
@@ -16,7 +16,7 @@ Rectangle {
     signal focused()               // ganhou o foco (útil para rolar até o campo)
     signal keyPressed(var event)   // teclas antes do TextInput (event.accepted = true para consumir)
 
-    function focusInput() { input.forceActiveFocus() }
+    function focusInput() { textInput.forceActiveFocus() }
 
     Layout.fillWidth: true
     implicitHeight: 34
@@ -28,7 +28,7 @@ Rectangle {
         anchors.fill: parent
         radius: root.radius
         borderWidth: 1
-        color: input.activeFocus ? Theme.accent : Theme.outline
+        color: textInput.activeFocus ? Theme.accent : Theme.outline
         fill: Theme.bgDark
     }
 
@@ -44,7 +44,7 @@ Rectangle {
     }
 
     TextInput {
-        id: input
+        id: textInput
         anchors.fill: parent
         anchors.leftMargin: glyph.visible ? 32 : 10
         anchors.rightMargin: 10
@@ -65,12 +65,12 @@ Rectangle {
     }
 
     Text {
-        anchors.fill: input
+        anchors.fill: textInput
         verticalAlignment: Text.AlignVCenter
-        visible: input.text === "" && !input.inputMethodComposing
+        visible: textInput.text === "" && !textInput.inputMethodComposing
         text: root.placeholder
         color: Theme.fgDim
-        font: input.font
+        font: textInput.font
         elide: Text.ElideRight
     }
 

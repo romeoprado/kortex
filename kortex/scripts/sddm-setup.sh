@@ -64,9 +64,10 @@ ok "SDDM instalado"
 
 colors="${XDG_STATE_HOME:-$HOME/.local/state}/kortex/colors.sh"
 if [ -f "$colors" ]; then
+    # shellcheck source=/dev/null
     ( . "$colors"
       KORTEX_SDDM_THEME_DIR="$THEME_DIR" bash "$HERE/sddm-colors.sh" \
-          "${KORTEX_ACCENT:-}" "${KORTEX_BG:-}" "${KORTEX_FG:-}" "${KORTEX_MUTED:-}" "${KORTEX_RED:-}" \
+          "${KORTEX_ACCENT:-}" "${KORTEX_BG:-}" "${KORTEX_FG:-}" "${KORTEX_RED:-}" \
           "${KORTEX_BG_ALT:-}" "${KORTEX_FG_BRIGHT:-}" "${KORTEX_FG_DIM:-}" "${KORTEX_YELLOW:-}" "${KORTEX_ACCENT2:-}" )
     ok "Tema \"kortex\" do SDDM instalado com as cores do tema ativo ($(cat "$(dirname "$colors")/theme.name" 2>/dev/null || echo "?"))"
 else
@@ -80,7 +81,7 @@ ok "Tema selecionado em /etc/sddm.conf.d/kortex.conf"
 
 # Outro arquivo de configuração pode escolher um tema por cima do nosso
 others="$(grep -lE '^[[:space:]]*Current=' "$ROOT/etc/sddm.conf" "$CONF_DIR"/*.conf 2>/dev/null | grep -v '/kortex\.conf$' || true)"
-[ -z "$others" ] || warn "Estes arquivos também definem o tema e podem sobrepor o Kortex: $(echo $others). Remova a linha 'Current='."
+[ -z "$others" ] || warn "Estes arquivos também definem o tema e podem sobrepor o Kortex: ${others//$'\n'/ }. Remova a linha 'Current='."
 
 # O SDDM lista as sessões por arquivo; sem isto ele pode oferecer primeiro a "Hyprland (uwsm)", que
 # só funciona com o uwsm instalado. Só preenche se ainda não há um "último usuário/sessão" gravado.

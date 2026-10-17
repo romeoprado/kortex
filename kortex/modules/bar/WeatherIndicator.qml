@@ -3,6 +3,8 @@ import QtQuick.Layouts
 import qs.services
 import qs.widgets
 
+// Clima, com o ícone e a temperatura atual. O clique abre o tempo agora e a previsão de 7 dias. O
+// botão Cidade, no pé do painel, abre a janela de digitar o local (modules/weather/CityPrompt.qml).
 BarButton {
     id: root
     required property string screenName

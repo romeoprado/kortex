@@ -88,6 +88,7 @@ info() { printf '    %s\n' "$*"; }
 ok()   { printf '    %s✓%s %s\n' "$C_G" "$C_0" "$*"; }
 warn() { printf '    %s!%s %s\n' "$C_Y" "$C_0" "$*"; WARNINGS+=("$*"); }
 die()  { printf '\n%sErro:%s %s\n' "$C_R" "$C_0" "$*" >&2; exit 1; }
+have() { command -v "$1" >/dev/null 2>&1; }
 WARNINGS=()
 
 confirm() {   # confirm "Pergunta" [padrão s|n]
@@ -325,8 +326,6 @@ fi
 if [ "$LOGIN_MODE" = sddm ]; then PKGS+=(sddm); fi
 
 # ------------------------------------------------ programas adicionais ----
-# >>> extras
-declare -F have >/dev/null || have() { command -v "$1" >/dev/null 2>&1; }
 CHOSEN=()
 add_chosen() { local n; for n in "${CHOSEN[@]}"; do [ "$n" = "$1" ] && return 0; done; CHOSEN+=("$1"); }
 
@@ -372,7 +371,6 @@ done
 if [[ " ${CHOSEN[*]} " == *" hyprmod "* ]] && ! have yay && ! have paru && [[ " ${CHOSEN[*]} " != *" yay "* ]]; then
     info "O HyprMod vem do AUR: o yay será instalado junto."
 fi
-# <<< extras
 
 # ---------------------------------------------------------------- resumo -----
 step "Resumo"

@@ -1,9 +1,9 @@
 #!/usr/bin/env bash
 # Grava as cores do tema ativo na tela de login (SDDM), se o tema "kortex" do SDDM estiver instalado.
-#   sddm-colors.sh <acento> <fundo> <texto> <muted> <vermelho> <fundo-alt> <texto-forte> <texto-apagado> <amarelo> <acento2>
+#   sddm-colors.sh <acento> <fundo> <texto> <vermelho> <fundo-alt> <texto-forte> <texto-apagado> <amarelo> <acento2>
 # O theme.conf.user do tema pertence ao usuário (veja sddm-setup.sh), então isto não pede senha.
 # Sem o tema instalado, ou sem permissão de escrita, não faz nada.
-accent="$1"; bg="$2"; fg="$3"; muted="$4"; red="$5"; bg_alt="$6"; fg_bright="$7"; fg_dim="$8"; yellow="$9"; accent2="${10}"
+accent="$1"; bg="$2"; fg="$3"; red="$4"; bg_alt="$5"; fg_bright="$6"; fg_dim="$7"; yellow="$8"; accent2="$9"
 
 file="${KORTEX_SDDM_THEME_DIR:-/usr/share/sddm/themes/kortex}/theme.conf.user"
 [ -w "$file" ] || exit 0
@@ -21,7 +21,6 @@ add fgBright "$fg_bright"
 add fgDim "$fg_dim"
 add accent "$accent"
 add accent2 "$accent2"
-add muted "$muted"
 add red "$red"
 add yellow "$yellow"
 

@@ -30,8 +30,8 @@ Singleton {
     // Nome do programa, sem o caminho: é o que o Settings guarda para o terminal
     function commandName(entry) { return entry ? String(entry.command[0]).split("/").pop() : "" }
 
-    // Escolha atual de cada tipo: a do Kortex e, na falta dela, o padrão do sistema
-    function currentTerminal() { return Settings.data.terminal }
+    // Escolha atual do explorador e do navegador: a do Kortex e, na falta dela, o padrão do sistema.
+    // O terminal não tem padrão do sistema: vale Settings.data.terminal (vazio = automático).
     function currentFileManager() { return Settings.data.fileManager || systemFileManager }
     function currentBrowser() { return Settings.data.browser || systemBrowser }
 

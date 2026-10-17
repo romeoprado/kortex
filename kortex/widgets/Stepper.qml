@@ -1,5 +1,4 @@
 import QtQuick
-import QtQuick.Layouts
 import qs.services
 
 // Número com botões − e +

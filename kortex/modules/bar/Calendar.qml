@@ -4,6 +4,8 @@ import QtQuick.Layouts
 import qs.services
 import qs.widgets
 
+// Calendário do painel do relógio (ClockIndicator). Mostra o mês, setas para o anterior e o
+// seguinte e só as semanas que têm dias do mês. Clicar no título volta para hoje.
 ColumnLayout {
     id: root
 

@@ -1,6 +1,5 @@
 import QtQuick
 import QtQuick.Layouts
-import qs.services
 
 // Grupo de opções em botões; quebra de linha quando não cabe.
 //   model: [{ label, value }]   current: valor selecionado   picked(value)

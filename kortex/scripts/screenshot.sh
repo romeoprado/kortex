@@ -25,7 +25,7 @@ hexa() {   # #rrggbb + alfa (00–ff) → #rrggbbaa, no formato do slurp
 # máquinas, por exemplo com placa NVIDIA), o Hyprland pinta o cursor no próprio quadro e o grim o
 # captura mesmo sem -c. Durante a captura o cursor passa para o plano de hardware, que fica fora da
 # imagem; um passo de 1 px (e a volta) faz o Hyprland trocar na hora. Depois tudo volta como era.
-hw_orig=""; hw_x=""; hw_y=""
+hw_orig=""; hw_x=""; hw_y=""; hw_nx=""
 hw_restore() {
     [ -n "$hw_orig" ] || return 0
     hyprctl --batch "keyword cursor:no_hardware_cursors $hw_orig ; dispatch movecursor $hw_nx $hw_y ; dispatch movecursor $hw_x $hw_y" >/dev/null 2>&1

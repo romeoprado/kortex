@@ -3,8 +3,8 @@ import Quickshell
 import Quickshell.Wayland
 import qs.services
 
-// Fecha os popups da barra ao clicar fora deles. (As janelas modais — lançador, temas, cidade e
-// rede — tratam o clique fora sozinhas: ver OverlayPanel.)
+// Fecha os popups da barra ao clicar fora deles. (As janelas modais, feitas com OverlayPanel,
+// tratam o clique fora sozinhas.)
 //
 // HyprlandFocusGrab não serve para isso aqui: nunca ativa para um PopupWindow e, em janelas
 // com teclado exclusivo, fica ativo mas nunca avisa do clique fora. Esta camada transparente

@@ -31,7 +31,7 @@ esac
 case "$scheme" in
     scheme-content|scheme-expressive|scheme-fidelity|scheme-fruit-salad|scheme-monochrome|\
     scheme-neutral|scheme-rainbow|scheme-tonal-spot|scheme-vibrant|scheme-smart) ;;
-    *) scheme=scheme-tonal-spot ;;
+    *) scheme="scheme-tonal-spot" ;;
 esac
 
 base="$(cd "$(dirname "$0")/.." && pwd)/matugen"
@@ -70,8 +70,9 @@ fi
 
 dest="$themes/$name"
 mkdir -p "$dest" || fail "Não foi possível criar $dest."
-cp -f "$work/colors.toml" "$dest/colors.toml.new" && mv -f "$dest/colors.toml.new" "$dest/colors.toml" \
-    || fail "Não foi possível gravar $dest/colors.toml."
+if ! { cp -f "$work/colors.toml" "$dest/colors.toml.new" && mv -f "$dest/colors.toml.new" "$dest/colors.toml"; }; then
+    fail "Não foi possível gravar $dest/colors.toml."
+fi
 rm -f "$dest/source.txt"    # de versões anteriores
 
 # Ícones: o Yaru mais próximo do acento gerado

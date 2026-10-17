@@ -2,10 +2,12 @@ import QtQuick
 import Quickshell
 import Quickshell.Wayland
 import Quickshell.Hyprland
-import qs.services
 
-// Janela modal para lançador, temas, cidade do clima e rede: tela cheia e transparente,
-// com o painel visível centralizado (panelWidth × panelHeight) e teclado exclusivo.
+// Janela modal das telas que precisam do teclado (lançador, temas, Configurações, rede, cidade do
+// clima, teclado e idioma, captura e gravação de tela): tela cheia e transparente, com o painel
+// visível centralizado (panelWidth × panelHeight) e teclado exclusivo. Quem a usa fica dentro de
+// um LazyLoader ligado a um estado (uma flag de Popups ou, nas janelas de salvar, a captura
+// pendente), então a janela só existe enquanto está aberta.
 //
 // Ocupar a tela toda é o que faz o "clicar fora fecha" funcionar: enquanto uma janela com
 // teclado exclusivo está aberta o Hyprland só entrega cliques a ela (nem uma camada por trás

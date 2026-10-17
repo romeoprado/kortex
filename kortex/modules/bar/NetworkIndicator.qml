@@ -1,9 +1,11 @@
 import QtQuick
 import QtQuick.Layouts
-import Quickshell
 import qs.services
 import qs.widgets
 
+// Rede (Wi-Fi ou cabo). O clique abre o painel com a conexão em uso (endereços e dados da sessão)
+// e as redes Wi-Fi. Nele, o clique conecta ou desconecta e o direito esquece uma rede salva. O
+// clique direito no ícone abre o editor de conexões (modules/network/NetworkSettings.qml).
 BarButton {
     id: root
     required property string screenName

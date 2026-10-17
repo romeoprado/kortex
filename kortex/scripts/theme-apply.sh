@@ -54,7 +54,7 @@ cat > "$state/colors.css" <<CSS
 CSS
 
 # Tela de login (SDDM): as mesmas cores vão para o tema "kortex" do SDDM, se ele estiver instalado
-bash "$(dirname "$0")/sddm-colors.sh" "$accent" "$bg" "$fg" "$muted" "$red" "$bg_alt" "$fg_bright" "$fg_dim" "$yellow" "$accent2" || true
+bash "$(dirname "$0")/sddm-colors.sh" "$accent" "$bg" "$fg" "$red" "$bg_alt" "$fg_bright" "$fg_dim" "$yellow" "$accent2" || true
 
 # Terminal (Kitty): gera o kitty-theme.conf que o kitty.conf inclui e recarrega os Kitty abertos
 bash "$(dirname "$0")/kitty-theme.sh" "$name" "$dir" "$light" "$bg" "$bg_alt" "$bg_dark" "$fg" "$fg_bright" \
