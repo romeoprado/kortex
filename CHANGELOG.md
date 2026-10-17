@@ -18,6 +18,7 @@
 - Documentação para desenvolvimento (`CLAUDE.md` e `docs/`) e `dev/verificar.sh`, que confere scripts, QML e permissões sem precisar do Hyprland.
 - README: o diagnóstico do Matugen usa o modo de prévia do `matugen-generate.sh`, que não grava nada.
 - Janela de rede: o campo da máscara deixa de ter o id `mask`, que escondia a propriedade `mask` da janela.
+- `dev/verificar.sh` usa o `qmlformat` e o `qmllint` do Qt 6 mesmo com os do Qt 5 no `PATH` (eles acusavam erro de sintaxe em `?.`, espalhamento e funções com tipo), mostra as mensagens do Qt que iam para o journald e confere a sintaxe dos scripts em Python.
 
 ## 0.2 — 2026-10-07
 

@@ -3,7 +3,7 @@
 #   bash dev/verificar.sh [--sem-instalar] [--so-scripts | --so-qml]
 #
 #  1. Repositório: os dois README e as duas LICENSE iguais, scripts executáveis e QML sem +x.
-#  2. Scripts: bash -n em todos e o shellcheck (nível info).
+#  2. Scripts: bash -n em todos, o shellcheck (nível info) e a sintaxe dos scripts em Python.
 #  3. QML: sintaxe de todos os arquivos (qmlformat) e o qmllint, mostrando só o que ele consegue
 #     afirmar sem os tipos do Quickshell: imports sem uso, expressões com vírgula, ids que escondem
 #     propriedades e erros.
@@ -12,8 +12,10 @@
 #     eles gravam. Nada fora da pasta temporária é tocado.
 #
 # Ferramentas: usa o shellcheck, o qmllint e o qmlformat do sistema (no Arch: pacotes shellcheck e
-# qt6-declarative, em /usr/lib/qt6/bin). Sem eles, instala o shellcheck-py e o PySide6-Essentials
-# num venv em ~/.cache/kortex-dev (a menos que receba --sem-instalar, que só pula o que faltar).
+# qt6-declarative, em /usr/lib/qt6/bin). Os de /usr/bin, quando existem, costumam ser do Qt 5
+# (qt5-declarative), que não entende ?., espalhamento nem funções com tipo, e são ignorados. Sem
+# eles, instala o shellcheck-py e o PySide6-Essentials num venv em ~/.cache/kortex-dev (a menos
+# que receba --sem-instalar, que só pula o que faltar).
 # Sai com código 1 se alguma verificação falhar.
 set -u
 
@@ -37,16 +39,26 @@ bad()  { printf '  FALHA %s\n' "$*"; fails=$((fails + 1)); }
 skip() { printf '  pula  %s\n' "$*"; }
 step() { printf '\n== %s\n' "$*"; }
 
+# Fora de um terminal, o Qt manda as mensagens para o journald, e o qmlformat e o qmllint falhariam
+# sem dizer por quê
+export QT_FORCE_STDERR_LOGGING=1
+
 work="$(mktemp -d)"
 trap 'rm -rf "$work"' EXIT
 
-# Primeira ferramenta encontrada entre os nomes dados, no PATH, em /usr/lib/qt6/bin ou no venv
+# Primeira ferramenta encontrada entre os nomes dados, em /usr/lib/qt6/bin, no venv ou no PATH. As
+# do QML precisam ser do Qt 6: as do Qt 5 se apresentam como "qmlformat 1.0" e acusariam erro de
+# sintaxe no que o Quickshell aceita.
 tool() {
-    local n
+    local n p
     for n in "$@"; do
-        command -v "$n" 2>/dev/null && return 0
-        [ -x "/usr/lib/qt6/bin/$n" ] && { echo "/usr/lib/qt6/bin/$n"; return 0; }
-        [ -x "$cache/venv/bin/$n" ] && { echo "$cache/venv/bin/$n"; return 0; }
+        for p in "/usr/lib/qt6/bin/$n" "$cache/venv/bin/$n" "$(command -v "$n" 2>/dev/null)"; do
+            [ -n "$p" ] && [ -x "$p" ] || continue
+            case "$n" in
+                *qml*) "$p" --version 2>&1 | grep -q ' 6\.' || continue ;;
+            esac
+            echo "$p"; return 0
+        done
     done
     return 1
 }
@@ -77,6 +89,19 @@ if [ "$only" != qml ]; then
         n=$((n + 1)); bash -n "$f" 2>"$work/err" || { e=$((e + 1)); bad "bash -n $f: $(head -1 "$work/err")"; }
     done
     [ "$e" = 0 ] && ok "bash -n em $n arquivos"
+    # Python (bt-agent.py): só a sintaxe, com ast.parse, para não deixar __pycache__ no repositório
+    if command -v python3 >/dev/null; then
+        n=0; e=0
+        for f in "$src"/scripts/*.py; do
+            [ -e "$f" ] || continue
+            n=$((n + 1))
+            python3 -c 'import ast, sys; ast.parse(open(sys.argv[1]).read(), sys.argv[1])' "$f" 2>"$work/err" \
+                || { e=$((e + 1)); bad "python $f: $(tail -1 "$work/err")"; }
+        done
+        [ "$e" = 0 ] && ok "sintaxe Python em $n arquivo(s)"
+    else
+        skip "sintaxe Python (python3 não encontrado)"
+    fi
     sc="$(tool shellcheck)" || { venv_install shellcheck-py && sc="$(tool shellcheck)"; } || sc=""
     if [ -n "$sc" ]; then
         if "$sc" -S info -s bash -x -P "$src/scripts" "$src"/scripts/*.sh "$repo"/*.sh "$repo"/dev/*.sh >"$work/sc" 2>&1; then

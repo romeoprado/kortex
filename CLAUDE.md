@@ -46,7 +46,7 @@ bash dev/verificar.sh --so-scripts  # só bash -n, shellcheck e a fumaça dos sc
 bash dev/verificar.sh --so-qml      # só sintaxe QML e qmllint
 ```
 
-O script confere a cópia do README, as permissões (scripts com `+x`, QML sem), `bash -n` e `shellcheck` (nível info) em todos os scripts, a sintaxe de todos os QML (`qmlformat`), o `qmllint` (só imports sem uso, expressões com vírgula, ids que escondem propriedades e erros, porque os tipos do Quickshell não existem aqui) e uma fumaça dos scripts num HOME temporário. Sem as ferramentas no sistema, ele instala `shellcheck-py` e `PySide6-Essentials` num venv em `~/.cache/kortex-dev`. Deve terminar com `Tudo certo.` antes de cada commit.
+O script confere a cópia do README, as permissões (scripts com `+x`, QML sem), `bash -n` e `shellcheck` (nível info) em todos os scripts, a sintaxe de todos os QML (`qmlformat`), o `qmllint` (só imports sem uso, expressões com vírgula, ids que escondem propriedades e erros, porque os tipos do Quickshell não existem aqui) e uma fumaça dos scripts num HOME temporário. As ferramentas do QML precisam ser do Qt 6: ele procura primeiro em `/usr/lib/qt6/bin` e ignora as do Qt 5 que o `qt5-declarative` põe em `/usr/bin`. Sem as ferramentas no sistema, ele instala `shellcheck-py` e `PySide6-Essentials` num venv em `~/.cache/kortex-dev`. Deve terminar com `Tudo certo.` antes de cada commit.
 
 O que ele **não** pega: erros de tipo, propriedades inexistentes, bindings quebrados e qualquer coisa que dependa do Quickshell. Para isso, releia o diff com cuidado e peça o teste com `qs -c kortex log`.
 
