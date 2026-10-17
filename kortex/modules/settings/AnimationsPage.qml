@@ -1,4 +1,5 @@
 import QtQuick
+import QtQuick.Layouts
 import qs.services
 import qs.widgets
 
@@ -72,6 +73,38 @@ SettingsPage {
                 { label: "Esmaecer", value: "fade" }
             ]
             onPicked: v => Settings.data.animWorkspaces = v
+        }
+    }
+
+    SettingsSection { text: "Papel de Parede" }
+
+    SettingRow {
+        title: "Troca do papel de parede"
+        dimmed: !Motion.enabled
+        Chips {
+            Layout.fillWidth: false
+            Layout.maximumWidth: 330
+            current: Settings.data.wallpaperTransition
+            model: [
+                { label: "Esmaecer", value: "fade" },
+                { label: "Círculo", value: "circle" },
+                { label: "Íris", value: "iris" },
+                { label: "Tinta", value: "ink" },
+                { label: "Ladrilhos", value: "tiles" },
+                { label: "Varredura", value: "scan" },
+                { label: "Falha", value: "glitch" }
+            ]
+            onPicked: v => Settings.data.wallpaperTransition = v
+        }
+    }
+
+    SettingRow {
+        title: "Ver a troca"
+        dimmed: !Motion.enabled
+        PlainButton {
+            icon: Icons.shuffle
+            text: "Trocar ao acaso"
+            onClicked: Theme.randomWallpaper()
         }
     }
 

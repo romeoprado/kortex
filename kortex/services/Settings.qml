@@ -50,6 +50,7 @@ Singleton {
             property string animSpeed: "normal"        // "slow" | "normal" | "fast"
             property string animWindows: "popin"       // abertura das janelas: "popin" | "slide" | "gnomed"
             property string animWorkspaces: "horizontal"   // troca de área de trabalho: "horizontal" | "vertical" | "fade"
+            property string wallpaperTransition: "iris"    // troca do papel de parede: "fade" | "circle" | "iris" | "ink" | "tiles" | "scan" | "glitch"
 
             // Barra
             property string barPosition: "top"      // "top" | "bottom"
@@ -202,7 +203,7 @@ Singleton {
             ["mainFont", ""], ["titleFont", ""], ["fontSize", 13], ["radius", 6], ["borderWidth", 2],
             ["hyprSyncAppearance", false], ["terminalOpacity", 85], ["terminalBlur", true], ["barPosition", "top"], ["barStyle", "full"], ["barBorder", true],
             ["animations", true], ["animIntensity", "elegant"], ["animSpeed", "normal"], ["animWindows", "popin"],
-            ["animWorkspaces", "horizontal"],
+            ["animWorkspaces", "horizontal"], ["wallpaperTransition", "iris"],
             ["workspaceCount", 5],
             ["barItems", ({})], ["barLayout", ({})], ["barFloatingOrder", []], ["powerActions", ({})], ["powerConfirm", true], ["toastSeconds", 6]
         ])

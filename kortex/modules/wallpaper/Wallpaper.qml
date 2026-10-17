@@ -25,6 +25,17 @@ Variants {
         // pisca o fundo, e trocas rápidas (carrossel) se sobrepõem sem saltos.
         readonly property int fadeMs: Theme.previewWallpaper !== "" ? 400 : 700
 
+        // Troca com efeito (Configurações › Animações › Troca do papel de parede): em vez de esmaecer,
+        // a imagem anterior e a nova viram texturas (ShaderEffectSource, que esconde as duas) e o shader
+        // shaders/wallpaper_transition.frag desenha a passagem por cima. Só existe durante a troca; uma
+        // troca nova no meio de outra termina a anterior na hora e parte dela. No carrossel, mais curta.
+        readonly property var shaderModes: ({ circle: 0, iris: 1, ink: 2, tiles: 3, scan: 4, glitch: 5 })
+        readonly property var shaderMs: ({ circle: 1100, iris: 1300, ink: 1500, tiles: 1300, scan: 1100, glitch: 950 })
+        readonly property string effect: Motion.enabled && shaderModes[Settings.data.wallpaperTransition] !== undefined
+            ? Settings.data.wallpaperTransition : ""
+        property bool shading: false
+        property real progress: 0
+
         onPathChanged: show(false)
         Component.onCompleted: show(true)
 
@@ -40,6 +51,43 @@ Variants {
                 if (c === top) break
                 c.destroy()
             }
+        }
+
+        // a camada por baixo de `top` já à vista (a imagem de onde a troca parte)
+        function shownBelow(top) {
+            let below = null
+            for (const c of stack.children) {
+                if (c === top) break
+                if (c.status === Image.Ready && c.opacity >= 1) below = c
+            }
+            return below
+        }
+
+        // true: a troca vai pelo shader; false: a camada esmaece como antes
+        function shade(img) {
+            if (effect === "") return false
+            finishShade()
+            const from = shownBelow(img)
+            if (!from) return false
+            img.opacity = 1   // escondida pelo ShaderEffectSource até o fim
+            fromSrc.sourceItem = from
+            toSrc.sourceItem = img
+            fx.mode = shaderModes[effect]
+            shading = true
+            progress = 0
+            shadeAnim.duration = Motion.ms(shaderMs[effect] * (Theme.previewWallpaper !== "" ? 0.6 : 1))
+            shadeAnim.restart()
+            return true
+        }
+
+        function finishShade() {
+            if (!shading) return
+            shading = false
+            shadeAnim.stop()
+            const top = toSrc.sourceItem
+            fromSrc.sourceItem = null
+            toSrc.sourceItem = null
+            if (top) dropBelow(top)
         }
 
         Item {
@@ -67,6 +115,7 @@ Variants {
                 onStatusChanged: {
                     if (status === Image.Ready) {
                         fading = true
+                        if (!instant && win.shade(img)) return
                         fadeIn.duration = instant ? 0 : win.fadeMs
                         fadeIn.start()
                     } else if (status === Image.Error) {
@@ -83,6 +132,45 @@ Variants {
                     onFinished: win.dropBelow(img)
                 }
             }
+        }
+
+        ShaderEffectSource {
+            id: fromSrc
+            anchors.fill: parent
+            visible: false
+            hideSource: true
+            textureSize: Qt.size(width * win.devicePixelRatio, height * win.devicePixelRatio)
+        }
+
+        ShaderEffectSource {
+            id: toSrc
+            anchors.fill: parent
+            visible: false
+            hideSource: true
+            textureSize: Qt.size(width * win.devicePixelRatio, height * win.devicePixelRatio)
+        }
+
+        ShaderEffect {
+            id: fx
+            property variant fromTex: fromSrc
+            property variant toTex: toSrc
+            property real progress: win.progress
+            property real mode: 0
+            property real aspect: width / Math.max(1, height)
+            property color edgeColor: Theme.accent
+            anchors.fill: parent
+            visible: win.shading
+            fragmentShader: Qt.resolvedUrl("../../shaders/wallpaper_transition.frag.qsb")
+        }
+
+        NumberAnimation {
+            id: shadeAnim
+            target: win
+            property: "progress"
+            from: 0
+            to: 1
+            easing.type: Easing.InOutCubic
+            onFinished: if (win.progress >= 1) win.finishShade()
         }
 
         // clique duplo na área de trabalho abre o seletor rápido de papel de parede
