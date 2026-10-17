@@ -1,5 +1,18 @@
 # Histórico de versões
 
+## Em desenvolvimento
+
+**Correções**
+
+- A escolha automática do tema de ícones pelo acento (`scripts/icon-theme.sh pick`) dependia do gawk; com outro awk, o nome saía quebrado. Agora funciona com qualquer awk.
+- `icon-theme.sh` e `matugen-generate.sh` voltam a ser executáveis, como os outros scripts.
+
+**Manutenção**
+
+- Revisão completa do código (relatório em `docs/auditoria-2026-10.md`): imports, ícones e funções sem uso removidos, a cor `muted` que ia para a tela de login sem ser lida, comentários atualizados e cabeçalho nos arquivos que não tinham. Os arquivos QML deixam de ser executáveis.
+- Documentação para desenvolvimento (`CLAUDE.md` e `docs/`) e `dev/verificar.sh`, que confere scripts, QML e permissões sem precisar do Hyprland.
+- README: o diagnóstico do Matugen usa o modo de prévia do `matugen-generate.sh`, que não grava nada.
+
 ## 0.2 — 2026-10-07
 
 **Novidades**
