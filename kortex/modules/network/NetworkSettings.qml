@@ -87,7 +87,7 @@ LazyLoader {
             if (ipv4Method === "manual") {
                 const ip = addr.text.trim()
                 if (!isIPv4(ip)) return { error: "Endereço IP inválido." }
-                const p = prefixOf(mask.text.trim())
+                const p = prefixOf(netmask.text.trim())
                 if (p < 0) return { error: "Máscara ou prefixo inválido (ex.: 24 ou 255.255.255.0)." }
                 const g = gw.text.trim()
                 if (g !== "" && !isIPv4(g)) return { error: "Gateway inválido." }
@@ -135,7 +135,7 @@ LazyLoader {
             autoconnect = p.autoconnect
             const first = (p.addresses[0] || "").split("/")
             addr.text = first[0] || ""
-            mask.text = first[1] || ""
+            netmask.text = first[1] || ""
             extraAddresses = p.addresses.slice(1)
             gw.text = p.gateway
             dns.text = p.dns.join(", ")
@@ -460,16 +460,16 @@ LazyLoader {
                             Field {
                                 id: addr
                                 placeholder: "ex.: 192.168.1.50"
-                                tabTo: mask
+                                tabTo: netmask
                                 onFocused: win.reveal(addr)
                                 onAccepted: win.apply()
                             }
                             Caption { Layout.topMargin: 8; text: "Máscara ou prefixo" }
                             Field {
-                                id: mask
+                                id: netmask
                                 placeholder: "ex.: 24 ou 255.255.255.0"
                                 tabTo: gw
-                                onFocused: win.reveal(mask)
+                                onFocused: win.reveal(netmask)
                                 onAccepted: win.apply()
                             }
                             Caption { Layout.topMargin: 8; text: "Gateway" }

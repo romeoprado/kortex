@@ -17,6 +17,7 @@
 - Revisão completa do código (relatório em `docs/auditoria-2026-10.md`): imports, ícones e funções sem uso removidos, a cor `muted` que ia para a tela de login sem ser lida, comentários atualizados e cabeçalho nos arquivos que não tinham. Os arquivos QML deixam de ser executáveis.
 - Documentação para desenvolvimento (`CLAUDE.md` e `docs/`) e `dev/verificar.sh`, que confere scripts, QML e permissões sem precisar do Hyprland.
 - README: o diagnóstico do Matugen usa o modo de prévia do `matugen-generate.sh`, que não grava nada.
+- Janela de rede: o campo da máscara deixa de ter o id `mask`, que escondia a propriedade `mask` da janela.
 
 ## 0.2 — 2026-10-07
 
