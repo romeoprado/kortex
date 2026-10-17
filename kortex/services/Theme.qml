@@ -30,8 +30,11 @@ Singleton {
     readonly property int textBody: fontSize        // texto comum, campos, linhas de lista
     readonly property int textLarge: fontSize + 2   // destaques, títulos de seção e de cartão
     readonly property int textTitle: fontSize + 5   // títulos dos painéis e números grandes
-    // Altura da barra: fixa em 30 px (cabe o maior tamanho de texto, 16 + 12)
+    // Altura da barra: fixa em 30 px (cabe o maior tamanho de texto, 16 + 12), levada a um número
+    // inteiro de pixels físicos por barHeightFor (a 1.25, 32 em vez de 30: 37,5 pixels físicos
+    // fariam o Hyprland reamostrar a barra, e os cantos da flutuante saíam com pixels pretos)
     readonly property int barHeight: 30
+    function barHeightFor(dpr) { return snapUp(barHeight, dpr) }
     readonly property int radius: Math.max(0, Math.min(20, Settings.data.radius))
     readonly property int radiusSmall: Math.max(0, radius - 2)   // controles dentro dos painéis
     readonly property int gap: 8

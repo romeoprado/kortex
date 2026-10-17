@@ -11,6 +11,7 @@ BarButton {
     required property string screenName
 
     readonly property var net: Network.active
+    property bool tsExpanded: false   // lista de dispositivos do Tailscale aberta
     icon: Network.wiredName !== "" && !net ? Icons.ethernet : Icons.wifi
     color: (net || Network.wiredName !== "") ? Theme.fg : Theme.fgDim
     active: popup.visible
@@ -28,6 +29,8 @@ BarButton {
         onWantedChanged: {
             if (wanted) {
                 Network.error = ""
+                Tailscale.error = ""
+                root.tsExpanded = false
                 Network.rescan()
             }
         }
@@ -337,6 +340,203 @@ BarButton {
             visible: Network.error !== ""
             Layout.fillWidth: true
             text: Network.error
+            color: Theme.red
+            font.family: Theme.font
+            font.pixelSize: Theme.textSmall
+            wrapMode: Text.Wrap
+        }
+
+        // ── Tailscale ──────────────────────────────────────────────────
+        // Estado, interruptor (tailscale up/down) e os dispositivos da tailnet, este computador
+        // primeiro e depois os online; clicar numa linha copia o IP. A lista começa recolhida a cada
+        // abertura do painel (clique no cabeçalho para ver), para o painel não crescer demais
+        Rectangle {
+            visible: Tailscale.installed
+            Layout.fillWidth: true
+            implicitHeight: 1
+            color: Theme.muted
+        }
+
+        MouseArea {
+            id: tsHead
+            visible: Tailscale.installed
+            Layout.fillWidth: true
+            implicitHeight: tsHeadRow.implicitHeight + 12
+            hoverEnabled: true
+            readonly property bool expandable: Tailscale.running && tsList.count > 0
+            cursorShape: expandable ? Qt.PointingHandCursor : Qt.ArrowCursor
+            onClicked: if (expandable) root.tsExpanded = !root.tsExpanded
+
+            readonly property bool on: Tailscale.running || Tailscale.backendState === "Starting"
+            readonly property int onlineCount: Tailscale.peers.filter(p => p.online).length
+
+            Rectangle {
+                anchors.fill: parent
+                radius: 4
+                color: tsHead.expandable && tsHead.containsMouse ? Theme.bgAlt : "transparent"
+            }
+
+            RowLayout {
+                id: tsHeadRow
+                anchors.fill: parent
+                anchors.leftMargin: 8
+                anchors.rightMargin: 8
+                spacing: 10
+
+                Icon {
+                    text: Icons.tailscale
+                    color: tsHead.on ? Theme.accent : Theme.fgDim
+                    size: Theme.iconSize
+                }
+                ColumnLayout {
+                    Layout.fillWidth: true
+                    spacing: 1
+                    Text {
+                        text: "Tailscale"
+                        color: Theme.fg
+                        font.family: Theme.font
+                        font.pixelSize: Theme.textBody
+                        font.bold: true
+                    }
+                    Text {
+                        Layout.fillWidth: true
+                        text: !Tailscale.daemonRunning ? (Tailscale.busy ? "Iniciando o serviço…" : "Serviço parado")
+                            : Tailscale.busy ? (tsHead.on ? "Conectando…" : "Desconectando…")
+                            : Tailscale.running ? "Conectado · " + tsHead.onlineCount + " de " + Tailscale.peers.length + " online"
+                            : Tailscale.backendState === "NeedsLogin" ? "É preciso entrar na conta"
+                            : Tailscale.backendState === "NeedsMachineAuth" ? "Aguardando aprovação no painel"
+                            : Tailscale.backendState === "Starting" ? "Conectando…"
+                            : "Desligado"
+                        color: Theme.fgDim
+                        font.family: Theme.font
+                        font.pixelSize: Theme.textSmall
+                        elide: Text.ElideRight
+                    }
+                }
+                PlainButton {
+                    visible: Tailscale.backendState === "NeedsLogin" && !Tailscale.busy
+                    implicitHeight: 26
+                    text: "Entrar"
+                    onClicked: Tailscale.authUrl ? Qt.openUrlExternally(Tailscale.authUrl) : Tailscale.setRunning(true)
+                }
+                Icon {
+                    visible: tsHead.expandable
+                    text: root.tsExpanded ? Icons.up : Icons.down
+                    color: Theme.fgDim
+                    size: Theme.iconSize
+                }
+                Toggle {
+                    checked: tsHead.on
+                    enabled: !Tailscale.busy
+                    opacity: enabled ? 1 : 0.5
+                    onToggled: value => Tailscale.setRunning(value)
+                }
+            }
+        }
+
+        ListView {
+            id: tsList
+            visible: root.tsExpanded && Tailscale.installed && Tailscale.running && count > 0
+            Layout.fillWidth: true
+            implicitHeight: Math.min(contentHeight, 240)
+            clip: true
+            spacing: 2
+            boundsBehavior: Flickable.StopAtBounds
+            model: Tailscale.running
+                ? (Tailscale.self ? [Object.assign({ isSelf: true, online: true }, Tailscale.self)] : []).concat(Tailscale.peers)
+                : []
+
+            property string copied: ""   // nome da linha cujo IP acabou de ser copiado
+            Timer {
+                id: copiedReset
+                interval: 1400
+                onTriggered: tsList.copied = ""
+            }
+
+            delegate: MouseArea {
+                id: peer
+                required property var modelData
+                readonly property var p: modelData
+                readonly property bool justCopied: tsList.copied === p.name
+
+                width: ListView.view.width
+                height: 40
+                hoverEnabled: true
+                cursorShape: p.ip ? Qt.PointingHandCursor : Qt.ArrowCursor
+                onClicked: {
+                    if (!p.ip) return
+                    Tailscale.copy(p.ip)
+                    tsList.copied = p.name
+                    copiedReset.restart()
+                }
+
+                Rectangle {
+                    anchors.fill: parent
+                    radius: 4
+                    color: peer.p.isSelf ? Theme.selectionTint : (peer.containsMouse ? Theme.bgAlt : "transparent")
+                }
+
+                RowLayout {
+                    anchors.fill: parent
+                    anchors.leftMargin: 8
+                    anchors.rightMargin: 8
+                    spacing: 10
+
+                    Icon {
+                        text: Tailscale.deviceIcon(peer.p)
+                        color: peer.p.online ? Theme.accent : Theme.fgDim
+                        size: Theme.iconSize
+                        // no desenho padrão do Qt, o contorno esquerdo do celular saía borrado a 1,25×
+                        renderType: Text.NativeRendering
+                    }
+                    ColumnLayout {
+                        Layout.fillWidth: true
+                        spacing: 0
+                        Text {
+                            Layout.fillWidth: true
+                            text: peer.p.name
+                            color: peer.p.online ? Theme.fg : Theme.fgDim
+                            font.family: Theme.font
+                            font.pixelSize: Theme.textBody
+                            font.bold: peer.p.isSelf === true
+                            elide: Text.ElideRight
+                        }
+                        Text {
+                            Layout.fillWidth: true
+                            // offline: só quando foi visto (com o sistema junto não cabe ao lado do IP)
+                            text: peer.p.isSelf ? "Este computador"
+                                : !peer.p.online ? (peer.p.lastSeen ? "Visto " + Tailscale.ago(peer.p.lastSeen) : "Offline")
+                                : [Tailscale.osLabel(peer.p.os),
+                                   peer.p.exitNode ? "saída para a internet"
+                                       : peer.p.active ? (peer.p.direct ? "conexão direta" : "via relay")
+                                       : ""].filter(x => x).join(" · ")
+                            color: Theme.fgDim
+                            font.family: Theme.font
+                            font.pixelSize: Theme.textSmall
+                            elide: Text.ElideRight
+                        }
+                    }
+                    Text {
+                        text: peer.justCopied ? "Copiado" : peer.p.ip
+                        color: peer.justCopied ? Theme.accent : (peer.p.online ? Theme.fg : Theme.fgDim)
+                        font.family: Theme.font
+                        font.pixelSize: Theme.textSmall
+                    }
+                    Icon {
+                        // opacidade, e não visible: o espaço fica reservado e o IP não pula
+                        opacity: peer.containsMouse && !peer.justCopied && peer.p.ip !== "" ? 1 : 0
+                        text: Icons.copy
+                        color: Theme.fgDim
+                        size: Theme.fontSize
+                    }
+                }
+            }
+        }
+
+        Text {
+            visible: Tailscale.error !== ""
+            Layout.fillWidth: true
+            text: Tailscale.error
             color: Theme.red
             font.family: Theme.font
             font.pixelSize: Theme.textSmall

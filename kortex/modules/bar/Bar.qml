@@ -39,8 +39,12 @@ PanelWindow {
     // num pixel físico inteiro (com meio passo de sobra ela cairia entre pixels e borraria)
     readonly property int widthStep: 2 * Theme.snapStep(devicePixelRatio)
     implicitWidth: floating ? Math.ceil(Math.min(contentWidth, (modelData ? modelData.width : 1920) - 2 * edgeGap) / widthStep - 0.000001) * widthStep : 0
-    implicitHeight: Theme.barHeight
+    implicitHeight: Theme.barHeightFor(devicePixelRatio)
     color: floating ? "transparent" : Theme.bg
+    // Nunca opaca: a cor muda entre a inteira (Theme.bg) e a flutuante (transparente), e com a camada
+    // marcada como opaca o Hyprland deixava de desenhar o papel de parede sob os cantos arredondados
+    // a cada redesenho parcial (ao passar o mouse), e eles apareciam pretos
+    surfaceFormat.opaque: false
     WlrLayershell.namespace: "kortex-bar"
     WlrLayershell.layer: WlrLayer.Top
 

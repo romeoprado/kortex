@@ -705,6 +705,9 @@ bind = , Print, exec, \$kortex screenshot toggle
 # Gravação de tela (áudio e vídeo): o mesmo menu, com o áudio; repetir o atalho para a gravação
 bind = SHIFT, Print, exec, \$kortex record toggle
 
+# Gerenciador de Processos do Kortex: o que está rodando, por aplicativo, com CPU, memória e Encerrar
+bind = CTRL SHIFT, Escape, exec, \$kortex processes toggle
+
 # Teclas de mídia
 bindel = , XF86AudioRaiseVolume, exec, wpctl set-volume -l 1 @DEFAULT_AUDIO_SINK@ 5%+
 bindel = , XF86AudioLowerVolume, exec, wpctl set-volume @DEFAULT_AUDIO_SINK@ 5%-
@@ -854,7 +857,7 @@ esac
 step "Pronto!"
 EXTRA_NOTE=""
 if [[ " ${CHOSEN[*]} " == *" tailscale "* ]]; then
-    EXTRA_NOTE="  Tailscale: para entrar na sua rede, rode:  sudo tailscale up"$'\n'
+    EXTRA_NOTE="  Tailscale: para entrar na sua rede, rode:  sudo tailscale up --operator=$USER"$'\n'
 fi
 LOGIN_NOTE=""
 if [ "$LOGIN_MODE" = sddm ]; then
