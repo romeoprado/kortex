@@ -64,7 +64,10 @@ bash "$(dirname "$0")/kitty-theme.sh" "$name" "$dir" "$light" "$bg" "$bg_alt" "$
 bash "$(dirname "$0")/btop-theme.sh" "$name" "$bg" "$bg_alt" "$fg" "$fg_bright" "$fg_dim" \
     "$accent" "$muted" "$red" "$green" "$yellow" "$blue" "$magenta" "$cyan" || true
 
-# Firefox: grava as cores no perfil, se o firefox-setup.sh já o configurou (vale na próxima abertura dele)
+# Firefox: configura o perfil padrão que ainda não tem o Kortex (num Arch limpo, ele só nasce na primeira
+# abertura do Firefox, depois do instalador), salvo se o usuário o desligou com --remove, e grava as cores
+# nos perfis configurados (vale na próxima abertura dele)
+bash "$(dirname "$0")/firefox-setup.sh" --auto >/dev/null 2>&1 || true
 bash "$(dirname "$0")/firefox-theme.sh" || true
 
 # Apps GTK4/libadwaita (Nautilus, Calculadora, Editor de Texto…): cores, claro/escuro e esquema do editor,
