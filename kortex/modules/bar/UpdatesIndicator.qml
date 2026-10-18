@@ -41,6 +41,14 @@ BarButton {
             }
         }
 
+        // verificando: faixa logo abaixo do título
+        LoadingBar {
+            active: Updates.checking
+            collapse: true
+            Layout.topMargin: -6
+            Layout.bottomMargin: -4
+        }
+
         ListView {
             visible: Updates.count > 0
             Layout.fillWidth: true

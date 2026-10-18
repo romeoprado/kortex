@@ -32,6 +32,47 @@ BarButton {
             }
         }
 
+        // carregando pela primeira vez: o desenho do painel em blocos que respiram em onda
+        ColumnLayout {
+            visible: !Weather.ready && Weather.loading
+            Layout.fillWidth: true
+            spacing: 12
+
+            RowLayout {
+                spacing: 14
+                Skeleton { implicitWidth: 44; implicitHeight: 44; radius: 22 }
+                ColumnLayout {
+                    spacing: 8
+                    Skeleton { implicitWidth: 110; implicitHeight: 22; delay: 120 }
+                    Skeleton { implicitWidth: 170; implicitHeight: 14; delay: 240 }
+                }
+            }
+
+            RowLayout {
+                Layout.fillWidth: true
+                spacing: 8
+                Repeater {
+                    model: 3
+                    Skeleton {
+                        required property int index
+                        Layout.fillWidth: true
+                        implicitHeight: 36
+                        delay: 240 + index * 120
+                    }
+                }
+            }
+
+            Repeater {
+                model: 4
+                Skeleton {
+                    required property int index
+                    Layout.fillWidth: true
+                    implicitHeight: 26
+                    delay: 480 + index * 120
+                }
+            }
+        }
+
         RowLayout {
             visible: Weather.ready
             Layout.fillWidth: true

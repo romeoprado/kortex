@@ -4,8 +4,14 @@ import Quickshell
 import Quickshell.Hyprland
 import qs.services
 
-// Áreas de trabalho numeradas (1…N, N em Configurações)
-RowLayout {
+// Áreas de trabalho numeradas (1…N, N em Configurações). Clique troca de área; a roda do mouse passa
+// para a próxima ou a anterior.
+//
+// A área atual tem uma marca só, no acento, que desliza de uma área para a outra (a bolinha na barra
+// flutuante, a linha de cima na inteira). Ela se estica como uma minhoca: a ponta da frente sai na
+// hora e a de trás alcança depois; quanto alcança vem da intensidade em Motion. Ideia do indicador
+// deslizante do dhrruvsharma/shell (GPLv3).
+Item {
     id: root
 
     required property ShellScreen shellScreen
@@ -13,80 +19,139 @@ RowLayout {
     readonly property int activeId: monitor?.activeWorkspace?.id ?? Hyprland.focusedWorkspace?.id ?? -1
     readonly property int count: Math.max(1, Math.min(10, Settings.data.workspaceCount))
 
+    // Na flutuante, cada área é uma bolinha: a atual no acento, as com janela num fundo discreto.
+    readonly property bool pill: Theme.barFloating
+    readonly property int cell: pill ? 26 : 24
+    readonly property real markWidth: pill ? cell - 4 : 14
+    readonly property bool markShown: activeId >= 1 && activeId <= count
+    // pontas da marca, animadas separadamente
+    property real edgeL: 0
+    property real edgeR: 0
+    property int hoverId: -1   // área sob o mouse (os fundos ficam numa fileira separada dos cliques)
+
+    function place(instant) {
+        if (!markShown) return
+        const l = (activeId - 1) * cell + (cell - markWidth) / 2
+        const r = l + markWidth
+        if (instant || !Motion.enabled || edgeR === edgeL) {
+            animL.stop(); animR.stop()
+            edgeL = l; edgeR = r
+            return
+        }
+        const forward = l > edgeL
+        const lead = Motion.ms(180)
+        const tail = Motion.ms(Motion.pick(220, 340, 460))
+        animL.to = l; animL.duration = forward ? tail : lead
+        animR.to = r; animR.duration = forward ? lead : tail
+        animL.restart(); animR.restart()
+    }
+
     Layout.fillHeight: true
-    spacing: 0
+    implicitWidth: count * cell
 
-    Repeater {
-        model: root.count
+    onActiveIdChanged: place(false)
+    onPillChanged: place(true)
+    onCountChanged: place(true)
+    Component.onCompleted: place(true)
 
-        MouseArea {
-            id: ws
-            required property int index
-            readonly property int wsId: index + 1
-            readonly property bool isActive: root.activeId === wsId
-            // com janela aberta (a área atual, mesmo vazia, também consta na lista do Hyprland)
-            readonly property bool occupied: Hyprland.workspaces.values.some(w => w.id === wsId && w.toplevels.values.length > 0)
+    NumberAnimation { id: animL; target: root; property: "edgeL"; easing.type: Easing.BezierSpline; easing.bezierCurve: Motion.curveOut }
+    NumberAnimation { id: animR; target: root; property: "edgeR"; easing.type: Easing.BezierSpline; easing.bezierCurve: Motion.curveOut }
 
-            // Na flutuante, cada área é uma bolinha: a atual no acento, as com janela num fundo
-            // discreto. A largura é fixa; só o fundo muda.
-            readonly property bool pill: Theme.barFloating
-            Layout.fillHeight: true
-            implicitWidth: pill ? 26 : 24
-            hoverEnabled: true
-            cursorShape: Qt.PointingHandCursor
-            // clicar aqui também fecha o popup aberto, como no resto da barra (este MouseArea cobre o
-            // fundo da barra, que é quem fecha)
-            onPressed: Popups.dismiss()
-            onClicked: Hyprland.dispatch("workspace " + wsId)
+    // Fundos (por baixo da marca): na flutuante, as áreas com janela e a área sob o mouse; na inteira,
+    // a linha embaixo do número das áreas com janela
+    Row {
+        height: parent.height
 
-            Rectangle {
-                visible: ws.pill
-                anchors.centerIn: parent
-                width: parent.width - 4
-                height: Math.round(Theme.barHeight * 0.6)
-                radius: height / 2
-                color: ws.isActive ? Theme.accent
-                     : ws.containsMouse ? Qt.tint(Theme.bgAlt, Qt.alpha(Theme.accent, 0.35))
-                     : ws.occupied ? Theme.bgAlt : "transparent"
-                Behavior on color { ColorAnimation { duration: 230 } }
+        Repeater {
+            model: root.count
+
+            Item {
+                id: back
+                required property int index
+                readonly property int wsId: index + 1
+                // com janela aberta (a área atual, mesmo vazia, também consta na lista do Hyprland)
+                readonly property bool occupied: Hyprland.workspaces.values.some(w => w.id === wsId && w.toplevels.values.length > 0)
+                readonly property bool hovered: root.hoverId === wsId
+
+                width: root.cell
+                height: parent.height
+
+                Rectangle {
+                    visible: root.pill
+                    anchors.centerIn: parent
+                    width: parent.width - 4
+                    height: Math.round(Theme.barHeight * 0.6)
+                    radius: height / 2
+                    color: back.hovered ? Qt.tint(Theme.bgAlt, Qt.alpha(Theme.accent, 0.35))
+                         : back.occupied ? Theme.bgAlt : "transparent"
+                    Behavior on color { ColorAnimation { duration: 230 } }
+                }
+
+                Rectangle {
+                    anchors.bottom: parent.bottom
+                    anchors.bottomMargin: 3
+                    anchors.horizontalCenter: parent.horizontalCenter
+                    height: 2
+                    radius: 1
+                    visible: !root.pill
+                    width: back.occupied ? 14 : 0
+                    color: Theme.accent
+                    Behavior on width { NumberAnimation { duration: 160; easing.type: Easing.OutCubic } }
+                }
             }
+        }
+    }
 
-            Text {
-                anchors.centerIn: parent
-                text: ws.wsId
-                font.family: Theme.font
-                font.pixelSize: Theme.textBody
-                font.bold: ws.isActive
-                color: ws.pill && ws.isActive ? Theme.accentText
-                     : ws.isActive ? Theme.accent
-                     : ws.containsMouse ? Theme.fgBright
-                     : ws.occupied ? Theme.fg : Theme.fgDim
-            }
+    // A marca da área atual
+    Rectangle {
+        visible: root.markShown
+        x: root.edgeL
+        width: root.edgeR - root.edgeL
+        height: root.pill ? Math.round(Theme.barHeight * 0.6) : 2
+        y: root.pill ? Math.round((root.height - height) / 2) : 3
+        radius: height / 2
+        color: Theme.accent
+    }
 
-            // Barra inteira — área com janela aberta: linha embaixo do número
-            Rectangle {
-                anchors.bottom: parent.bottom
-                anchors.bottomMargin: 3
-                anchors.horizontalCenter: parent.horizontalCenter
-                height: 2
-                radius: 1
-                visible: !ws.pill
-                width: ws.occupied ? 14 : 0
-                color: Theme.accent
-                Behavior on width { NumberAnimation { duration: 160; easing.type: Easing.OutCubic } }
-            }
+    // Números e cliques (por cima da marca)
+    Row {
+        height: parent.height
 
-            // Área atual: a mesma linha, em cima do número
-            Rectangle {
-                anchors.top: parent.top
-                anchors.topMargin: 3
-                anchors.horizontalCenter: parent.horizontalCenter
-                height: 2
-                radius: 1
-                visible: !ws.pill
-                width: ws.isActive ? 14 : 0
-                color: Theme.accent
-                Behavior on width { NumberAnimation { duration: 160; easing.type: Easing.OutCubic } }
+        Repeater {
+            model: root.count
+
+            MouseArea {
+                id: ws
+                required property int index
+                readonly property int wsId: index + 1
+                readonly property bool isActive: root.activeId === wsId
+                readonly property bool occupied: Hyprland.workspaces.values.some(w => w.id === wsId && w.toplevels.values.length > 0)
+
+                width: root.cell
+                height: parent.height
+                hoverEnabled: true
+                cursorShape: Qt.PointingHandCursor
+                onContainsMouseChanged: {
+                    if (containsMouse) root.hoverId = wsId
+                    else if (root.hoverId === wsId) root.hoverId = -1
+                }
+                // clicar aqui também fecha o popup aberto, como no resto da barra (este MouseArea cobre o
+                // fundo da barra, que é quem fecha)
+                onPressed: Popups.dismiss()
+                onClicked: Hyprland.dispatch("workspace " + wsId)
+
+                Text {
+                    anchors.centerIn: parent
+                    text: ws.wsId
+                    font.family: Theme.font
+                    font.pixelSize: Theme.textBody
+                    font.bold: ws.isActive
+                    color: root.pill && ws.isActive ? Theme.accentText
+                         : ws.isActive ? Theme.accent
+                         : ws.containsMouse ? Theme.fgBright
+                         : ws.occupied ? Theme.fg : Theme.fgDim
+                    Behavior on color { ColorAnimation { duration: Motion.enabled ? Motion.ms(200) : 0 } }
+                }
             }
         }
     }

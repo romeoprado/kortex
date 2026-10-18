@@ -6,7 +6,8 @@
 #  2. Scripts: bash -n em todos, o shellcheck (nível info) e a sintaxe dos scripts em Python.
 #  3. QML: sintaxe de todos os arquivos (qmlformat) e o qmllint, mostrando só o que ele consegue
 #     afirmar sem os tipos do Quickshell: imports sem uso, expressões com vírgula, ids que escondem
-#     propriedades e erros.
+#     propriedades e erros. Os shaders de kortex/shaders: cada .frag tem o .qsb compilado e, com o
+#     qsb do Qt 6 (pacote qt6-shadertools), o .qsb é igual ao que a fonte gera hoje.
 #  4. Fumaça: roda os scripts do tema, dos ícones, do terminal, da captura, do Matugen (com um
 #     matugen falso), do Firefox e do SDDM (modo de ensaio) num HOME temporário e confere o que
 #     eles gravam. Nada fora da pasta temporária é tocado.
@@ -148,6 +149,19 @@ if [ "$only" != scripts ]; then
     else
         skip "qmllint (não encontrado)"
     fi
+    # Shaders: o Quickshell carrega o .qsb, não o .frag, então um .frag mudado sem recompilar não vale.
+    # As opções são as do cabeçalho de cada .frag; o qsb gera sempre os mesmos bytes.
+    qsb="$(tool qsb)" || qsb=""
+    while IFS= read -r f; do
+        rel="${f#"$repo"/}"
+        if [ ! -f "$f.qsb" ]; then bad "shader sem .qsb: $rel"; continue; fi
+        if [ -z "$qsb" ]; then skip "$rel.qsb atualizado (qsb não encontrado)"; continue; fi
+        if "$qsb" --glsl "100 es,120,150" --hlsl 50 --msl 12 -o "$work/s.qsb" "$f" >"$work/err" 2>&1 && cmp -s "$work/s.qsb" "$f.qsb"; then
+            ok "$rel.qsb atualizado"
+        else
+            bad "$rel.qsb desatualizado ou o shader não compila (recompile com o comando do cabeçalho)"; sed 's/^/        /' "$work/err"
+        fi
+    done < <(find "$src" -name '*.frag' | sort)
 fi
 
 # ── 4. Fumaça dos scripts ─────────────────────────────────────────────────
@@ -170,12 +184,13 @@ EOF
         export KORTEX_GNOME_NO_GSETTINGS=1 KORTEX_SDDM_THEME_DIR="$H/sddm" PATH="$work/bin:$PATH"
         unset HYPRLAND_INSTANCE_SIGNATURE
         st="$XDG_STATE_HOME/kortex"
-        mkdir -p "$H/sddm" "$H/.config/gtk-4.0" "$H/.mozilla/firefox/p.default"; : > "$H/sddm/theme.conf.user"
+        mkdir -p "$H/sddm" "$H/.config/gtk-4.0" "$H/.config/gtk-3.0" "$H/.mozilla/firefox/p.default"; : > "$H/sddm/theme.conf.user"
         printf '/* >>> kortex */\n@import url("kortex-colors.css");\n/* <<< kortex */\n' > "$H/.config/gtk-4.0/gtk.css"
+        printf '.minha-regra { color: red; }\n' > "$H/.config/gtk-3.0/gtk.css"
+        bash "$src/scripts/gnome-setup.sh" >/dev/null 2>&1
         printf '[Install1]\nDefault=p.default\n\n[Profile0]\nName=p\nIsRelative=1\nPath=p.default\nDefault=1\n' > "$H/.mozilla/firefox/profiles.ini"
         check() { if eval "$2" >/dev/null 2>&1; then echo "ok $1"; else echo "FALHA $1"; fi; }
 
-        bash "$src/scripts/firefox-setup.sh" >/dev/null 2>&1
         bash "$src/scripts/theme-apply.sh" morello "$src/themes/morello" "#686868" "#222222" "#ffffff" "#525252" "#7c7c7c" 1 \
             "#343434" "#ffffff" "#9c9c9c" "#a0a0a0" "#393939" "#8b8b8b" "#686868" "#747474" "#868686" "#686868" "#1b1b1b" 0 >/dev/null 2>&1
         check "theme-apply: colors.sh" "( . '$st/colors.sh'; [ \"\$KORTEX_ACCENT\" = '#686868' ] && [ \"\$KORTEX_THEME\" = morello ] )"
@@ -184,8 +199,11 @@ EOF
         check "kitty-theme.conf" "grep -qx 'background #222222' '$st/kitty-theme.conf'"
         check "btop: kortex.theme" "grep -qF 'theme[hi_fg]=\"#686868\"' '$H/.config/btop/themes/kortex.theme'"
         check "sddm-colors: 9 cores" "[ \"\$(grep -c '=' '$H/sddm/theme.conf.user')\" = 9 ] && grep -qx 'accent=#686868' '$H/sddm/theme.conf.user'"
+        check "firefox: theme-apply configura o perfil" "[ -f '$H/.mozilla/firefox/p.default/chrome/kortex-chrome.css' ] && grep -qF '// kortex' '$H/.mozilla/firefox/p.default/user.js'"
         check "firefox: kortex-colors.css" "grep -qF -- '--kortex-accent: #686868' '$H/.mozilla/firefox/p.default/chrome/kortex-colors.css'"
-        check "gnome: kortex-colors.css" "grep -qF -- '--accent-bg-color: #686868' '$H/.config/gtk-4.0/kortex-colors.css'"
+        check "gnome: kortex-colors.css" "grep -qF -- '--accent-bg-color: #686868' '$H/.config/gtk-4.0/kortex-colors.css' && grep -qF -- '--card-shade-color: rgba(0, 0, 0, 0.36);' '$H/.config/gtk-4.0/kortex-colors.css'"
+        check "gnome: gtk-3.0 importa as cores e guarda o gtk.css" "head -1 '$H/.config/gtk-3.0/gtk.css' | grep -qF '>>> kortex' && grep -qF 'minha-regra' '$H/.config/gtk-3.0/gtk.css' && ls '$H/.config/gtk-3.0/' | grep -q 'gtk.css.bak-kortex-'"
+        check "gnome: gtk-3.0 kortex-colors.css" "grep -qx '@define-color accent_bg_color #686868;' '$H/.config/gtk-3.0/kortex-colors.css' && grep -qx '@define-color window_bg_color #222222;' '$H/.config/gtk-3.0/kortex-colors.css'"
         check "icon-theme pick (awk POSIX)" "[ \"\$(bash '$src/scripts/icon-theme.sh' pick '#61afef' 0)\" = Yaru-blue-dark ] && [ \"\$(bash '$src/scripts/icon-theme.sh' pick '#686868' 1)\" = Yaru-sage ]"
         check "list-themes: 8 temas" "[ \"\$(bash '$src/scripts/list-themes.sh' '$src/themes' | grep -c '^@@THEME')\" = 8 ]"
         bash "$src/scripts/terminal-apply.sh" 70 0 >/dev/null 2>&1
@@ -198,7 +216,13 @@ EOF
         bash "$src/scripts/matugen-generate.sh" "$H/papel.jpg" dark scheme-vibrant "$H/t" salvo >/dev/null 2>&1
         check "matugen-generate: tema salvo" "[ -f '$H/t/salvo/backgrounds/papel.jpg' ] && [ \"\$(cat '$H/t/salvo/icons.theme')\" = Yaru-blue-dark ]"
         bash "$src/scripts/firefox-setup.sh" --remove >/dev/null 2>&1
+        bash "$src/scripts/gnome-setup.sh" --remove >/dev/null 2>&1
+        check "gnome-setup --remove" "[ ! -e '$H/.config/gtk-4.0' ] && [ ! -e '$H/.config/gtk-3.0/kortex-colors.css' ] && [ \"\$(cat '$H/.config/gtk-3.0/gtk.css')\" = '.minha-regra { color: red; }' ]"
         check "firefox-setup --remove" "[ ! -e '$H/.mozilla/firefox/p.default/chrome' ] && [ ! -e '$H/.mozilla/firefox/p.default/user.js' ]"
+        bash "$src/scripts/firefox-setup.sh" --auto >/dev/null 2>&1
+        check "firefox-setup --auto respeita o --remove" "[ ! -e '$H/.mozilla/firefox/p.default/chrome' ] && grep -qxF '$H/.mozilla/firefox/p.default' '$st/firefox-off'"
+        bash "$src/scripts/firefox-setup.sh" >/dev/null 2>&1
+        check "firefox-setup religa e apaga a anotação" "[ -f '$H/.mozilla/firefox/p.default/chrome/kortex-chrome.css' ] && [ ! -e '$st/firefox-off' ]"
         root="$work/sddmroot"
         KORTEX_SDDM_ROOT="$root" bash "$src/scripts/sddm-setup.sh" --yes >/dev/null 2>&1
         check "sddm-setup (ensaio)" "[ -f '$root/usr/share/sddm/themes/kortex/Main.qml' ] && grep -qx 'Current=kortex' '$root/etc/sddm.conf.d/kortex.conf' && grep -qx 'accent=#686868' '$root/usr/share/sddm/themes/kortex/theme.conf.user'"

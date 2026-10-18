@@ -57,6 +57,14 @@ BarButton {
             }
         }
 
+        // buscando redes: faixa logo abaixo do título (as margens negativas a encostam nele)
+        LoadingBar {
+            active: Network.scanning
+            collapse: true
+            Layout.topMargin: -6
+            Layout.bottomMargin: -4
+        }
+
         // Conexão em uso: cabeçalho (rede, interface e sinal) e um bloco por dado: primeiro os dados
         // recebidos e enviados nesta sessão (ao vivo), depois os endereços; o IPv6 só aparece se
         // houver um endereço global e ocupa a linha inteira

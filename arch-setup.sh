@@ -280,6 +280,8 @@ PKGS=(
 
     # Ícones dos apps: o icons.theme de cada tema do Kortex escolhe uma variante do Yaru (vem do AUR)
     yaru-icon-theme
+    # Visual do libadwaita nos apps GTK3 e nos GTK4 sem libadwaita, que assim recebem as cores do tema
+    adw-gtk-theme
     polkit gnome-keyring
 )
 
@@ -521,12 +523,13 @@ CONF
     fi
 fi
 # Firefox: se já existe um perfil, liga as cores do tema (interface e páginas internas). O Firefox só
-# lê isso ao abrir; num Arch limpo o perfil só nasce na primeira abertura, e então basta rodar o script.
+# lê isso ao abrir; num Arch limpo o perfil só nasce na primeira abertura, e então o próprio Kortex o
+# configura na próxima troca de tema ou no próximo início do shell (theme-apply.sh).
 if command -v firefox >/dev/null; then
     bash "$DEST/scripts/firefox-setup.sh" || true
 fi
-# Apps GNOME (GTK4/libadwaita: Nautilus, Calculadora, Editor de Texto…): cores do tema, claro/escuro e
-# esquema do editor. Só se algum deles existir; o gsettings precisa de sessão gráfica, então numa instalação
+# Apps GNOME (GTK4/libadwaita: Nautilus, Calculadora, Editor de Texto…; com o adw-gtk-theme, também os
+# GTK3 e os GTK4 sem libadwaita): cores do tema, claro/escuro e esquema do editor. Só se algum deles existir; o gsettings precisa de sessão gráfica, então numa instalação
 # pelo tty a escolha claro/escuro fica para a primeira troca de tema.
 if command -v nautilus >/dev/null || command -v gnome-calculator >/dev/null || command -v gnome-text-editor >/dev/null; then
     bash "$DEST/scripts/gnome-setup.sh" || true
@@ -886,8 +889,8 @@ ${LOGIN_NOTE}  Atalhos principais:
       Hyprland:     ~/.config/hypr/hyprland.conf  (personalize em user.conf)
       Log:          $LOG
 
-  Firefox (cores do tema):  depois de abri-lo uma vez, rode
-      bash $DEST/scripts/firefox-setup.sh
+  Firefox (cores do tema):  depois de abri-lo uma vez, o Kortex o configura sozinho
+      na próxima troca de tema ou no próximo início do shell
 
 ${EXTRA_NOTE}
   Se a barra não aparecer:  qs -c kortex log

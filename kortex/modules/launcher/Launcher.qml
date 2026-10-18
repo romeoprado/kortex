@@ -8,6 +8,11 @@ import qs.widgets
 //   Digite para filtrar · ↑/↓ ou Ctrl+J/K navegam · Enter abre · Esc fecha
 //   Ctrl+D marca/desmarca o favorito · Ctrl+F lista só os favoritos
 //   Comece com ">" para executar um comando do shell.
+//
+// Abre em cascata: o painel cresce e surge, a busca desce, as primeiras linhas entram uma depois da
+// outra com um quique leve e a dica aparece por último. Só na abertura; as buscas trocam a lista na
+// hora. O Hyprland só esmaece a camada (HyprSync). Ideia da abertura do lançador do
+// dhrruvsharma/shell (GPLv3).
 LazyLoader {
     active: Popups.launcherOpen
 
@@ -29,6 +34,10 @@ LazyLoader {
         readonly property bool hasFavorites: apps.some(a => favs[a.id] === true)
 
         function close() { Popups.launcherOpen = false }
+
+        // as linhas criadas enquanto isto vale entram em cascata
+        property bool opening: Motion.enabled
+        Timer { running: win.opening; interval: Motion.ms(700); onTriggered: win.opening = false }
 
         // Entrada fixa que abre as Configurações do Kortex
         readonly property var settingsEntry: ({
@@ -131,9 +140,31 @@ LazyLoader {
         }
 
         GradientFrame {
+            id: frame
             anchors.fill: parent
             color: Theme.bg
             radius: Theme.radius
+            opacity: Motion.enabled ? 0 : 1
+
+            ParallelAnimation {
+                running: Motion.enabled
+                NumberAnimation { target: frame; property: "opacity"; from: 0; to: 1; duration: Motion.ms(200); easing.type: Easing.OutQuad }
+                NumberAnimation {
+                    target: frame; property: "scale"; from: Motion.pick(0.97, 0.94, 0.9); to: 1; duration: Motion.ms(320)
+                    easing.type: Easing.BezierSpline; easing.bezierCurve: Motion.curveOut
+                }
+                SequentialAnimation {
+                    PauseAnimation { duration: Motion.ms(50) }
+                    ParallelAnimation {
+                        NumberAnimation { target: searchRow; property: "opacity"; from: 0; to: 1; duration: Motion.ms(300); easing.type: Easing.OutCubic }
+                        NumberAnimation { target: searchShift; property: "y"; from: -12; to: 0; duration: Motion.ms(380); easing.type: Easing.OutCubic }
+                    }
+                }
+                SequentialAnimation {
+                    PauseAnimation { duration: Motion.ms(440) }
+                    NumberAnimation { target: hint; property: "opacity"; from: 0; to: 1; duration: Motion.ms(260); easing.type: Easing.OutCubic }
+                }
+            }
 
             ColumnLayout {
                 anchors.fill: parent
@@ -141,8 +172,11 @@ LazyLoader {
                 spacing: 10
 
                 RowLayout {
+                    id: searchRow
                     Layout.fillWidth: true
                     spacing: 8
+                    opacity: Motion.enabled ? 0 : 1
+                    transform: Translate { id: searchShift }
 
                     Field {
                         id: search
@@ -215,6 +249,25 @@ LazyLoader {
                         cursorShape: Qt.PointingHandCursor
                         onPositionChanged: list.currentIndex = index
                         onClicked: win.launch(modelData)
+                        transform: Translate { id: rowShift }
+                        Component.onCompleted: {
+                            if (!win.opening || index > 11) return
+                            opacity = 0
+                            rowIn.start()
+                        }
+
+                        SequentialAnimation {
+                            id: rowIn
+                            PauseAnimation { duration: Motion.ms(110 + row.index * 28) }
+                            ParallelAnimation {
+                                NumberAnimation { target: row; property: "opacity"; to: 1; duration: Motion.ms(240); easing.type: Easing.OutCubic }
+                                NumberAnimation { target: rowShift; property: "y"; from: 10; to: 0; duration: Motion.ms(320); easing.type: Easing.OutCubic }
+                                NumberAnimation {
+                                    target: row; property: "scale"; from: Motion.pick(0.98, 0.95, 0.9); to: 1; duration: Motion.ms(320)
+                                    easing.type: Easing.OutBack; easing.overshoot: Motion.pick(0.3, 0.6, 1.2)
+                                }
+                            }
+                        }
 
                         Rectangle {
                             anchors.fill: parent
@@ -310,7 +363,9 @@ LazyLoader {
                 }
 
                 Text {
+                    id: hint
                     Layout.fillWidth: true
+                    opacity: Motion.enabled ? 0 : 1
                     horizontalAlignment: Text.AlignHCenter
                     text: (Settings.data.launcherFavoritesOnly ? "Ctrl+F todos os apps" : "Ctrl+F só favoritos") + " · Ctrl+D marcar"
                     color: Theme.fgDim

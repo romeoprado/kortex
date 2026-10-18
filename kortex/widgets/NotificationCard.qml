@@ -56,16 +56,27 @@ Rectangle {
         return out
     }
 
-    Timer {
-        running: root.toast && !root.critical && !hover.containsMouse
-        interval: (root.notif && root.notif.expireTimeout > 0) ? root.notif.expireTimeout : Math.max(2, Settings.data.toastSeconds) * 1000
-        onTriggered: root.expired()
+    // Tempo do aviso: `life` vai de 1 a 0 e a barrinha no pé do cartão encolhe junto. O mouse por cima
+    // pausa a contagem, que continua de onde parou ao sair. Os críticos não expiram. Ideia da barra de
+    // contagem dos avisos do dhrruvsharma/shell (GPLv3).
+    property real life: 1
+    readonly property bool expires: root.toast && !root.critical
+    NumberAnimation {
+        id: lifeAnim
+        target: root
+        property: "life"
+        from: 1
+        to: 0
+        duration: (root.notif && root.notif.expireTimeout > 0) ? root.notif.expireTimeout : Math.max(2, Settings.data.toastSeconds) * 1000
+        onFinished: if (root.life <= 0) root.expired()
     }
+    Component.onCompleted: if (expires) lifeAnim.start()
 
     MouseArea {
         id: hover
         anchors.fill: parent
         hoverEnabled: true
+        onContainsMouseChanged: if (lifeAnim.running) lifeAnim.paused = containsMouse
         acceptedButtons: Qt.LeftButton | Qt.RightButton
         cursorShape: Qt.PointingHandCursor
         onClicked: mouse => {
@@ -75,6 +86,19 @@ Rectangle {
             if (def) Notifs.invoke(n, def)
             else root.close()
         }
+    }
+
+    // contagem regressiva do aviso, recolhendo para a esquerda
+    Rectangle {
+        visible: root.expires
+        anchors.bottom: parent.bottom
+        anchors.bottomMargin: Theme.border + 3
+        x: Math.max(root.radius, 8)
+        width: (parent.width - 2 * x) * root.life
+        height: 2
+        radius: 1
+        color: Theme.borderColor
+        opacity: 0.7
     }
 
     RowLayout {
