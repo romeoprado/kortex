@@ -10,6 +10,7 @@
 
 **Correções**
 
+- Apps GTK3 (Visualizador de Documentos, Discos) e GTK4 sem libadwaita (Controle de Volume) não acompanhavam o tema, porque o Kortex só gravava as cores do libadwaita e os temas embutidos do GTK usam cores fixas. Agora o `gnome-setup.sh` também configura `~/.config/gtk-3.0`, e o `gnome-theme.sh` escolhe o tema GTK `adw-gtk3-dark` ou `adw-gtk3` (pacote `adw-gtk-theme`, que o `arch-setup.sh` passa a instalar), que lê as mesmas cores. O `gtk-theme` anterior fica guardado para o `--remove`. Quem já usava a integração precisa rodar `gnome-setup.sh` de novo.
 - Na barra flutuante, os cantos arredondados ficavam pretos por alguns quadros ao passar o mouse nos itens (visto com NVIDIA e escala 1,25×). A camada da barra chegava ao Hyprland como opaca e ele não redesenhava o papel de parede sob os cantos. A altura da barra também passa a cair em pixels físicos inteiros.
 - O botão direito também esquece um dispositivo que ficou confiável sem chegar a parear.
 - A escolha automática do tema de ícones pelo acento (`scripts/icon-theme.sh pick`) dependia do gawk; com outro awk, o nome saía quebrado. Agora funciona com qualquer awk.
