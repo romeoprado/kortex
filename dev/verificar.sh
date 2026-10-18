@@ -6,7 +6,8 @@
 #  2. Scripts: bash -n em todos, o shellcheck (nível info) e a sintaxe dos scripts em Python.
 #  3. QML: sintaxe de todos os arquivos (qmlformat) e o qmllint, mostrando só o que ele consegue
 #     afirmar sem os tipos do Quickshell: imports sem uso, expressões com vírgula, ids que escondem
-#     propriedades e erros.
+#     propriedades e erros. Os shaders de kortex/shaders: cada .frag tem o .qsb compilado e, com o
+#     qsb do Qt 6 (pacote qt6-shadertools), o .qsb é igual ao que a fonte gera hoje.
 #  4. Fumaça: roda os scripts do tema, dos ícones, do terminal, da captura, do Matugen (com um
 #     matugen falso), do Firefox e do SDDM (modo de ensaio) num HOME temporário e confere o que
 #     eles gravam. Nada fora da pasta temporária é tocado.
@@ -148,6 +149,19 @@ if [ "$only" != scripts ]; then
     else
         skip "qmllint (não encontrado)"
     fi
+    # Shaders: o Quickshell carrega o .qsb, não o .frag, então um .frag mudado sem recompilar não vale.
+    # As opções são as do cabeçalho de cada .frag; o qsb gera sempre os mesmos bytes.
+    qsb="$(tool qsb)" || qsb=""
+    while IFS= read -r f; do
+        rel="${f#"$repo"/}"
+        if [ ! -f "$f.qsb" ]; then bad "shader sem .qsb: $rel"; continue; fi
+        if [ -z "$qsb" ]; then skip "$rel.qsb atualizado (qsb não encontrado)"; continue; fi
+        if "$qsb" --glsl "100 es,120,150" --hlsl 50 --msl 12 -o "$work/s.qsb" "$f" >"$work/err" 2>&1 && cmp -s "$work/s.qsb" "$f.qsb"; then
+            ok "$rel.qsb atualizado"
+        else
+            bad "$rel.qsb desatualizado ou o shader não compila (recompile com o comando do cabeçalho)"; sed 's/^/        /' "$work/err"
+        fi
+    done < <(find "$src" -name '*.frag' | sort)
 fi
 
 # ── 4. Fumaça dos scripts ─────────────────────────────────────────────────

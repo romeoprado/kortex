@@ -3,7 +3,9 @@ import Quickshell
 import Quickshell.Wayland
 import qs.services
 
-// Papel de parede desenhado pelo próprio shell, com transição suave.
+// Papel de parede desenhado pelo próprio shell, com transição suave. Não recebe cliques nem teclado.
+// A troca esmaece ou, com outro efeito escolhido em Configurações › Animações (wallpaperTransition),
+// passa pelo shader shaders/wallpaper_transition.frag (círculo, íris, tinta, ladrilhos, varredura, falha).
 // Desative em settings.json (wallpaperEnabled: false) se preferir hyprpaper/swww.
 Variants {
     model: Settings.data.wallpaperEnabled ? Quickshell.screens : []

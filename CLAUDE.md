@@ -23,6 +23,7 @@ kortex/              o shell em si, o que é copiado para ~/.config/quickshell/k
   themes/            temas embutidos (colors.toml + icons.theme)
   matugen/           modelo do Matugen e cores fixas de cada modo
   sddm/  firefox/    tema da tela de login e CSS do Firefox
+  shaders/           shaders (.frag) e o .qsb compilado; recompile com o comando do cabeçalho do .frag
   fonts/             Material Symbols (os ícones), com a licença
 ```
 
