@@ -280,6 +280,8 @@ PKGS=(
 
     # Ícones dos apps: o icons.theme de cada tema do Kortex escolhe uma variante do Yaru (vem do AUR)
     yaru-icon-theme
+    # Visual do libadwaita nos apps GTK3 e nos GTK4 sem libadwaita, que assim recebem as cores do tema
+    adw-gtk-theme
     polkit gnome-keyring
 )
 
@@ -526,8 +528,8 @@ fi
 if command -v firefox >/dev/null; then
     bash "$DEST/scripts/firefox-setup.sh" || true
 fi
-# Apps GNOME (GTK4/libadwaita: Nautilus, Calculadora, Editor de Texto…): cores do tema, claro/escuro e
-# esquema do editor. Só se algum deles existir; o gsettings precisa de sessão gráfica, então numa instalação
+# Apps GNOME (GTK4/libadwaita: Nautilus, Calculadora, Editor de Texto…; com o adw-gtk-theme, também os
+# GTK3 e os GTK4 sem libadwaita): cores do tema, claro/escuro e esquema do editor. Só se algum deles existir; o gsettings precisa de sessão gráfica, então numa instalação
 # pelo tty a escolha claro/escuro fica para a primeira troca de tema.
 if command -v nautilus >/dev/null || command -v gnome-calculator >/dev/null || command -v gnome-text-editor >/dev/null; then
     bash "$DEST/scripts/gnome-setup.sh" || true

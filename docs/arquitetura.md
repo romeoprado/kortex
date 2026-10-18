@@ -121,7 +121,7 @@ Outros lugares:
 - `~/.local/share/kortex/themes/` guarda os temas do usuário (o `matugen` gerado e os salvos dele).
 - `~/.local/share/kortex/backgrounds/<tema>/` guarda papéis de parede extras de um tema.
 - `$XDG_RUNTIME_DIR/kortex/` guarda as capturas e gravações ainda não salvas (apagadas ao iniciar o shell).
-- Fora do Kortex, a cada troca de tema: `~/.config/btop/themes/kortex.theme` (e `btop.conf`, só se nenhum tema foi escolhido), `~/.config/gtk-4.0/kortex-colors.css`, `~/.local/share/gtksourceview-5/styles/kortex.xml`, o `gtk-icon-theme-name` dos `settings.ini` do GTK que existirem, o `gsettings`, o `chrome/kortex-colors.css` dos perfis do Firefox configurados e o `/usr/share/sddm/themes/kortex/theme.conf.user` (que pertence ao usuário).
+- Fora do Kortex, a cada troca de tema: `~/.config/btop/themes/kortex.theme` (e `btop.conf`, só se nenhum tema foi escolhido), `~/.config/gtk-4.0/kortex-colors.css`, `~/.config/gtk-3.0/kortex-colors.css`, `~/.local/share/gtksourceview-5/styles/kortex.xml`, o `gtk-icon-theme-name` dos `settings.ini` do GTK que existirem, o `gsettings` (`color-scheme`, o `gtk-theme` quando há o adw-gtk3 e o esquema do Editor de Texto), o `chrome/kortex-colors.css` dos perfis do Firefox configurados e o `/usr/share/sddm/themes/kortex/theme.conf.user` (que pertence ao usuário).
 
 ## Scripts
 

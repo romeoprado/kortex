@@ -170,8 +170,10 @@ EOF
         export KORTEX_GNOME_NO_GSETTINGS=1 KORTEX_SDDM_THEME_DIR="$H/sddm" PATH="$work/bin:$PATH"
         unset HYPRLAND_INSTANCE_SIGNATURE
         st="$XDG_STATE_HOME/kortex"
-        mkdir -p "$H/sddm" "$H/.config/gtk-4.0" "$H/.mozilla/firefox/p.default"; : > "$H/sddm/theme.conf.user"
+        mkdir -p "$H/sddm" "$H/.config/gtk-4.0" "$H/.config/gtk-3.0" "$H/.mozilla/firefox/p.default"; : > "$H/sddm/theme.conf.user"
         printf '/* >>> kortex */\n@import url("kortex-colors.css");\n/* <<< kortex */\n' > "$H/.config/gtk-4.0/gtk.css"
+        printf '.minha-regra { color: red; }\n' > "$H/.config/gtk-3.0/gtk.css"
+        bash "$src/scripts/gnome-setup.sh" >/dev/null 2>&1
         printf '[Install1]\nDefault=p.default\n\n[Profile0]\nName=p\nIsRelative=1\nPath=p.default\nDefault=1\n' > "$H/.mozilla/firefox/profiles.ini"
         check() { if eval "$2" >/dev/null 2>&1; then echo "ok $1"; else echo "FALHA $1"; fi; }
 
@@ -185,7 +187,9 @@ EOF
         check "sddm-colors: 9 cores" "[ \"\$(grep -c '=' '$H/sddm/theme.conf.user')\" = 9 ] && grep -qx 'accent=#686868' '$H/sddm/theme.conf.user'"
         check "firefox: theme-apply configura o perfil" "[ -f '$H/.mozilla/firefox/p.default/chrome/kortex-chrome.css' ] && grep -qF '// kortex' '$H/.mozilla/firefox/p.default/user.js'"
         check "firefox: kortex-colors.css" "grep -qF -- '--kortex-accent: #686868' '$H/.mozilla/firefox/p.default/chrome/kortex-colors.css'"
-        check "gnome: kortex-colors.css" "grep -qF -- '--accent-bg-color: #686868' '$H/.config/gtk-4.0/kortex-colors.css'"
+        check "gnome: kortex-colors.css" "grep -qF -- '--accent-bg-color: #686868' '$H/.config/gtk-4.0/kortex-colors.css' && grep -qF -- '--card-shade-color: rgba(0, 0, 0, 0.36);' '$H/.config/gtk-4.0/kortex-colors.css'"
+        check "gnome: gtk-3.0 importa as cores e guarda o gtk.css" "head -1 '$H/.config/gtk-3.0/gtk.css' | grep -qF '>>> kortex' && grep -qF 'minha-regra' '$H/.config/gtk-3.0/gtk.css' && ls '$H/.config/gtk-3.0/' | grep -q 'gtk.css.bak-kortex-'"
+        check "gnome: gtk-3.0 kortex-colors.css" "grep -qx '@define-color accent_bg_color #686868;' '$H/.config/gtk-3.0/kortex-colors.css' && grep -qx '@define-color window_bg_color #222222;' '$H/.config/gtk-3.0/kortex-colors.css'"
         check "icon-theme pick (awk POSIX)" "[ \"\$(bash '$src/scripts/icon-theme.sh' pick '#61afef' 0)\" = Yaru-blue-dark ] && [ \"\$(bash '$src/scripts/icon-theme.sh' pick '#686868' 1)\" = Yaru-sage ]"
         check "list-themes: 8 temas" "[ \"\$(bash '$src/scripts/list-themes.sh' '$src/themes' | grep -c '^@@THEME')\" = 8 ]"
         bash "$src/scripts/terminal-apply.sh" 70 0 >/dev/null 2>&1
@@ -198,6 +202,8 @@ EOF
         bash "$src/scripts/matugen-generate.sh" "$H/papel.jpg" dark scheme-vibrant "$H/t" salvo >/dev/null 2>&1
         check "matugen-generate: tema salvo" "[ -f '$H/t/salvo/backgrounds/papel.jpg' ] && [ \"\$(cat '$H/t/salvo/icons.theme')\" = Yaru-blue-dark ]"
         bash "$src/scripts/firefox-setup.sh" --remove >/dev/null 2>&1
+        bash "$src/scripts/gnome-setup.sh" --remove >/dev/null 2>&1
+        check "gnome-setup --remove" "[ ! -e '$H/.config/gtk-4.0' ] && [ ! -e '$H/.config/gtk-3.0/kortex-colors.css' ] && [ \"\$(cat '$H/.config/gtk-3.0/gtk.css')\" = '.minha-regra { color: red; }' ]"
         check "firefox-setup --remove" "[ ! -e '$H/.mozilla/firefox/p.default/chrome' ] && [ ! -e '$H/.mozilla/firefox/p.default/user.js' ]"
         bash "$src/scripts/firefox-setup.sh" --auto >/dev/null 2>&1
         check "firefox-setup --auto respeita o --remove" "[ ! -e '$H/.mozilla/firefox/p.default/chrome' ] && grep -qxF '$H/.mozilla/firefox/p.default' '$st/firefox-off'"
