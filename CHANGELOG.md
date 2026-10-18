@@ -10,6 +10,7 @@
 
 **Correções**
 
+- O Firefox não acompanhava o tema numa instalação nova: o `arch-setup.sh` rodava o `firefox-setup.sh` antes de existir um perfil (ele só nasce na primeira abertura do Firefox), e o `firefox-theme.sh` ignora perfis não configurados. Agora o `theme-apply.sh` roda `firefox-setup.sh --auto`, que configura o perfil padrão na próxima troca de tema ou no próximo início do shell. Um perfil desligado com `firefox-setup.sh --remove` fica anotado em `~/.local/state/kortex/firefox-off` e não é religado.
 - Na barra flutuante, os cantos arredondados ficavam pretos por alguns quadros ao passar o mouse nos itens (visto com NVIDIA e escala 1,25×). A camada da barra chegava ao Hyprland como opaca e ele não redesenhava o papel de parede sob os cantos. A altura da barra também passa a cair em pixels físicos inteiros.
 - O botão direito também esquece um dispositivo que ficou confiável sem chegar a parear.
 - A escolha automática do tema de ícones pelo acento (`scripts/icon-theme.sh pick`) dependia do gawk; com outro awk, o nome saía quebrado. Agora funciona com qualquer awk.

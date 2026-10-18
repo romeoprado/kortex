@@ -84,7 +84,7 @@ Padrões que se repetem nos serviços:
 1. `Theme.refresh()` roda `list-themes.sh`, que imprime cada tema (embutidos em `kortex/themes`, depois os do usuário em `~/.local/share/kortex/themes`, que têm prioridade) como um bloco `@@THEME<TAB>nome<TAB>pasta<TAB>1º fundo<TAB>origem` seguido do `colors.toml`. `parseThemes()` monta a lista e `normalize()` completa as cores que o tema não define.
 2. `Theme.apply(nome)` grava `Settings.data.theme`. O handler `onThemeChanged` chama `loadCurrent()`, que aplica a paleta (`setPalette`) e relê os papéis de parede. `apply` também escolhe o papel de parede (o lembrado para esse tema, o primeiro do tema ou o atual) e chama `runHook()`.
 3. `setPalette()` não usa as cores cruas: texto apagado, acento, vermelho, verde e amarelo são levados ao contraste mínimo (WCAG 4,5:1) sobre o fundo, o contorno a 3:1, e o texto sobre o acento e sobre o vermelho é a cor que mais contrasta. Só a interface do Kortex vê esses ajustes. `borderColor` é o acento sem ajuste, igual à borda das janelas do Hyprland.
-4. `runHook()` chama `theme-apply.sh` com 20 argumentos posicionais (nome, pasta e as cores). O script grava os arquivos de estado e chama, em sequência, `sddm-colors.sh`, `kitty-theme.sh`, `btop-theme.sh`, `firefox-theme.sh`, `gnome-theme.sh`, as bordas do Hyprland pelo `hyprctl`, `icon-theme.sh apply` e, por fim, o gancho do usuário em `~/.config/kortex/hooks/theme-set`, se existir e for executável.
+4. `runHook()` chama `theme-apply.sh` com 20 argumentos posicionais (nome, pasta e as cores). O script grava os arquivos de estado e chama, em sequência, `sddm-colors.sh`, `kitty-theme.sh`, `btop-theme.sh`, `firefox-setup.sh --auto` (configura o perfil do Firefox que ainda não tem o Kortex), `firefox-theme.sh`, `gnome-theme.sh`, as bordas do Hyprland pelo `hyprctl`, `icon-theme.sh apply` e, por fim, o gancho do usuário em `~/.config/kortex/hooks/theme-set`, se existir e for executável.
 
 Ao iniciar, o tema salvo passa pelo mesmo caminho uma vez (`_hookRan`), para os arquivos de estado existirem mesmo sem troca.
 
@@ -114,6 +114,7 @@ Estado do Kortex, em `~/.local/state/kortex/`:
 | `theme.name`, `current-theme` | `theme-apply.sh` | `sddm-setup.sh`, o usuário |
 | `network-sessions.json` | `Network` | `Network` |
 | `gnome-original.txt` | `gnome-setup.sh` | `gnome-setup.sh --remove` |
+| `firefox-off` | `firefox-setup.sh --remove` (e apagado pelo `firefox-setup.sh` sem opções) | `firefox-setup.sh --auto` |
 
 Outros lugares:
 
@@ -140,7 +141,7 @@ Todos ficam em `kortex/scripts/` e começam com o uso no cabeçalho. Os que grav
 | `screenshot.sh` | `Screenshot` | `capture`, `save`, `pick`, `dirs` (1 = cancelado, 2 = erro, 3 = destino existe) |
 | `screenrecord.sh` | `ScreenRecord` | `target`, `record`, `info`, `save`, `dirs` (mesmos códigos) |
 | `gpu-stats.sh`, `disk-stats.sh`, `sensors.sh` | `SystemStats` | linhas com TAB ou `chave=valor` |
-| `firefox-setup.sh`, `gnome-setup.sh`, `sddm-setup.sh` | o usuário e o `arch-setup.sh` | instalam a integração (todos aceitam desfazer) |
+| `firefox-setup.sh`, `gnome-setup.sh`, `sddm-setup.sh` | o usuário e o `arch-setup.sh`; o `firefox-setup.sh --auto` também pelo `theme-apply.sh` | instalam a integração (todos aceitam desfazer) |
 | `firefox-common.sh` | `source` nos scripts do Firefox | acha os perfis padrão |
 
 Variáveis só para teste: `KORTEX_GNOME_NO_GSETTINGS=1` (pula o `gsettings`), `KORTEX_SDDM_THEME_DIR` (outra pasta para o `theme.conf.user`) e `KORTEX_SDDM_ROOT` (o `sddm-setup.sh` instala numa raiz falsa, sem sudo nem pacotes). O `dev/verificar.sh` usa as três.

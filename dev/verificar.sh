@@ -175,7 +175,6 @@ EOF
         printf '[Install1]\nDefault=p.default\n\n[Profile0]\nName=p\nIsRelative=1\nPath=p.default\nDefault=1\n' > "$H/.mozilla/firefox/profiles.ini"
         check() { if eval "$2" >/dev/null 2>&1; then echo "ok $1"; else echo "FALHA $1"; fi; }
 
-        bash "$src/scripts/firefox-setup.sh" >/dev/null 2>&1
         bash "$src/scripts/theme-apply.sh" morello "$src/themes/morello" "#686868" "#222222" "#ffffff" "#525252" "#7c7c7c" 1 \
             "#343434" "#ffffff" "#9c9c9c" "#a0a0a0" "#393939" "#8b8b8b" "#686868" "#747474" "#868686" "#686868" "#1b1b1b" 0 >/dev/null 2>&1
         check "theme-apply: colors.sh" "( . '$st/colors.sh'; [ \"\$KORTEX_ACCENT\" = '#686868' ] && [ \"\$KORTEX_THEME\" = morello ] )"
@@ -184,6 +183,7 @@ EOF
         check "kitty-theme.conf" "grep -qx 'background #222222' '$st/kitty-theme.conf'"
         check "btop: kortex.theme" "grep -qF 'theme[hi_fg]=\"#686868\"' '$H/.config/btop/themes/kortex.theme'"
         check "sddm-colors: 9 cores" "[ \"\$(grep -c '=' '$H/sddm/theme.conf.user')\" = 9 ] && grep -qx 'accent=#686868' '$H/sddm/theme.conf.user'"
+        check "firefox: theme-apply configura o perfil" "[ -f '$H/.mozilla/firefox/p.default/chrome/kortex-chrome.css' ] && grep -qF '// kortex' '$H/.mozilla/firefox/p.default/user.js'"
         check "firefox: kortex-colors.css" "grep -qF -- '--kortex-accent: #686868' '$H/.mozilla/firefox/p.default/chrome/kortex-colors.css'"
         check "gnome: kortex-colors.css" "grep -qF -- '--accent-bg-color: #686868' '$H/.config/gtk-4.0/kortex-colors.css'"
         check "icon-theme pick (awk POSIX)" "[ \"\$(bash '$src/scripts/icon-theme.sh' pick '#61afef' 0)\" = Yaru-blue-dark ] && [ \"\$(bash '$src/scripts/icon-theme.sh' pick '#686868' 1)\" = Yaru-sage ]"
@@ -199,6 +199,10 @@ EOF
         check "matugen-generate: tema salvo" "[ -f '$H/t/salvo/backgrounds/papel.jpg' ] && [ \"\$(cat '$H/t/salvo/icons.theme')\" = Yaru-blue-dark ]"
         bash "$src/scripts/firefox-setup.sh" --remove >/dev/null 2>&1
         check "firefox-setup --remove" "[ ! -e '$H/.mozilla/firefox/p.default/chrome' ] && [ ! -e '$H/.mozilla/firefox/p.default/user.js' ]"
+        bash "$src/scripts/firefox-setup.sh" --auto >/dev/null 2>&1
+        check "firefox-setup --auto respeita o --remove" "[ ! -e '$H/.mozilla/firefox/p.default/chrome' ] && grep -qxF '$H/.mozilla/firefox/p.default' '$st/firefox-off'"
+        bash "$src/scripts/firefox-setup.sh" >/dev/null 2>&1
+        check "firefox-setup religa e apaga a anotação" "[ -f '$H/.mozilla/firefox/p.default/chrome/kortex-chrome.css' ] && [ ! -e '$st/firefox-off' ]"
         root="$work/sddmroot"
         KORTEX_SDDM_ROOT="$root" bash "$src/scripts/sddm-setup.sh" --yes >/dev/null 2>&1
         check "sddm-setup (ensaio)" "[ -f '$root/usr/share/sddm/themes/kortex/Main.qml' ] && grep -qx 'Current=kortex' '$root/etc/sddm.conf.d/kortex.conf' && grep -qx 'accent=#686868' '$root/usr/share/sddm/themes/kortex/theme.conf.user'"
