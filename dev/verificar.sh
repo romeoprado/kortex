@@ -202,8 +202,9 @@ EOF
         check "firefox: theme-apply configura o perfil" "[ -f '$H/.mozilla/firefox/p.default/chrome/kortex-chrome.css' ] && grep -qF '// kortex' '$H/.mozilla/firefox/p.default/user.js'"
         uj="$H/.mozilla/firefox/p.default/user.js"
         check "firefox: sites com a aparência clara" "grep -qx 'user_pref(\"layout.css.prefers-color-scheme.content-override\", 1); // kortex' '$uj'"
-        sed -i '/content-override/d' "$uj"; bash "$src/scripts/firefox-setup.sh" --auto >/dev/null 2>&1
-        check "firefox-setup --auto completa um perfil já configurado" "[ \"\$(grep -c 'content-override' '$uj')\" = 1 ]"
+        sed -i '/content-override/d' "$uj"; echo '/* versão antiga */' > "$H/.mozilla/firefox/p.default/chrome/kortex-chrome.css"
+        bash "$src/scripts/firefox-setup.sh" --auto >/dev/null 2>&1
+        check "firefox-setup --auto completa um perfil já configurado" "[ \"\$(grep -c 'content-override' '$uj')\" = 1 ] && cmp -s '$src/firefox/kortex-chrome.css' '$H/.mozilla/firefox/p.default/chrome/kortex-chrome.css'"
         sed -i '/content-override/d' "$uj"; echo 'user_pref("layout.css.prefers-color-scheme.content-override", 0);' >> "$uj"
         bash "$src/scripts/firefox-setup.sh" --auto >/dev/null 2>&1
         check "firefox-setup respeita a preferência do usuário" "[ \"\$(grep -c 'content-override' '$uj')\" = 1 ] && grep -qF 'content-override\", 0);' '$uj'"

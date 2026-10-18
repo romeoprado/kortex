@@ -8,7 +8,8 @@
 #   firefox-setup.sh [--remove] <pasta-de-perfil>...   age só nestes perfis
 #   firefox-setup.sh --auto         instala, sem mensagens, só nos perfis padrão que ainda não têm o Kortex
 #                                   e que não passaram por um --remove (chamado pelo theme-apply.sh); nos
-#                                   já configurados, só acrescenta ao user.js as preferências que faltarem
+#                                   já configurados, atualiza os kortex-*.css (são do Kortex: uma correção
+#                                   neles chega assim ao perfil) e acrescenta as preferências que faltarem
 # Mexe só em chrome/ e no user.js do perfil, guarda cópia (.bak-kortex-…) de qualquer arquivo seu que
 # alterar e não toca no prefs.js. O Firefox lê tudo ao abrir: reinicie-o depois (o script não o fecha).
 # O --remove anota o perfil em ~/.local/state/kortex/firefox-off, para o --auto não o religar; rodar o
@@ -95,11 +96,15 @@ drop_import() {
 for p in "${profiles[@]}"; do
     p="${p%/}"
     [ -d "$p" ] || { echo "Perfil não encontrado: $p" >&2; continue; }
-    # --auto: perfil desligado de propósito fica como está; um já configurado só ganha as preferências
-    # que o Kortex passou a gravar depois dele
+    # --auto: perfil desligado de propósito fica como está; um já configurado recebe a versão atual dos
+    # CSS do Kortex e as preferências que o Kortex passou a gravar depois dele
     if [ "$auto" = 1 ]; then
         is_off "$p" && continue
-        if [ -f "$p/chrome/kortex-chrome.css" ]; then add_prefs "$p"; continue; fi
+        if [ -f "$p/chrome/kortex-chrome.css" ]; then
+            cp -f "$src/kortex-chrome.css" "$src/kortex-content.css" "$p/chrome/"
+            add_prefs "$p"
+            continue
+        fi
     fi
     if [ "$remove" = 1 ]; then
         rm -f "$p/chrome/kortex-chrome.css" "$p/chrome/kortex-content.css" "$p/chrome/kortex-colors.css"
