@@ -200,6 +200,14 @@ EOF
         check "btop: kortex.theme" "grep -qF 'theme[hi_fg]=\"#686868\"' '$H/.config/btop/themes/kortex.theme'"
         check "sddm-colors: 9 cores" "[ \"\$(grep -c '=' '$H/sddm/theme.conf.user')\" = 9 ] && grep -qx 'accent=#686868' '$H/sddm/theme.conf.user'"
         check "firefox: theme-apply configura o perfil" "[ -f '$H/.mozilla/firefox/p.default/chrome/kortex-chrome.css' ] && grep -qF '// kortex' '$H/.mozilla/firefox/p.default/user.js'"
+        uj="$H/.mozilla/firefox/p.default/user.js"
+        check "firefox: sites com a aparência clara" "grep -qx 'user_pref(\"layout.css.prefers-color-scheme.content-override\", 1); // kortex' '$uj'"
+        sed -i '/content-override/d' "$uj"; bash "$src/scripts/firefox-setup.sh" --auto >/dev/null 2>&1
+        check "firefox-setup --auto completa um perfil já configurado" "[ \"\$(grep -c 'content-override' '$uj')\" = 1 ]"
+        sed -i '/content-override/d' "$uj"; echo 'user_pref("layout.css.prefers-color-scheme.content-override", 0);' >> "$uj"
+        bash "$src/scripts/firefox-setup.sh" --auto >/dev/null 2>&1
+        check "firefox-setup respeita a preferência do usuário" "[ \"\$(grep -c 'content-override' '$uj')\" = 1 ] && grep -qF 'content-override\", 0);' '$uj'"
+        sed -i '/content-override/d' "$uj"   # a escolha simulada sai, para o --remove abaixo poder apagar o user.js
         check "firefox: kortex-colors.css" "grep -qF -- '--kortex-accent: #686868' '$H/.mozilla/firefox/p.default/chrome/kortex-colors.css'"
         check "gnome: kortex-colors.css" "grep -qF -- '--accent-bg-color: #686868' '$H/.config/gtk-4.0/kortex-colors.css' && grep -qF -- '--card-shade-color: rgba(0, 0, 0, 0.36);' '$H/.config/gtk-4.0/kortex-colors.css'"
         check "gnome: gtk-3.0 importa as cores e guarda o gtk.css" "head -1 '$H/.config/gtk-3.0/gtk.css' | grep -qF '>>> kortex' && grep -qF 'minha-regra' '$H/.config/gtk-3.0/gtk.css' && ls '$H/.config/gtk-3.0/' | grep -q 'gtk.css.bak-kortex-'"

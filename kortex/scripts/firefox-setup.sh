@@ -1,11 +1,14 @@
 #!/usr/bin/env bash
 # Configura o Firefox para usar as cores do tema do Kortex: instala no perfil o kortex-chrome.css (interface)
 # e o kortex-content.css (páginas internas: nova aba, about:…) e liga o suporte a essas folhas de estilo.
+# Os sites ficam fora: o user.js também pede a eles a aparência clara, para um tema escuro do Kortex (que
+# põe o sistema no escuro) não trocar o visual dos sites que têm modo escuro.
 #   firefox-setup.sh                instala no perfil padrão de cada instalação do Firefox
 #   firefox-setup.sh --remove       desfaz (remove os arquivos e as linhas do Kortex)
 #   firefox-setup.sh [--remove] <pasta-de-perfil>...   age só nestes perfis
 #   firefox-setup.sh --auto         instala, sem mensagens, só nos perfis padrão que ainda não têm o Kortex
-#                                   e que não passaram por um --remove (chamado pelo theme-apply.sh)
+#                                   e que não passaram por um --remove (chamado pelo theme-apply.sh); nos
+#                                   já configurados, só acrescenta ao user.js as preferências que faltarem
 # Mexe só em chrome/ e no user.js do perfil, guarda cópia (.bak-kortex-…) de qualquer arquivo seu que
 # alterar e não toca no prefs.js. O Firefox lê tudo ao abrir: reinicie-o depois (o script não o fecha).
 # O --remove anota o perfil em ~/.local/state/kortex/firefox-off, para o --auto não o religar; rodar o
@@ -41,7 +44,13 @@ unmark_off() {
 
 stamp="$(date +%Y%m%d-%H%M%S)"
 begin='/* >>> kortex */'; end='/* <<< kortex */'
-pref='user_pref("toolkit.legacyUserProfileCustomizations.stylesheets", true);'
+# Preferências que o Kortex grava no user.js, marcadas com "// kortex" (o --remove apaga essas linhas).
+# Uma preferência que o user.js já menciona sem a marca é escolha sua e fica como está.
+#   stylesheets: o Firefox só lê o userChrome.css e o userContent.css com ela ligada;
+#   content-override 1: os sites recebem prefers-color-scheme: light, seja qual for o tema do Kortex
+#   (o padrão, 2, segue o tema do Firefox, que segue o escuro do sistema)
+prefs=('toolkit.legacyUserProfileCustomizations.stylesheets|true'
+       'layout.css.prefers-color-scheme.content-override|1')
 
 backup() { [ -f "$1" ] && cp -p "$1" "$1.bak-kortex-$stamp"; }
 
@@ -58,6 +67,22 @@ add_import() {
     fi
 }
 
+# Acrescenta ao user.js as preferências do Kortex que ele ainda não menciona (com cópia, uma vez)
+add_prefs() {
+    local js="$1/user.js" item name value copied=0
+    for item in "${prefs[@]}"; do
+        name="${item%%|*}"; value="${item#*|}"
+        if [ -f "$js" ] && grep -qF "\"$name\"" "$js"; then
+            if [ "$name" = toolkit.legacyUserProfileCustomizations.stylesheets ] && ! grep -q "\"$name\", *true" "$js"; then
+                echo "Aviso: o user.js de $1 desliga $name; o Kortex não muda isso." >&2
+            fi
+            continue
+        fi
+        [ "$copied" = 1 ] || { backup "$js"; copied=1; }
+        printf 'user_pref("%s", %s); // kortex\n' "$name" "$value" >> "$js"
+    done
+}
+
 drop_import() {
     local file="$1"
     [ -f "$file" ] || return 0
@@ -70,8 +95,12 @@ drop_import() {
 for p in "${profiles[@]}"; do
     p="${p%/}"
     [ -d "$p" ] || { echo "Perfil não encontrado: $p" >&2; continue; }
-    # --auto: perfil já configurado ou desligado de propósito fica como está
-    if [ "$auto" = 1 ] && { [ -f "$p/chrome/kortex-chrome.css" ] || is_off "$p"; }; then continue; fi
+    # --auto: perfil desligado de propósito fica como está; um já configurado só ganha as preferências
+    # que o Kortex passou a gravar depois dele
+    if [ "$auto" = 1 ]; then
+        is_off "$p" && continue
+        if [ -f "$p/chrome/kortex-chrome.css" ]; then add_prefs "$p"; continue; fi
+    fi
     if [ "$remove" = 1 ]; then
         rm -f "$p/chrome/kortex-chrome.css" "$p/chrome/kortex-content.css" "$p/chrome/kortex-colors.css"
         drop_import "$p/chrome/userChrome.css"
@@ -89,13 +118,7 @@ for p in "${profiles[@]}"; do
     cp -f "$src/kortex-chrome.css" "$src/kortex-content.css" "$p/chrome/"
     add_import "$p/chrome/userChrome.css" kortex-chrome.css
     add_import "$p/chrome/userContent.css" kortex-content.css
-    if [ -f "$p/user.js" ] && grep -q 'legacyUserProfileCustomizations.stylesheets' "$p/user.js"; then
-        grep -q 'legacyUserProfileCustomizations.stylesheets", *true' "$p/user.js" \
-            || echo "Aviso: o user.js de $p desliga toolkit.legacyUserProfileCustomizations.stylesheets; o Kortex não muda isso." >&2
-    else
-        backup "$p/user.js"
-        printf '%s // kortex\n' "$pref" >> "$p/user.js"
-    fi
+    add_prefs "$p"
     bash "$here/firefox-theme.sh" "$p"
     unmark_off "$p"
     echo "Configurado: $p"
