@@ -1,6 +1,6 @@
 # Kortex: guia para sessões de desenvolvimento
 
-Shell para o Hyprland escrito em QML sobre o [Quickshell](https://quickshell.org), com scripts em bash para o que fica fora dele. Tudo em português do Brasil: interface, comentários, README, CHANGELOG e mensagens de commit. Versão atual: **0.2**.
+Shell para o Hyprland escrito em QML sobre o [Quickshell](https://quickshell.org), com scripts em bash para o que fica fora dele. Tudo em português do Brasil: interface, comentários, README, CHANGELOG e mensagens de commit. Versão atual: **0.3**.
 
 Leia também `docs/arquitetura.md` (como as peças conversam) e, para o histórico das revisões, `docs/auditoria-2026-10.md` e `docs/auditoria-2026-11.md` (esta com o que ficou pendente). O `README.md` é o manual do usuário e a referência das opções do `settings.json` (seção 5).
 

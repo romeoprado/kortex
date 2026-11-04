@@ -1,6 +1,6 @@
 # Histórico de versões
 
-## Em desenvolvimento
+## 0.3 — 2026-11-03
 
 **Novidades**
 

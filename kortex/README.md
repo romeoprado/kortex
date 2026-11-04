@@ -1,6 +1,6 @@
 # Kortex
 
-Shell para **Hyprland** feito em **Quickshell**. Versão **0.2**.
+Shell para **Hyprland** feito em **Quickshell**. Versão **0.3**.
 
 Inclui barra superior, lançador estilo Rofi, central de notificações, controles de teclado e idioma, Bluetooth, Wi‑Fi, som e tela, energia (modo de energia e bateria), menu de sessão, calendário, previsão do tempo, estatísticas de hardware, mídia tocando, bandeja, atualizações pendentes, captura e gravação de tela e um seletor de temas e papéis de parede. O tema também chega ao Kitty, ao btop, ao Firefox, à tela de login e aos apps do GNOME.
 
