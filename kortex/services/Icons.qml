@@ -75,7 +75,6 @@ Singleton {
     readonly property string fog: "foggy"
     readonly property string rainChance: "water_drop"   // chance de chuva na previsão
     readonly property string brush: "brush"
-    readonly property string palette: "palette"
     readonly property string image: "image"
     readonly property string download: "download"
     readonly property string save: "save"

@@ -89,6 +89,8 @@ if ! { [ -f "$out" ] && cmp -s "$tmp" "$out"; }; then
     chmod 644 "$tmp"
     mv -f "$tmp" "$out"
     changed=1
+else
+    rm -f "$tmp"   # igual ao que já existe: o temporário não serve mais (o trap sai logo abaixo)
 fi
 trap - EXIT
 
