@@ -205,7 +205,7 @@ Singleton {
             ["animations", true], ["animIntensity", "elegant"], ["animSpeed", "normal"], ["animWindows", "popin"],
             ["animWorkspaces", "horizontal"], ["wallpaperTransition", "iris"],
             ["workspaceCount", 5],
-            ["barItems", ({})], ["barLayout", ({})], ["barFloatingOrder", []], ["powerActions", ({})], ["powerConfirm", true], ["toastSeconds", 6]
+            ["barItems", ({})], ["barLayout", ({})], ["barFloatingOrder", []], ["use24h", true], ["powerActions", ({})], ["powerConfirm", true], ["toastSeconds", 6]
         ])
     }
 

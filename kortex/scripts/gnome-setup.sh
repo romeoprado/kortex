@@ -59,7 +59,7 @@ if [ "${1:-}" = "--remove" ]; then
         done < "$orig"
     fi
     rm -f "$orig"
-    echo "Removido: apps GTK4 e Editor de Texto voltam ao padrão ao serem reabertos."
+    echo "Removido: apps GTK3, GTK4 e Editor de Texto voltam ao padrão ao serem reabertos."
     exit 0
 fi
 

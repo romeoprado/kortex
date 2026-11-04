@@ -1,14 +1,18 @@
 # Histórico de versões
 
-## Em desenvolvimento
+## 0.3 — 2026-11-03
 
 **Novidades**
 
 - **Animações novas.** O aviso de volume, brilho, Caps Lock e Num Lock surge como uma gota, abre em pílula e pulsa a cada passo. A marca da área de trabalho atual desliza entre as áreas e se estica no caminho. Os avisos ganham uma barrinha de contagem regressiva, que pausa com o mouse por cima. O lançador abre em cascata. A busca de redes, a procura de atualizações, a conexão ao Wi‑Fi e o clima mostram indicadores de carregamento (faixa, anel e esqueleto). Ideias adaptadas do [dhrruvsharma/shell](https://github.com/dhrruvsharma/shell) (GPL-3.0).
 - **Troca do papel de parede com efeito** (`wallpaperTransition`, em *Configurações › Animações*): círculo, íris (o padrão), tinta, ladrilhos, varredura ou falha, desenhados por um shader (`kortex/shaders/`), ou o esmaecer de antes. `dev/verificar.sh` confere se o `.qsb` compilado está em dia com o `.frag`.
 - **Pareamento Bluetooth pelo painel.** O Kortex agora tem um agente de pareamento (`scripts/bt-agent.py`, que precisa de `python-dbus` e `python-gobject`). Sem ele, o bluetoothd recusava mouses e fones com `No agent available`. Mouses e fones que você manda parear pelo painel são aceitos sozinhos; quando o dispositivo mostra um código, o painel abre para conferir e aceitar, e num teclado ele mostra o código para digitar. Um pedido que você não iniciou abre o painel e só é aceito com o seu clique. Se o pareamento falha, o dispositivo mostra *Falha ao parear* e deixa de ser marcado como confiável.
-- **Gerenciador de Processos** (`CTRL+SHIFT+Esc`, o botão *Processos* no painel Recursos ou `qs -c kortex ipc call processes toggle`). Mostra o que está rodando na sessão agrupado por aplicativo, com a CPU e a memória de cada grupo e os totais da máquina. Busca por nome, comando ou PID, ordena pelas colunas e funciona pelo teclado. *Encerrar* pede confirmação e, se o programa não fechar em 3 s, vira *Forçar*. O instalador acrescenta o atalho ao `hyprland.conf`.
+- **Gerenciador de Processos** (`CTRL+SHIFT+Esc`, o botão *Processos* no painel Recursos ou `qs -c kortex ipc call processes toggle`). Mostra o que está rodando na sessão agrupado por aplicativo, com a CPU e a memória de cada grupo e os totais da máquina. Busca por nome, comando ou PID, ordena pelas colunas e funciona pelo teclado. *Encerrar* pede confirmação e, se o programa não fechar em 3 s, vira *Forçar*. O instalador acrescenta o atalho ao `hyprland.lua`.
 - **Tailscale no painel de rede.** Com o Tailscale instalado, uma seção mostra o estado, liga e desliga a conexão e lista os dispositivos da tailnet com o IP, que um clique copia. Sem o `--operator`, o Kortex pede a senha pelo polkit; o instalador passa a sugerir `sudo tailscale up --operator=$USER`.
+
+**Mudanças**
+
+- **Configuração do Hyprland em Lua.** O Hyprland 0.57 deixou de ler o `hyprland.conf`, e o Kortex passa a usar o `hyprland.lua` (Hyprland 0.55 ou mais novo). O `arch-setup.sh` grava o `hyprland.lua` com os mesmos atalhos, regras e aparência de antes e o `user.lua` para as suas personalizações (o conteúdo do `user.conf` vai junto, comentado, para você reescrever). O que o shell aplica ao vivo (animações, atalhos das áreas 6 a 10, Caps Lock e Num Lock, bordas, cantos, teclado, tela e as cores do tema) usa o `hyprctl eval`, e os arquivos de estado lidos pelo Hyprland viram `hyprland-colors.lua`, `monitors.lua` e `hyprland-terminal.lua`. Para migrar, rode o `arch-setup.sh` de novo e saia e entre na sessão; a resolução confirmada no widget de tela é convertida sozinha, e o `hypridle.conf` criado pelo instalador é corrigido. Os ajustes do HyprMod (`hyprland-gui.lua`) continuam carregados depois da reinstalação. Enquanto o Hyprland ainda usar o `hyprland.conf`, o Kortex avisa. O `hyprlock` continua no formato de antes e lê o `hyprland-colors.conf`.
 
 **Correções**
 
@@ -18,13 +22,21 @@
 - O botão direito também esquece um dispositivo que ficou confiável sem chegar a parear.
 - A escolha automática do tema de ícones pelo acento (`scripts/icon-theme.sh pick`) dependia do gawk; com outro awk, o nome saía quebrado. Agora funciona com qualquer awk.
 - `icon-theme.sh` e `matugen-generate.sh` voltam a ser executáveis, como os outros scripts.
+- O tema do btop deixava um arquivo temporário (`~/.config/btop/themes/.kortex.*`) cada vez que era reaplicado sem mudança, o que acontece a cada início do shell. Pode apagar os que sobraram.
+- As bordas das janelas saíam com a inativa opaca no login e depois de um `hyprctl reload`, e translúcida depois de uma troca de tema; com `hyprBorders` desligado, o login voltava a pintá-las com o tema. Agora o `hyprland-colors.lua` traz as bordas prontas e se elas seguem o tema, e o `hyprland.lua` as usa (rode o `arch-setup.sh` de novo para o `hyprland.lua` novo).
+- Uma instrução recusada pelo Hyprland no que o Kortex aplica ao vivo (atalhos, animações, regras das camadas) não leva mais junto as que vêm depois: cada uma roda protegida, e os erros aparecem juntos no `qs -c kortex log`.
+- Ligar ou desligar o desfoque do terminal recarregava também os monitores; volta a recarregar só a configuração.
+- *Restaurar padrões* também volta o relógio de 24 horas, que fica na página Barra.
+- O aviso de que o Hyprland ainda usa o `hyprland.conf` apontava para a seção errada do README, e a falha ao iniciar o `tailscaled` mostrava uma mensagem genérica.
 
 **Manutenção**
 
+- Revisão depois da migração para o Lua, feita com o Hyprland e o Quickshell rodando (relatório em `docs/auditoria-2026-11.md`), com a documentação de arquitetura, a estrutura e as dependências do README atualizadas.
 - Revisão completa do código (relatório em `docs/auditoria-2026-10.md`): imports, ícones e funções sem uso removidos, a cor `muted` que ia para a tela de login sem ser lida, comentários atualizados e cabeçalho nos arquivos que não tinham. Os arquivos QML deixam de ser executáveis.
 - Documentação para desenvolvimento (`CLAUDE.md` e `docs/`) e `dev/verificar.sh`, que confere scripts, QML e permissões sem precisar do Hyprland.
 - README: o diagnóstico do Matugen usa o modo de prévia do `matugen-generate.sh`, que não grava nada.
 - Janela de rede: o campo da máscara deixa de ter o id `mask`, que escondia a propriedade `mask` da janela.
+- `dev/verificar.sh` confere o `hyprland.lua` do instalador e o Lua que o shell gera, com o `dev/hl-mock.lua` e, havendo Hyprland, o `Hyprland --verify-config`.
 - `dev/verificar.sh` usa o `qmlformat` e o `qmllint` do Qt 6 mesmo com os do Qt 5 no `PATH` (eles acusavam erro de sintaxe em `?.`, espalhamento e funções com tipo), mostra as mensagens do Qt que iam para o journald e confere a sintaxe dos scripts em Python.
 
 ## 0.2 — 2026-10-07

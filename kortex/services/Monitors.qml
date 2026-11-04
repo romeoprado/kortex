@@ -4,12 +4,13 @@ import QtQuick
 import Quickshell
 import Quickshell.Io
 
-// Resolução, taxa de atualização e escala dos monitores, via hyprctl.
+// Resolução, taxa de atualização e escala dos monitores, via hyprctl (hl.monitor, em Lua).
 //
 // apply() aplica na hora e deixa a mudança "em teste": se não for confirmada em
 // `confirmSeconds`, o modo anterior volta sozinho (evita ficar preso numa tela preta).
-// Só o que foi confirmado é gravado em ~/.local/state/kortex/monitors.conf, que o
-// hyprland.conf carrega (`source`) — assim a escolha sobrevive a um reload e ao relogin.
+// Só o que foi confirmado é gravado em ~/.local/state/kortex/monitors.lua, que o
+// hyprland.lua carrega (dofile): assim a escolha sobrevive a um reload e ao relogin.
+// As regras ficam no settings.json no formato "2560x1440@165,0x0,1.6" (modo, posição e escala).
 Singleton {
     id: root
 
@@ -92,10 +93,17 @@ Singleton {
              + "," + m.x + "x" + m.y + "," + fmtNumber(m.scale)
     }
 
+    // hl.monitor de uma regra "DP-1,2560x1440@165,0x0,1.6"
+    function luaRule(r) {
+        const p = r.split(",")
+        return "hl.monitor({ output = " + HyprSync.lua(p[0]) + ", mode = " + HyprSync.lua(p[1])
+             + ", position = " + HyprSync.lua(p[2]) + ", scale = " + HyprSync.lua(p[3]) + " })"
+    }
+
     function writeConf() {
         const rules = Settings.data.monitorRules || {}
-        let text = "# Gerado pelo Kortex (widget de tela). Carregado pelo Hyprland.\n"
-        for (const name of Object.keys(rules)) text += "monitor = " + name + ", " + rules[name] + "\n"
+        let text = "-- Gerado pelo Kortex (widget de tela). Carregado pelo hyprland.lua.\n"
+        for (const name of Object.keys(rules)) text += luaRule(name + "," + rules[name]) + "\n"
         conf.setText(text)
     }
 
@@ -106,7 +114,7 @@ Singleton {
 
     function _pump() {
         if (setter.running || _queue.length === 0) return
-        setter.command = ["hyprctl", "keyword", "monitor", _queue[0]]
+        setter.command = ["hyprctl", "eval", luaRule(_queue[0])]
         _queue = _queue.slice(1)
         setter.running = true
     }
@@ -197,7 +205,7 @@ Singleton {
 
     FileView {
         id: conf
-        path: Settings.stateDir + "/monitors.conf"
+        path: Settings.stateDir + "/monitors.lua"
         printErrors: false
     }
 }

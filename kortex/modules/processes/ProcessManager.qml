@@ -75,7 +75,7 @@ LazyLoader {
         }
 
         function focusApp(pid) {
-            Quickshell.execDetached(["hyprctl", "dispatch", "focuswindow", "pid:" + pid])
+            Quickshell.execDetached(["hyprctl", "dispatch", "hl.dsp.focus({ window = \"pid:" + Number(pid) + "\" })"])
             close()
         }
 

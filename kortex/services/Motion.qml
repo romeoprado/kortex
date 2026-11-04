@@ -4,9 +4,9 @@ import QtQuick
 import Quickshell
 
 // Animações do Kortex (Configurações › Animações). Um só lugar para o que o Hyprland anima
-// (HyprSync aplica `hyprlandCommands`) e para o que o Qt anima (painéis da barra e avisos).
+// (HyprSync aplica `hyprlandLua`, em Lua) e para o que o Qt anima (painéis da barra e avisos).
 //
-// Curvas (Bézier; as molas do Hyprland só existem na configuração em Lua):
+// Curvas (Bézier):
 //  kortexOut  desaceleração forte: o que entra chega depressa e assenta devagar
 //  kortexIn   aceleração: o que sai parte devagar e some depressa
 //  kortexStd  padrão, para o que muda de lugar (mover/redimensionar, áreas de trabalho)
@@ -43,10 +43,22 @@ Singleton {
 
     function _speed(base) { return (base * factor).toFixed(2) }
 
-    readonly property var hyprlandCommands: {
-        if (!enabled) return ["keyword animations:enabled 0"]
+    // hl.curve de uma Bézier: os dois pontos de controle, [x1, y1, x2, y2]
+    function _curve(name, p) {
+        return 'hl.curve("' + name + '", { type = "bezier", points = { {' + p[0] + ", " + p[1] + "}, {" + p[2] + ", " + p[3] + "} } })"
+    }
 
-        const back = pick("0.05,0.7,0.1,1", "0.34,1.3,0.64,1", "0.34,1.56,0.64,1")
+    // hl.animation de uma folha da árvore de animações; o estilo é opcional
+    function _anim(leaf, speed, curve, style) {
+        return 'hl.animation({ leaf = "' + leaf + '", enabled = true, speed = ' + speed + ', bezier = "' + curve + '"'
+             + (style ? ', style = "' + style + '"' : "") + " })"
+    }
+
+    // Comandos em Lua (um por linha), mandados juntos num `hyprctl eval`
+    readonly property var hyprlandLua: {
+        if (!enabled) return ["hl.config({ animations = { enabled = false } })"]
+
+        const back = pick([0.05, 0.7, 0.1, 1], [0.34, 1.3, 0.64, 1], [0.34, 1.56, 0.64, 1])
         const winIn = windowStyle === "slide" ? "slide"
                     : windowStyle === "gnomed" ? "gnomed"
                     : "popin " + pick(92, 80, 70) + "%"
@@ -59,30 +71,30 @@ Singleton {
         const special = workspaceStyle === "fade" ? "fade" : pick("slidefadevert 15%", "slidefadevert 25%", "slidevert")
 
         return [
-            "keyword animations:enabled 1",
-            "keyword bezier kortexOut,0.05,0.7,0.1,1",
-            "keyword bezier kortexIn,0.3,0,0.8,0.15",
-            "keyword bezier kortexStd,0.2,0,0,1",
-            "keyword bezier kortexBack," + back,
+            "hl.config({ animations = { enabled = true } })",
+            _curve("kortexOut", [0.05, 0.7, 0.1, 1]),
+            _curve("kortexIn", [0.3, 0, 0.8, 0.15]),
+            _curve("kortexStd", [0.2, 0, 0, 1]),
+            _curve("kortexBack", back),
             // janelas: abrem com a mola e fecham mais depressa
-            "keyword animation windowsIn,1," + _speed(pick(3.5, 4.5, 5)) + ",kortexBack," + winIn,
-            "keyword animation windowsOut,1," + _speed(pick(1.8, 2.2, 2.5)) + ",kortexIn," + winOut,
-            "keyword animation windowsMove,1," + _speed(4) + "," + (level === 2 ? "kortexBack" : "kortexStd"),
-            "keyword animation fadeIn,1," + _speed(2.5) + ",kortexOut",
-            "keyword animation fadeOut,1," + _speed(2.2) + ",kortexIn",
-            "keyword animation fadeSwitch,1," + _speed(3) + ",kortexStd",
-            "keyword animation fadeDim,1," + _speed(3) + ",kortexStd",
-            "keyword animation border,1," + _speed(4) + ",kortexStd",
-            "keyword animation workspaces,1," + _speed(pick(3.5, 4.5, 5)) + ",kortexStd," + ws,
-            "keyword animation specialWorkspace,1," + _speed(4) + ",kortexOut," + special,
+            _anim("windowsIn", _speed(pick(3.5, 4.5, 5)), "kortexBack", winIn),
+            _anim("windowsOut", _speed(pick(1.8, 2.2, 2.5)), "kortexIn", winOut),
+            _anim("windowsMove", _speed(4), level === 2 ? "kortexBack" : "kortexStd"),
+            _anim("fadeIn", _speed(2.5), "kortexOut"),
+            _anim("fadeOut", _speed(2.2), "kortexIn"),
+            _anim("fadeSwitch", _speed(3), "kortexStd"),
+            _anim("fadeDim", _speed(3), "kortexStd"),
+            _anim("border", _speed(4), "kortexStd"),
+            _anim("workspaces", _speed(pick(3.5, 4.5, 5)), "kortexStd", ws),
+            _anim("specialWorkspace", _speed(4), "kortexOut", special),
             // camadas de qualquer programa esmaecem; as do Kortex têm regras próprias (HyprSync)
-            "keyword animation layersIn,1," + _speed(3.5) + ",kortexBack,fade",
-            "keyword animation layersOut,1," + _speed(2) + ",kortexIn,fade",
-            "keyword animation fadeLayersIn,1," + _speed(2.5) + ",kortexOut",
-            "keyword animation fadeLayersOut,1," + _speed(1.8) + ",kortexIn",
+            _anim("layersIn", _speed(3.5), "kortexBack", "fade"),
+            _anim("layersOut", _speed(2), "kortexIn", "fade"),
+            _anim("fadeLayersIn", _speed(2.5), "kortexOut"),
+            _anim("fadeLayersOut", _speed(1.8), "kortexIn"),
             // popups: menus de qualquer programa e os painéis da barra (que ainda se movem pelo Qt)
-            "keyword animation fadePopupsIn,1," + _speed(2) + ",kortexOut",
-            "keyword animation fadePopupsOut,1," + _speed(1.5) + ",kortexIn"
+            _anim("fadePopupsIn", _speed(2), "kortexOut"),
+            _anim("fadePopupsOut", _speed(1.5), "kortexIn")
         ]
     }
 }

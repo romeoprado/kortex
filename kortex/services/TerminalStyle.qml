@@ -7,9 +7,9 @@ import Quickshell
 //  • opacidade: vai para o Kitty pelo scripts/terminal-apply.sh (background_opacity num arquivo que o
 //    kitty-theme.conf inclui); os Kitty abertos recarregam sozinhos.
 //  • desfoque: é do Hyprland, que desfoca o que aparece por trás de uma janela translúcida. O mesmo script
-//    grava ~/.local/state/kortex/hyprland-terminal.conf (regra no_blur para a classe "kitty" quando desligado),
-//    que o hyprland.conf carrega, e manda o Hyprland recarregar se ele mudou.
-// Nada aqui grava no hyprland.conf.
+//    grava ~/.local/state/kortex/hyprland-terminal.lua (regra no_blur para a classe "kitty" quando desligado),
+//    que o hyprland.lua carrega, e manda o Hyprland recarregar se ele mudou.
+// Nada aqui grava no hyprland.lua.
 Singleton {
     id: root
 

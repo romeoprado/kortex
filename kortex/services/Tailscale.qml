@@ -181,7 +181,8 @@ Singleton {
         stderr: StdioCollector { id: startErr }
         onExited: code => {
             if (code !== 0) {
-                root.error = root.friendly(startErr.text) || "Não foi possível iniciar o tailscaled."
+                // friendly() sempre devolve um texto; sem mensagem do systemctl, vale a específica do serviço
+                root.error = startErr.text.trim() !== "" ? root.friendly(startErr.text) : "Não foi possível iniciar o tailscaled."
                 root.busy = false
                 root.refresh()
                 return

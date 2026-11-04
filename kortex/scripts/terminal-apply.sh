@@ -6,7 +6,7 @@
 #  • opacidade: grava ~/.local/state/kortex/kitty-window.conf (background_opacity), que o kitty-theme.conf
 #    inclui, e manda os Kitty abertos recarregarem a configuração.
 #  • desfoque: é do Hyprland, que desfoca o que aparece por trás de uma janela translúcida. Grava
-#    ~/.local/state/kortex/hyprland-terminal.conf, que o hyprland.conf carrega (`source`): vazio = desfoque
+#    ~/.local/state/kortex/hyprland-terminal.lua, que o hyprland.lua carrega (dofile): sem regra = desfoque
 #    ligado; desligado = regra `no_blur` para a classe kitty. Uma regra nova só chega às janelas já abertas
 #    depois de um reload, então, se o arquivo mudou, o script manda o Hyprland recarregar a configuração.
 pct="${1:-85}"
@@ -26,9 +26,9 @@ printf '# Gerado pelo Kortex (scripts/terminal-apply.sh): opacidade do terminal,
     $((pct / 100)) $((pct % 100)) > "$tmp_op"
 
 {
-    printf '# Gerado pelo Kortex (scripts/terminal-apply.sh): desfoque do terminal, escolhido em Configurações.\n'
-    printf '# Carregado pelo hyprland.conf. Sem regra = desfoque ligado (o Hyprland desfoca janelas translúcidas).\n'
-    [ "$blur" = 1 ] || printf 'windowrule = no_blur on, match:class ^kitty$\n'
+    printf -- '-- Gerado pelo Kortex (scripts/terminal-apply.sh): desfoque do terminal, escolhido em Configurações.\n'
+    printf -- '-- Carregado pelo hyprland.lua. Sem regra = desfoque ligado (o Hyprland desfoca janelas translúcidas).\n'
+    [ "$blur" = 1 ] || printf 'hl.window_rule({ name = "kortex-terminal-no-blur", match = { class = "^kitty$" }, no_blur = true })\n'
 } > "$tmp_bl"
 
 # Opacidade
@@ -40,7 +40,7 @@ if ! { [ -f "$out" ] && cmp -s "$tmp_op" "$out"; }; then
 fi
 
 # Desfoque: um arquivo que ainda não existia equivale ao padrão (ligado), então só pede reload se houver regra
-out="$state/hyprland-terminal.conf"
+out="$state/hyprland-terminal.lua"
 reload=0
 if [ -f "$out" ]; then
     cmp -s "$tmp_bl" "$out" || reload=1
@@ -52,6 +52,7 @@ if [ ! -f "$out" ] || [ "$reload" = 1 ]; then
     mv -f "$tmp_bl" "$out"
 fi
 if [ "$reload" = 1 ] && [ -n "${HYPRLAND_INSTANCE_SIGNATURE:-}" ] && command -v hyprctl >/dev/null; then
+    # config-only: a regra nova só precisa da configuração; sem ele o Hyprland refaria também os monitores
     hyprctl reload config-only >/dev/null 2>&1 || true
 fi
 exit 0

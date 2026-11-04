@@ -106,7 +106,7 @@ backup() {    # guarda uma cópia antes de sobrescrever
     info "backup: $1.bak-$STAMP"
 }
 
-# Layouts de teclado: só entra no hyprland.conf o que o XKB (xkeyboard-config) conhece; um código
+# Layouts de teclado: só entra no hyprland.lua o que o XKB (xkeyboard-config) conhece; um código
 # inválido faz o Hyprland cair no layout "us" já no primeiro boot. Confere nos arquivos symbols/,
 # que são o que o XKB carrega de fato (o evdev.lst não lista variantes como br(abnt2)).
 kb_known() {    # kb_known layout [variante]
@@ -429,6 +429,18 @@ fi
 command -v qs >/dev/null || die "O Quickshell (qs) não foi instalado."
 ok "Quickshell $(qs --version 2>/dev/null | head -1 || echo instalado)"
 
+# O Kortex e o hyprland.lua gravado aqui exigem a configuração em Lua (Hyprland 0.55 ou mais novo).
+# Com o pacote do Arch isso já vem; o aviso cobre um Hyprland compilado à mão ou de outra fonte.
+HYPR_VER="$(Hyprland --version 2>/dev/null | sed -nE '1s/^Hyprland ([0-9]+)\.([0-9]+).*/\1 \2/p')"
+if [ -n "$HYPR_VER" ]; then
+    read -r HV_MAJ HV_MIN <<<"$HYPR_VER"
+    if [ "$HV_MAJ" -eq 0 ] && [ "$HV_MIN" -lt 55 ]; then
+        warn "Hyprland $HV_MAJ.$HV_MIN: o Kortex precisa do 0.55 ou mais novo (configuração em Lua). Atualize com: sudo pacman -Syu hyprland"
+    else
+        ok "Hyprland $HV_MAJ.$HV_MIN"
+    fi
+fi
+
 # --------------------------------------------------------------- serviços ----
 step "Configurando serviços"
 
@@ -478,12 +490,22 @@ chmod +x "$DEST"/scripts/*.sh
 
 STATE="${XDG_STATE_HOME:-$HOME/.local/state}/kortex"
 mkdir -p "$STATE"
+# Cores do tema para o hyprlock (o shell grava também o hyprland-colors.lua, que o hyprland.lua lê)
 touch "$STATE/hyprland-colors.conf"
-# Resolução/taxa/escala confirmadas no widget de tela (o hyprland.conf carrega este arquivo).
-# Não sobrescreve: numa reinstalação, a configuração de tela do usuário é preservada.
-[ -f "$STATE/monitors.conf" ] || printf '# Gerado pelo Kortex (widget de tela). Carregado pelo Hyprland.\n' > "$STATE/monitors.conf"
-# Desfoque do terminal (Configurações › Aparência): o shell reescreve este arquivo; vazio = desfoque ligado
-[ -f "$STATE/hyprland-terminal.conf" ] || printf '# Gerado pelo Kortex (Configurações). Carregado pelo Hyprland.\n' > "$STATE/hyprland-terminal.conf"
+# Resolução/taxa/escala confirmadas no widget de tela (o hyprland.lua carrega este arquivo).
+# Não sobrescreve: numa reinstalação, a configuração de tela do usuário é preservada. Quem vem do
+# formato antigo tem as regras do monitors.conf convertidas para hl.monitor.
+if [ ! -f "$STATE/monitors.lua" ]; then
+    {
+        printf -- '-- Gerado pelo Kortex (widget de tela). Carregado pelo hyprland.lua.\n'
+        [ -f "$STATE/monitors.conf" ] && awk -F', *' '/^monitor *= */ {
+            sub(/^monitor *= */, "")
+            if (NF >= 4) printf "hl.monitor({ output = \"%s\", mode = \"%s\", position = \"%s\", scale = \"%s\" })\n", $1, $2, $3, $4
+        }' "$STATE/monitors.conf"
+    } > "$STATE/monitors.lua"
+fi
+# Desfoque do terminal (Configurações › Aparência): o shell reescreve este arquivo; sem regra = desfoque ligado
+[ -f "$STATE/hyprland-terminal.lua" ] || printf -- '-- Gerado pelo Kortex (Configurações). Carregado pelo hyprland.lua.\n' > "$STATE/hyprland-terminal.lua"
 
 # Terminal escolhido vira o padrão do Kortex (só se ainda não há configurações)
 if [ ! -f "$STATE/settings.json" ]; then
@@ -542,195 +564,231 @@ if [ "$WRITE_HYPR" = 1 ]; then
     HYPR="$HOME/.config/hypr"
     mkdir -p "$HYPR"
 
-    # hyprland.conf
-    if [ -f "$HYPR/hyprland.conf" ] && ! grep -q "Kortex" "$HYPR/hyprland.conf"; then
-        backup "$HYPR/hyprland.conf"
+    # hyprland.lua (desde o Hyprland 0.55 a configuração é em Lua; o 0.57 já não lê o hyprland.conf).
+    # Com um hyprland.lua presente, o Hyprland ignora o hyprland.conf, que fica onde está.
+    if [ -f "$HYPR/hyprland.lua" ] && ! grep -q "Kortex" "$HYPR/hyprland.lua"; then
+        backup "$HYPR/hyprland.lua"
     fi
 
     NVIDIA_ENV=""
     if [ "$HAS_NVIDIA" = 1 ] && [ -z "$VIRT" ] && [ "$INSTALL_DRIVERS" = 1 ]; then
-        NVIDIA_ENV="
-# NVIDIA
-env = LIBVA_DRIVER_NAME,nvidia
-env = __GLX_VENDOR_LIBRARY_NAME,nvidia
-env = NVD_BACKEND,direct"
+        NVIDIA_ENV='
+-- NVIDIA
+hl.env("LIBVA_DRIVER_NAME", "nvidia")
+hl.env("__GLX_VENDOR_LIBRARY_NAME", "nvidia")
+hl.env("NVD_BACKEND", "direct")'
     fi
     VM_ENV=""
     if [ -n "$VIRT" ]; then
-        VM_ENV="
-# Máquina virtual: cursor por software
-cursor {
-    no_hardware_cursors = 1
-}"
+        VM_ENV='
+-- Máquina virtual: cursor por software
+hl.config({ cursor = { no_hardware_cursors = 1 } })'
     fi
 
     kb_sanitize    # de novo: agora o catálogo do xkeyboard-config já está instalado
 
-    cat > "$HYPR/hyprland.conf" <<CONF
-# =============================================================================
-#  Hyprland — gerado pelo instalador do Kortex em $(date +%F)
-#  Documentação: https://wiki.hypr.land
-#  Suas personalizações: coloque em ~/.config/hypr/user.conf (carregado no fim)
-# =============================================================================
+    cat > "$HYPR/hyprland.lua" <<CONF
+-- =============================================================================
+--  Hyprland: gerado pelo instalador do Kortex em $(date +%F)
+--  Documentação: https://wiki.hypr.land
+--  Suas personalizações: coloque em ~/.config/hypr/user.lua (carregado no fim)
+-- =============================================================================
 
-monitor = , preferred, auto, 1
-# Resolução, taxa e escala por monitor, escolhidas no widget de tela do Kortex
-source = $STATE/monitors.conf
-# Desfoque do terminal (regra de janela), escolhido em Configurações › Aparência › Terminal
-source = $STATE/hyprland-terminal.conf
+local state      = "$STATE"
+local kortex_dir = "$DEST"
 
-# Terminal, explorador de arquivos e navegador: o open-app.sh abre o que foi escolhido em
-# Configurações › Aplicativos (lê ~/.local/state/kortex/apps.sh), então a troca vale sem editar este arquivo.
-\$terminal    = $DEST/scripts/open-app.sh terminal
-\$fileManager = $DEST/scripts/open-app.sh files
-\$browser     = $DEST/scripts/open-app.sh browser
-\$kortex        = qs -c kortex ipc call
+-- Carrega um arquivo que o Kortex grava em ~/.local/state/kortex. Um arquivo que ainda não existe
+-- não é erro, e um erro dentro dele vira um aviso em vez de interromper o resto desta configuração.
+local function kortex_load(name)
+    local path = state .. "/" .. name
+    local f = io.open(path, "r")
+    if not f then return nil end
+    f:close()
+    local ok, ret = pcall(dofile, path)
+    if ok then return ret end
+    pcall(hl.notification.create, { text = "Kortex: " .. tostring(ret), timeout = 10000, icon = "error" })
+    return nil
+end
 
-# ---------------------------------------------------------------- cores ----
-# Valores padrão; o tema ativo do Kortex sobrescreve pelo arquivo abaixo.
-\$kortex_accent = rgb(686868)
-\$kortex_bg     = rgb(222222)
-\$kortex_fg     = rgb(ffffff)
-\$kortex_muted  = rgb(525252)
-\$kortex_red    = rgb(7c7c7c)
-source = $STATE/hyprland-colors.conf
+hl.monitor({ output = "", mode = "preferred", position = "auto", scale = 1 })
+-- Resolução, taxa e escala por monitor, escolhidas no widget de tela do Kortex
+kortex_load("monitors.lua")
+-- Desfoque do terminal (regra de janela), escolhido em Configurações › Aparência › Terminal
+kortex_load("hyprland-terminal.lua")
 
-# ------------------------------------------------------------- ambiente ----
-env = XCURSOR_SIZE,22
-env = HYPRCURSOR_SIZE,24
-env = QT_QPA_PLATFORM,wayland;xcb
-env = ELECTRON_OZONE_PLATFORM_HINT,auto
-env = TERMINAL,$TERMINAL_APP
+-- Terminal, explorador de arquivos e navegador: o open-app.sh abre o que foi escolhido em
+-- Configurações › Aplicativos (lê ~/.local/state/kortex/apps.sh), então a troca vale sem editar este arquivo.
+local terminal    = kortex_dir .. "/scripts/open-app.sh terminal"
+local fileManager = kortex_dir .. "/scripts/open-app.sh files"
+local browser     = kortex_dir .. "/scripts/open-app.sh browser"
+local kortex      = "qs -c kortex ipc call"
+
+-- ----------------------------------------------------------------- cores ----
+-- Valores padrão (Morello); o tema ativo do Kortex sobrescreve pelo hyprland-colors.lua, que também
+-- traz as bordas prontas (a inativa translúcida, como o Kortex aplica ao vivo) e se elas seguem o tema
+-- (Settings.data.hyprBorders). Desligado, as bordas ficam nas cores padrão do Hyprland.
+local colors = {
+    accent          = "rgb(686868)",
+    bg              = "rgb(222222)",
+    fg              = "rgb(ffffff)",
+    muted           = "rgb(525252)",
+    red             = "rgb(7c7c7c)",
+    borders         = true,
+    active_border   = "rgb(686868)",
+    inactive_border = "rgba(525252aa)",
+}
+local theme = kortex_load("hyprland-colors.lua")
+if type(theme) == "table" then
+    for k, v in pairs(theme) do colors[k] = v end
+end
+local border_colors = nil
+if colors.borders ~= false then
+    border_colors = { active_border = colors.active_border, inactive_border = colors.inactive_border }
+end
+
+-- -------------------------------------------------------------- ambiente ----
+hl.env("XCURSOR_SIZE", "22")
+hl.env("HYPRCURSOR_SIZE", "24")
+hl.env("QT_QPA_PLATFORM", "wayland;xcb")
+hl.env("ELECTRON_OZONE_PLATFORM_HINT", "auto")
+hl.env("TERMINAL", "$TERMINAL_APP")
 $NVIDIA_ENV
 
-# -------------------------------------------------------------- início ----
-exec-once = systemctl --user start hyprpolkitagent
-exec-once = hypridle
-exec-once = qs -c kortex
+-- ---------------------------------------------------------------- início ----
+hl.on("hyprland.start", function()
+    hl.exec_cmd("systemctl --user start hyprpolkitagent")
+    hl.exec_cmd("hypridle")
+    hl.exec_cmd("qs -c kortex")
+end)
 
-# ------------------------------------------------------------ aparência ----
-general {
-    gaps_in = 3
-    gaps_out = 6
-    border_size = 1
-    col.active_border = \$kortex_accent
-    col.inactive_border = \$kortex_muted
-    layout = master
-    resize_on_border = false
-}
+-- ------------------------------------------------------------- aparência ----
+hl.config({
+    general = {
+        gaps_in          = 3,
+        gaps_out         = 6,
+        border_size      = 1,
+        col              = border_colors,
+        layout           = "master",
+        resize_on_border = false,
+    },
 
-decoration {
-    rounding = 8
-    inactive_opacity = 1.0
-    shadow {
-        enabled = false
-    }
-    blur {
-        enabled = true
-        size = 4
-        passes = 2
-    }
-}
+    decoration = {
+        rounding         = 8,
+        inactive_opacity = 1.0,
+        shadow = { enabled = false },
+        blur   = { enabled = true, size = 4, passes = 2 },
+    },
 
-animations {
-    enabled = true
-}
+    animations = { enabled = true },
 
-dwindle {
-    preserve_split = true
-}
+    dwindle = { preserve_split = true },
 
-misc {
-    disable_hyprland_logo = true
-    disable_splash_rendering = true
-}
+    misc = {
+        disable_hyprland_logo    = true,
+        disable_splash_rendering = true,
+    },
+
+    -- ------------------------------------------------------------- entrada --
+    input = {
+        kb_layout    = "$KB_LAYOUT",
+        kb_variant   = "$KB_VARIANT",
+        follow_mouse = 1,
+        touchpad = { natural_scroll = true },
+    },
+})
 $VM_ENV
 
-# ---------------------------------------------------------------- entrada --
-input {
-    kb_layout = $KB_LAYOUT
-    kb_variant = $KB_VARIANT
-    follow_mouse = 1
-    touchpad {
-        natural_scroll = true
-    }
-}
+-- --------------------------------------------------------------- atalhos ----
+hl.bind("SUPER + RETURN", hl.dsp.exec_cmd(terminal))
+hl.bind("SUPER + E", hl.dsp.exec_cmd(fileManager))
+hl.bind("SUPER + W", hl.dsp.exec_cmd(browser))
+hl.bind("SUPER + SPACE", hl.dsp.exec_cmd(kortex .. " launcher toggle"))
+hl.bind("SUPER + C", hl.dsp.window.close())
+hl.bind("SUPER + F", hl.dsp.window.fullscreen())
+hl.bind("SUPER + V", hl.dsp.window.float({ action = "toggle" }))
+hl.bind("SUPER + CTRL + L", hl.dsp.exec_cmd("pidof hyprlock || hyprlock"))
 
-# ------------------------------------------------------------- atalhos ----
-bind = SUPER, RETURN, exec, \$terminal
-bind = SUPER, E, exec, \$fileManager
-bind = SUPER, W, exec, \$browser
-bind = SUPER, SPACE, exec, \$kortex launcher toggle
-bind = SUPER, C, killactive
-bind = SUPER, F, fullscreen
-bind = SUPER, V, togglefloating
-bind = SUPER CTRL, L, exec, pidof hyprlock || hyprlock
+-- Kortex
+hl.bind("SUPER + SHIFT + T", hl.dsp.exec_cmd(kortex .. " themes toggle"))
+hl.bind("SUPER + SHIFT + W", hl.dsp.exec_cmd(kortex .. " themes carousel"))
+hl.bind("SUPER + CTRL + W", hl.dsp.exec_cmd(kortex .. " themes randomWallpaper"))
+hl.bind("SUPER + N", hl.dsp.exec_cmd(kortex .. " notifications toggleDnd"))
+hl.bind("SUPER + SHIFT + N", hl.dsp.exec_cmd(kortex .. " notifications clear"))
+hl.bind("SUPER + comma", hl.dsp.exec_cmd(kortex .. " settings toggle"))
+hl.bind("SUPER + SHIFT + A", hl.dsp.exec_cmd(kortex .. " keepAwake toggle"))
 
-# Kortex
-bind = SUPER SHIFT, T, exec, \$kortex themes toggle
-bind = SUPER SHIFT, W, exec, \$kortex themes carousel
-bind = SUPER CTRL, W, exec, \$kortex themes randomWallpaper
-bind = SUPER, N, exec, \$kortex notifications toggleDnd
-bind = SUPER SHIFT, N, exec, \$kortex notifications clear
-bind = SUPER, comma, exec, \$kortex settings toggle
-bind = SUPER SHIFT, A, exec, \$kortex keepAwake toggle
+-- Foco e movimento
+for key, dir in pairs({ left = "left", right = "right", up = "up", down = "down" }) do
+    hl.bind("SUPER + " .. key, hl.dsp.focus({ direction = dir }))
+    hl.bind("SUPER + SHIFT + " .. key, hl.dsp.window.move({ direction = dir }))
+end
 
-# Foco e movimento
-bind = SUPER, left, movefocus, l
-bind = SUPER, right, movefocus, r
-bind = SUPER, up, movefocus, u
-bind = SUPER, down, movefocus, d
-bind = SUPER SHIFT, left, movewindow, l
-bind = SUPER SHIFT, right, movewindow, r
-bind = SUPER SHIFT, up, movewindow, u
-bind = SUPER SHIFT, down, movewindow, d
+-- Áreas de trabalho 1–5 (a barra pode mostrar até 10 nas Configurações; o Kortex cria SUPER+6…0 quando precisar)
+for i = 1, 5 do
+    hl.bind("SUPER + " .. i, hl.dsp.focus({ workspace = i }))
+    hl.bind("SUPER + SHIFT + " .. i, hl.dsp.window.move({ workspace = i }))
+end
+hl.bind("SUPER + mouse_down", hl.dsp.focus({ workspace = "e+1" }))
+hl.bind("SUPER + mouse_up", hl.dsp.focus({ workspace = "e-1" }))
 
-# Áreas de trabalho 1–5 (a barra pode mostrar até 10 nas Configurações; o Kortex cria SUPER+6…0 quando precisar)
-bind = SUPER, 1, workspace, 1
-bind = SUPER, 2, workspace, 2
-bind = SUPER, 3, workspace, 3
-bind = SUPER, 4, workspace, 4
-bind = SUPER, 5, workspace, 5
-bind = SUPER SHIFT, 1, movetoworkspace, 1
-bind = SUPER SHIFT, 2, movetoworkspace, 2
-bind = SUPER SHIFT, 3, movetoworkspace, 3
-bind = SUPER SHIFT, 4, movetoworkspace, 4
-bind = SUPER SHIFT, 5, movetoworkspace, 5
-bind = SUPER, mouse_down, workspace, e+1
-bind = SUPER, mouse_up, workspace, e-1
+-- Mouse: SUPER + arrastar move / redimensiona
+hl.bind("SUPER + mouse:272", hl.dsp.window.drag(), { mouse = true })
+hl.bind("SUPER + mouse:273", hl.dsp.window.resize(), { mouse = true })
 
-# Mouse: SUPER + arrastar move / redimensiona
-bindm = SUPER, mouse:272, movewindow
-bindm = SUPER, mouse:273, resizewindow
+-- Captura de tela do Kortex: tela inteira, janela ou área; depois escolhe nome, formato e pasta
+hl.bind("Print", hl.dsp.exec_cmd(kortex .. " screenshot toggle"))
+-- Gravação de tela (áudio e vídeo): o mesmo menu, com o áudio; repetir o atalho para a gravação
+hl.bind("SHIFT + Print", hl.dsp.exec_cmd(kortex .. " record toggle"))
 
-# Captura de tela do Kortex: tela inteira, janela ou área; depois escolhe nome, formato e pasta
-bind = , Print, exec, \$kortex screenshot toggle
-# Gravação de tela (áudio e vídeo): o mesmo menu, com o áudio; repetir o atalho para a gravação
-bind = SHIFT, Print, exec, \$kortex record toggle
+-- Gerenciador de Processos do Kortex: o que está rodando, por aplicativo, com CPU, memória e Encerrar
+hl.bind("CTRL + SHIFT + Escape", hl.dsp.exec_cmd(kortex .. " processes toggle"))
 
-# Gerenciador de Processos do Kortex: o que está rodando, por aplicativo, com CPU, memória e Encerrar
-bind = CTRL SHIFT, Escape, exec, \$kortex processes toggle
+-- Teclas de mídia (funcionam também com a tela bloqueada; volume e brilho repetem ao segurar)
+local held = { locked = true, repeating = true }
+hl.bind("XF86AudioRaiseVolume", hl.dsp.exec_cmd("wpctl set-volume -l 1 @DEFAULT_AUDIO_SINK@ 5%+"), held)
+hl.bind("XF86AudioLowerVolume", hl.dsp.exec_cmd("wpctl set-volume @DEFAULT_AUDIO_SINK@ 5%-"), held)
+hl.bind("XF86AudioMute", hl.dsp.exec_cmd("wpctl set-mute @DEFAULT_AUDIO_SINK@ toggle"), { locked = true })
+hl.bind("XF86AudioMicMute", hl.dsp.exec_cmd("wpctl set-mute @DEFAULT_AUDIO_SOURCE@ toggle"), { locked = true })
+hl.bind("XF86MonBrightnessUp", hl.dsp.exec_cmd(kortex_dir .. "/scripts/brightness.sh -e4 -n2 set 5%+"), held)
+hl.bind("XF86MonBrightnessDown", hl.dsp.exec_cmd(kortex_dir .. "/scripts/brightness.sh -e4 -n2 set 5%-"), held)
+hl.bind("XF86AudioPlay", hl.dsp.exec_cmd("playerctl play-pause"), { locked = true })
+hl.bind("XF86AudioNext", hl.dsp.exec_cmd("playerctl next"), { locked = true })
+hl.bind("XF86AudioPrev", hl.dsp.exec_cmd("playerctl previous"), { locked = true })
 
-# Teclas de mídia
-bindel = , XF86AudioRaiseVolume, exec, wpctl set-volume -l 1 @DEFAULT_AUDIO_SINK@ 5%+
-bindel = , XF86AudioLowerVolume, exec, wpctl set-volume @DEFAULT_AUDIO_SINK@ 5%-
-bindl  = , XF86AudioMute, exec, wpctl set-mute @DEFAULT_AUDIO_SINK@ toggle
-bindl  = , XF86AudioMicMute, exec, wpctl set-mute @DEFAULT_AUDIO_SOURCE@ toggle
-bindel = , XF86MonBrightnessUp, exec, $DEST/scripts/brightness.sh -e4 -n2 set 5%+
-bindel = , XF86MonBrightnessDown, exec, $DEST/scripts/brightness.sh -e4 -n2 set 5%-
-bindl  = , XF86AudioPlay, exec, playerctl play-pause
-bindl  = , XF86AudioNext, exec, playerctl next
-bindl  = , XF86AudioPrev, exec, playerctl previous
+-- --------------------------------------------------------------- janelas ----
+-- Abrem flutuantes: Calculadora, Discos, HyprMod, Visualizador de Imagens e Controle de Volume
+hl.window_rule({
+    name  = "kortex-float",
+    match = { class = [[^(org\.gnome\.Calculator|org\.gnome\.DiskUtility|io\.github\.bluemancz\.hyprmod|org\.gnome\.Loupe|org\.pulseaudio\.pavucontrol)\$]] },
+    float = true,
+})
 
-# -------------------------------------------------------------- janelas ----
-# Abrem flutuantes: Calculadora, Discos, HyprMod, Visualizador de Imagens e Controle de Volume
-windowrule = float on, match:class ^(org\.gnome\.Calculator|org\.gnome\.DiskUtility|io\.github\.bluemancz\.hyprmod|org\.gnome\.Loupe|org\.pulseaudio\.pavucontrol)\$
-
-# --------------------------------------------------------- do usuário ----
-source = $HYPR/user.conf
+-- ------------------------------------------------------------ do usuário ----
+-- Um erro no user.lua aparece como erro de configuração (hyprctl configerrors) sem desfazer o que está
+-- acima; o pcall só cobre o user.lua apagado.
+pcall(require, "user")
 CONF
-    [ -f "$HYPR/user.conf" ] || printf '# Suas configurações pessoais do Hyprland (este arquivo não é sobrescrito)\n' > "$HYPR/user.conf"
-    ok "hyprland.conf"
+    if [ ! -f "$HYPR/user.lua" ]; then
+        {
+            printf -- '-- Suas configurações pessoais do Hyprland, em Lua (este arquivo não é sobrescrito).\n'
+            printf -- '-- Sintaxe: https://wiki.hypr.land/configuring/ (hl.config, hl.bind, hl.window_rule…)\n'
+            # Personalizações do hyprland.conf antigo: vão comentadas, para você portar para o Lua
+            if [ -f "$HYPR/user.conf" ] && grep -qv '^[[:space:]]*\(#.*\)\?$' "$HYPR/user.conf"; then
+                printf -- '\n-- Conteúdo do user.conf (formato antigo, que o Hyprland não lê mais). Reescreva em Lua:\n'
+                sed 's/^/-- /' "$HYPR/user.conf"
+                warn "Seu ~/.config/hypr/user.conf foi copiado, comentado, para o user.lua: reescreva-o em Lua."
+            fi
+        } > "$HYPR/user.lua"
+    fi
+    # O HyprMod grava os ajustes dele no hyprland-gui.lua e acrescenta o require no fim do hyprland.lua.
+    # Como o arquivo acima foi regravado inteiro, a linha volta aqui, com o mesmo marcador que o HyprMod
+    # procura (assim ele não a acrescenta de novo). Fica depois do user.lua, onde o HyprMod a poria.
+    if [ -f "$HYPR/hyprland-gui.lua" ]; then
+        printf -- '\n-- HyprMod managed settings\nrequire("hyprland-gui")\n' >> "$HYPR/hyprland.lua"
+    elif [ -f "$HYPR/hyprland-gui.conf" ]; then
+        warn "O HyprMod gravou ajustes no formato antigo (hyprland-gui.conf). Abra o HyprMod para migrá-los ao Lua."
+    fi
+    ok "hyprland.lua"
 
     # hypridle.conf
     if [ ! -f "$HYPR/hypridle.conf" ]; then
@@ -738,7 +796,7 @@ CONF
 general {
     lock_cmd = pidof hyprlock || hyprlock
     before_sleep_cmd = loginctl lock-session
-    after_sleep_cmd = hyprctl dispatch dpms on
+    after_sleep_cmd = hyprctl dispatch 'hl.dsp.dpms({ action = "enable" })'
 }
 
 # 5 min: bloqueia
@@ -750,11 +808,18 @@ listener {
 # 5,5 min: desliga a tela
 listener {
     timeout = 330
-    on-timeout = hyprctl dispatch dpms off
-    on-resume = hyprctl dispatch dpms on
+    on-timeout = hyprctl dispatch 'hl.dsp.dpms({ action = "disable" })'
+    on-resume = hyprctl dispatch 'hl.dsp.dpms({ action = "enable" })'
 }
 CONF
         ok "hypridle.conf (bloqueio após 5 min)"
+    elif grep -q 'hyprctl dispatch dpms' "$HYPR/hypridle.conf"; then
+        # O hypridle.conf de uma instalação antiga desliga a tela com o dispatch do formato antigo,
+        # que o Hyprland em Lua recusa: passa para hl.dsp.dpms
+        backup "$HYPR/hypridle.conf"
+        sed -i -e "s/hyprctl dispatch dpms on/hyprctl dispatch 'hl.dsp.dpms({ action = \"enable\" })'/g" \
+               -e "s/hyprctl dispatch dpms off/hyprctl dispatch 'hl.dsp.dpms({ action = \"disable\" })'/g" "$HYPR/hypridle.conf"
+        ok "hypridle.conf (desligar a tela no formato em Lua)"
     fi
 
     # hyprlock.conf
@@ -886,7 +951,7 @@ ${LOGIN_NOTE}  Atalhos principais:
 
   Arquivos:
       Shell:        $DEST
-      Hyprland:     ~/.config/hypr/hyprland.conf  (personalize em user.conf)
+      Hyprland:     ~/.config/hypr/hyprland.lua  (personalize em user.lua)
       Log:          $LOG
 
   Firefox (cores do tema):  depois de abri-lo uma vez, o Kortex o configura sozinho

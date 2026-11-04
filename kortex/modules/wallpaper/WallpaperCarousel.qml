@@ -72,8 +72,8 @@ LazyLoader {
         Component.onCompleted: {
             const ws = Hyprland.focusedMonitor?.activeWorkspace
             if (!overlay && ws && ws.toplevels.values.length > 0) {
-                returnTo = ws.id > 0 ? String(ws.id) : "name:" + ws.name
-                Hyprland.dispatch("workspace emptym")
+                returnTo = ws.id > 0 ? String(ws.id) : ws.name
+                Hyprland.dispatch('hl.dsp.focus({ workspace = "emptym" })')
             }
             load()
             Theme.listWallpapers()
@@ -81,7 +81,7 @@ LazyLoader {
         }
         Component.onDestruction: {
             Theme.previewWallpaper = ""
-            if (returnTo !== "") Hyprland.dispatch("workspace " + returnTo)
+            if (returnTo !== "") Hyprland.dispatch("hl.dsp.focus({ workspace = " + HyprSync.lua(returnTo) + " })")
         }
 
         // ── Prévia em tela cheia, só sem o papel de parede do shell ───────

@@ -59,7 +59,7 @@ BarButton {
         switch (a.id) {
         case "lock": Settings.shell(Settings.data.lockCommand); break
         case "suspend": Quickshell.execDetached(["systemctl", "suspend"]); break
-        case "logout": Hyprland.dispatch("exit"); break
+        case "logout": Hyprland.dispatch("hl.dsp.exit()"); break
         case "reboot": Quickshell.execDetached(["systemctl", "reboot"]); break
         case "firmware": Quickshell.execDetached(["systemctl", "reboot", "--firmware-setup"]); break
         case "shutdown": Quickshell.execDetached(["systemctl", "poweroff"]); break

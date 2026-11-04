@@ -14,7 +14,9 @@ mkdir -p "$state"
 ln -nsf "$dir" "$state/current-theme"
 printf '%s\n' "$name" > "$state/theme.name"
 
-strip() { printf '%s' "${1#\#}"; }
+# Cor sem o "#", para o Hyprland e o hyprlock. Só passa hexadecimal de 6 dígitos: o hyprland-colors.lua é
+# código que o Hyprland executa, e nada vindo de um tema pode virar código ali
+strip() { local c="${1#\#}"; [[ "$c" =~ ^[0-9a-fA-F]{6}$ ]] && printf '%s' "$c" || printf '888888'; }
 
 # Variáveis para outros programas
 {
@@ -26,7 +28,7 @@ strip() { printf '%s' "${1#\#}"; }
     printf 'KORTEX_GREEN=%q\nKORTEX_BLUE=%q\nKORTEX_MAGENTA=%q\nKORTEX_CYAN=%q\n' "$green" "$blue" "$magenta" "$cyan"
 } > "$state/colors.sh"
 
-# Lido pelo Hyprland e também pelo hyprlock (tela de bloqueio): só variáveis, nada específico de um deles
+# Lido pelo hyprlock (tela de bloqueio), que continua no formato hyprlang: só variáveis
 cat > "$state/hyprland-colors.conf" <<CONF
 \$kortex_accent = rgb($(strip "$accent"))
 \$kortex_accent2 = rgb($(strip "$accent2"))
@@ -39,6 +41,29 @@ cat > "$state/hyprland-colors.conf" <<CONF
 \$kortex_red = rgb($(strip "$red"))
 \$kortex_yellow = rgb($(strip "$yellow"))
 CONF
+
+# Lido pelo hyprland.lua (dofile): a mesma paleta, como uma tabela do Lua. As bordas das janelas vão
+# prontas (a inativa com o alfa) e só valem com hyprBorders ligado, para o login e o "hyprctl reload"
+# darem as mesmas bordas que a troca de tema ao vivo, logo abaixo
+[ "$borders" = 1 ] && borders_lua=true || borders_lua=false
+cat > "$state/hyprland-colors.lua" <<LUA
+-- Gerado pelo Kortex (scripts/theme-apply.sh) a cada troca de tema. Carregado pelo hyprland.lua.
+return {
+    borders         = $borders_lua,   -- Settings.data.hyprBorders: as bordas das janelas seguem o tema
+    active_border   = "rgb($(strip "$accent"))",
+    inactive_border = "rgba($(strip "$muted")aa)",
+    accent    = "rgb($(strip "$accent"))",
+    accent2   = "rgb($(strip "$accent2"))",
+    bg        = "rgb($(strip "$bg"))",
+    bg_alt    = "rgb($(strip "$bg_alt"))",
+    fg        = "rgb($(strip "$fg"))",
+    fg_bright = "rgb($(strip "$fg_bright"))",
+    fg_dim    = "rgb($(strip "$fg_dim"))",
+    muted     = "rgb($(strip "$muted"))",
+    red       = "rgb($(strip "$red"))",
+    yellow    = "rgb($(strip "$yellow"))",
+}
+LUA
 
 cat > "$state/colors.css" <<CSS
 @define-color kortex_accent $accent;
@@ -74,9 +99,9 @@ bash "$(dirname "$0")/firefox-theme.sh" || true
 # se o gnome-setup.sh já os configurou
 bash "$(dirname "$0")/gnome-theme.sh" || true
 
-# Bordas das janelas do Hyprland, ao vivo
+# Bordas das janelas do Hyprland, ao vivo (em Lua; com o hyprland.conf antigo, o eval só é recusado)
 if [ "$borders" = 1 ] && [ -n "${HYPRLAND_INSTANCE_SIGNATURE:-}" ] && command -v hyprctl >/dev/null; then
-    hyprctl --batch "keyword general:col.active_border rgb($(strip "$accent")) ; keyword general:col.inactive_border rgba($(strip "$muted")aa)" >/dev/null 2>&1 || true
+    hyprctl eval "hl.config({ general = { col = { active_border = \"rgb($(strip "$accent"))\", inactive_border = \"rgba($(strip "$muted")aa)\" } } })" >/dev/null 2>&1 || true
 fi
 
 # Ícones dos apps GTK: o do icons.theme do tema ou, na falta dele, o Yaru mais próximo do acento

@@ -138,7 +138,7 @@ Item {
                 // clicar aqui também fecha o popup aberto, como no resto da barra (este MouseArea cobre o
                 // fundo da barra, que é quem fecha)
                 onPressed: Popups.dismiss()
-                onClicked: Hyprland.dispatch("workspace " + wsId)
+                onClicked: Hyprland.dispatch("hl.dsp.focus({ workspace = " + wsId + " })")
 
                 Text {
                     anchors.centerIn: parent
@@ -166,7 +166,7 @@ Item {
             acc -= n * 120
             const cur = root.activeId > 0 && root.activeId <= root.count ? root.activeId : 1
             const next = ((cur - 1 - n) % root.count + root.count) % root.count + 1
-            Hyprland.dispatch("workspace " + next)
+            Hyprland.dispatch("hl.dsp.focus({ workspace = " + next + " })")
         }
     }
 }

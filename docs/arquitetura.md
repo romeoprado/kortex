@@ -51,14 +51,14 @@ Todo item é um `widgets/BarButton.qml`. Ele trata o realce, o espaço entre íc
 | `Settings` | preferências persistidas, ordem da barra, utilitários de execução | `~/.local/state/kortex/settings.json` (`FileView` + `JsonAdapter`) |
 | `Theme` | paleta, fontes e métricas, catálogo de temas e papéis de parede, Matugen | `list-themes.sh`, `list-wallpapers.sh`, `matugen-generate.sh`, `theme-apply.sh`, `gio trash`, `rm`, `mv` |
 | `Motion` | parâmetros das animações (Qt e Hyprland) | `Settings` |
-| `HyprSync` | o que as Configurações aplicam ao Hyprland ao vivo | `hyprctl --batch` com `keyword` |
+| `HyprSync` | o que as Configurações aplicam ao Hyprland ao vivo, e o aviso quando o Hyprland ainda usa o `hyprland.conf` | `hyprctl eval` (Lua) |
 | `Popups` | estado das janelas e painéis | |
 | `Icons` | nomes dos ícones (Material Symbols) e a fonte | `fonts/MaterialSymbolsOutlined.ttf` |
 | `Notifs` | servidor de notificações, avisos flutuantes, `flash()` do próprio Kortex | `NotificationServer` |
 | `Osd` | aviso de volume, brilho, Caps Lock e Num Lock | PipeWire, `udevadm monitor`, `hyprctl devices` |
 | `Brightness` | brilho e luz noturna | `brightnessctl` (a cada 5 s), `hyprsunset` |
-| `Monitors` | resolução, taxa e escala, com teste e confirmação | `hyprctl monitors`, `hyprctl keyword monitor`, `monitors.conf` |
-| `Keyboard` | layouts, atalho de alternância, catálogo traduzido | `hyprctl devices/keyword`, `evdev.lst`, `msgunfmt`, `localectl` |
+| `Monitors` | resolução, taxa e escala, com teste e confirmação | `hyprctl monitors`, `hyprctl eval` com `hl.monitor`, `monitors.lua` |
+| `Keyboard` | layouts, atalho de alternância, catálogo traduzido | `hyprctl devices`, `hyprctl eval` com `hl.config`, `evdev.lst`, `msgunfmt`, `localectl` |
 | `Language` | idioma do sistema | `localectl`, `/etc/locale.conf`, `/etc/locale.gen`, `pkexec` |
 | `Network` | Wi-Fi, cabo, perfis, conexão em uso e dados da sessão | `nmcli` (estado a cada 8 s), `/sys/class/net/*/statistics`, `network-sessions.json` |
 | `Energy` | bateria e modos de energia | `/sys/class/power_supply/*/uevent`, `PowerProfiles` (D-Bus) |
@@ -71,6 +71,8 @@ Todo item é um `widgets/BarButton.qml`. Ele trata o realce, o espaço entre íc
 | `KeepAwake` | Manter Acordado (o `IdleInhibitor` fica na barra) | |
 | `BluetoothAgent` | agente de pareamento Bluetooth: aceita sozinho o que você pediu pelo painel e pergunta o resto | `bt-agent.py` (Python, `org.bluez.Agent1` no D-Bus do sistema), linhas JSON no stdout e respostas no stdin |
 | `Screenshot`, `ScreenRecord` | captura e gravação de tela | `screenshot.sh`, `screenrecord.sh`, `$XDG_RUNTIME_DIR/kortex` |
+| `Processes` | Gerenciador de Processos: os processos do usuário agrupados por aplicativo, encerrar e forçar | `processes.sh` (a cada 2 s, só com a janela aberta), `hyprctl clients`, `kill` |
+| `Tailscale` | estado da VPN, este computador e os dispositivos da tailnet; ligar e desligar | `tailscale status --json` (a cada 3 s, só com o painel de rede aberto), `tailscale up`/`down` (com `pkexec` se preciso), `systemctl start tailscaled` |
 
 Padrões que se repetem nos serviços:
 
@@ -105,11 +107,12 @@ Estado do Kortex, em `~/.local/state/kortex/`:
 | `settings.json` | `Settings` | `Settings` |
 | `colors.sh` | `theme-apply.sh` | `firefox-theme.sh`, `gnome-theme.sh`, `sddm-setup.sh`, ganchos do usuário |
 | `colors.css` | `theme-apply.sh` | programas do usuário (`@define-color`) |
-| `hyprland-colors.conf` | `theme-apply.sh` | `hyprland.conf` e `hyprlock.conf` (`source`) |
+| `hyprland-colors.conf` | `theme-apply.sh` | `hyprlock.conf` (`source`) |
+| `hyprland-colors.lua` | `theme-apply.sh` | `hyprland.lua` (`kortex_load`, devolve uma tabela) |
 | `kitty-theme.conf` | `kitty-theme.sh` | `kitty.conf` (`include`) |
 | `kitty-window.conf` | `terminal-apply.sh` | `kitty-theme.conf` (`include`) |
-| `hyprland-terminal.conf` | `terminal-apply.sh` | `hyprland.conf` (`source`) |
-| `monitors.conf` | `Monitors` | `hyprland.conf` (`source`) |
+| `hyprland-terminal.lua` | `terminal-apply.sh` | `hyprland.lua` (`kortex_load`) |
+| `monitors.lua` | `Monitors` (e o `install.sh`, que converte o `monitors.conf` antigo) | `hyprland.lua` (`kortex_load`) |
 | `apps.sh` | `apps-apply.sh` | `open-app.sh` |
 | `theme.name`, `current-theme` | `theme-apply.sh` | `sddm-setup.sh`, o usuário |
 | `network-sessions.json` | `Network` | `Network` |
@@ -136,11 +139,13 @@ Todos ficam em `kortex/scripts/` e começam com o uso no cabeçalho. Os que grav
 | `matugen-generate.sh` | `Theme` | cores do papel de parede (código 127 = sem Matugen) |
 | `terminal-apply.sh` | `TerminalStyle` | opacidade do Kitty e regra de desfoque |
 | `apps-apply.sh` | `Apps` | grava `apps.sh` e o `xdg-mime` |
-| `open-app.sh` | atalhos do `hyprland.conf` | abre terminal, explorador ou navegador, sem depender do shell |
+| `open-app.sh` | atalhos do `hyprland.lua` | abre terminal, explorador ou navegador, sem depender do shell |
 | `term.sh` | `Settings.runInTerminal` | abre um comando no terminal (trata o Kitty, que não tem `-e`) |
 | `screenshot.sh` | `Screenshot` | `capture`, `save`, `pick`, `dirs` (1 = cancelado, 2 = erro, 3 = destino existe) |
 | `screenrecord.sh` | `ScreenRecord` | `target`, `record`, `info`, `save`, `dirs` (mesmos códigos) |
 | `gpu-stats.sh`, `disk-stats.sh`, `sensors.sh` | `SystemStats` | linhas com TAB ou `chave=valor` |
+| `processes.sh` | `Processes` | processos do usuário (PID, pai, CPU, memória própria, nome e comando) e as janelas do `hyprctl clients` |
+| `brightness.sh` | `Brightness` e as teclas de brilho do `hyprland.lua` | o `brightnessctl` na luz de fundo da tela conectada (notebooks com duas GPUs têm duas) |
 | `firefox-setup.sh`, `gnome-setup.sh`, `sddm-setup.sh` | o usuário e o `arch-setup.sh`; o `firefox-setup.sh --auto` também pelo `theme-apply.sh` | instalam a integração (todos aceitam desfazer) |
 | `firefox-common.sh` | `source` nos scripts do Firefox | acha os perfis padrão |
 
@@ -157,12 +162,24 @@ Variáveis só para teste: `KORTEX_GNOME_NO_GSETTINGS=1` (pula o `gsettings`), `
 | `notifications` | `clear`, `toggleDnd` |
 | `keyboard` | `next`, `prev`, `set <posição>`, `settings`, `language` |
 | `settings` | `toggle`, `open <página>` (`appearance`, `animations`, `bar`, `apps`, `power`, `general`, `about`) |
-| `screenshot`, `record`, `keepAwake` | `toggle` |
-| `osd` | `locks` (chamado pelos atalhos `bindn` de Caps Lock e Num Lock que o HyprSync cria) |
+| `screenshot`, `record`, `processes`, `keepAwake` | `toggle` |
+| `osd` | `locks` (chamado pelos atalhos `non_consuming` de Caps Lock e Num Lock que o HyprSync cria) |
 
 ## Animações
 
-`services/Motion.qml` concentra tudo. Para o Hyprland, `hyprlandCommands` gera as curvas Bézier (`kortexOut`, `kortexIn`, `kortexStd`, `kortexBack`) e as animações de janelas, áreas de trabalho, camadas e popups, que o `HyprSync` aplica ao vivo e reaplica a cada recarga. Para o Qt, expõe as curvas no formato do `easing.bezierCurve`, `ms(base)` (a duração na velocidade escolhida) e os deslocamentos e escalas dos painéis (`BarPopup`) e dos avisos (`NotificationToasts`), que o Hyprland não sabe animar além de esmaecer.
+`services/Motion.qml` concentra tudo. Para o Hyprland, `hyprlandLua` gera as curvas Bézier (`hl.curve`) (`kortexOut`, `kortexIn`, `kortexStd`, `kortexBack`) e as animações (`hl.animation`) de janelas, áreas de trabalho, camadas e popups, que o `HyprSync` aplica ao vivo e reaplica a cada recarga. Para o Qt, expõe as curvas no formato do `easing.bezierCurve`, `ms(base)` (a duração na velocidade escolhida) e os deslocamentos e escalas dos painéis (`BarPopup`) e dos avisos (`NotificationToasts`), que o Hyprland não sabe animar além de esmaecer.
+
+## Hyprland em Lua
+
+O Kortex exige a configuração do Hyprland em Lua (`~/.config/hypr/hyprland.lua`, Hyprland 0.55 ou mais novo; o 0.57 não lê mais o `hyprland.conf`). Ele conversa com o Hyprland de três jeitos:
+
+- **Ao vivo, pelo `hyprctl eval`.** `HyprSync`, `Keyboard`, `Monitors`, `theme-apply.sh` e `screenshot.sh` mandam código Lua (`hl.config`, `hl.bind`, `hl.monitor`, `hl.layer_rule`, `hl.animation`…), e o Hyprland responde `ok` ou o erro. O `HyprSync` manda as instruções pelo `guard()`, que põe cada uma no seu `pcall` e devolve os erros juntos no fim: no Lua um erro interrompe o bloco, e sem isso uma instrução recusada levaria as seguintes. Todo texto que entra nesse código passa por `HyprSync.lua(s)`, que o devolve como literal de string do Lua; nos scripts, só entram números e cores já validadas como hexadecimal. Os dispatchers usam a sintaxe nova também pelo `Hyprland.dispatch` do Quickshell e pelo `hyprctl dispatch` (`hl.dsp.focus({ workspace = 3 })`, `hl.dsp.exit()`).
+- **Por arquivos em `~/.local/state/kortex`.** `hyprland-colors.lua` (devolve uma tabela com a paleta), `monitors.lua` e `hyprland-terminal.lua` são carregados pelo `hyprland.lua` com o `kortex_load`, que ignora um arquivo ausente e transforma um erro dentro dele em aviso, sem interromper o resto da configuração.
+- **Pelo `hyprland.lua` que o `arch-setup.sh` grava**, com os atalhos e as regras fixas, e o `user.lua` do usuário, carregado no fim com `pcall(require, "user")`.
+
+Com o Hyprland ainda no `hyprland.conf`, o `hyprctl eval` responde "eval is only supported with the lua config manager": o `HyprSync` então mostra um aviso uma vez e marca `luaConfig: false`. Um `hyprctl reload` recria o estado do Lua e apaga o que foi aplicado ao vivo; por isso `HyprSync` e `Keyboard` reaplicam tudo no evento `configreloaded`.
+
+O `dev/verificar.sh` confere esse Lua sem tocar na sessão: monta o `hyprland.lua` do `arch-setup.sh` com os arquivos que a fumaça gravou, roda o `dev/hl-mock.lua` (uma imitação da API `hl` que confere a forma das chamadas) e, com o Hyprland instalado, o `Hyprland --verify-config`, que acusa opções, campos de regra, estilos e curvas desconhecidos. As funções do `Motion.qml` e do `HyprSync.qml` são copiadas para um QML de teste que gera todas as combinações de animação, conferidas do mesmo jeito.
 
 ## Escala fracionária
 
