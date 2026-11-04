@@ -2,23 +2,24 @@
 
 Shell para o Hyprland escrito em QML sobre o [Quickshell](https://quickshell.org), com scripts em bash para o que fica fora dele. Tudo em português do Brasil: interface, comentários, README, CHANGELOG e mensagens de commit. Versão atual: **0.2**.
 
-Leia também `docs/arquitetura.md` (como as peças conversam) e, para o histórico da última revisão, `docs/auditoria-2026-10.md`. O `README.md` é o manual do usuário e a referência das opções do `settings.json` (seção 5).
+Leia também `docs/arquitetura.md` (como as peças conversam) e, para o histórico das revisões, `docs/auditoria-2026-10.md` e `docs/auditoria-2026-11.md` (esta com o que ficou pendente). O `README.md` é o manual do usuário e a referência das opções do `settings.json` (seção 5).
 
 ## Mapa do repositório
 
 ```
-arch-setup.sh        instalador completo para um Arch limpo (pacotes, serviços, hyprland.conf, SDDM)
+arch-setup.sh        instalador completo para um Arch limpo (pacotes, serviços, hyprland.lua, SDDM)
 install.sh           instalação mínima: copia kortex/ para ~/.config/quickshell/kortex
 README.md            manual (cópia idêntica em kortex/README.md, que vai para a pasta instalada)
 CHANGELOG.md         histórico de versões
 dev/verificar.sh     verificações que rodam sem Hyprland (ver abaixo)
+dev/hl-mock.lua      imitação da API hl do Hyprland, para rodar o hyprland.lua gerado fora dele
 docs/                documentação de desenvolvimento
 kortex/              o shell em si, o que é copiado para ~/.config/quickshell/kortex
   shell.qml          ponto de entrada: instancia tudo e define os atalhos IPC
   services/          singletons (estado, leitura do sistema, processos)
   widgets/           componentes visuais reutilizáveis
   modules/<área>/    barra, janelas e painéis (módulos qs.modules.<área>)
-  scripts/           auxiliares em bash chamados pelo shell e pelo hyprland.conf, e o bt-agent.py
+  scripts/           auxiliares em bash chamados pelo shell e pelo hyprland.lua, e o bt-agent.py
                      (agente de pareamento Bluetooth, em Python com python-dbus e python-gobject)
   themes/            temas embutidos (colors.toml + icons.theme)
   matugen/           modelo do Matugen e cores fixas de cada modo
@@ -67,7 +68,7 @@ O que ele **não** pega: erros de tipo, propriedades inexistentes, bindings queb
 3. **Gravar várias chaves do `settings.json` seguidas perde valores.** O `FileView` relê o arquivo enquanto o próximo valor chega. Para mais de uma chave na mesma volta, use `Settings.applyBatch([[chave, valor], …])`.
 4. **Mapas e listas do `Settings.data` não podem ser mudados no lugar.** Faça uma cópia e reatribua (`Object.assign({}, …)`, `concat`, `filter`), senão nada é gravado. `Settings.setFlag(mapa, chave, valor)` faz isso para `barItems` e `powerActions`.
 5. **Escala fracionária (1.25×, 1.6×) borra bordas.** Tamanhos de janela passam por `Theme.snapUp(px, devicePixelRatio)`, posições de camada caem em pixel físico inteiro e bordas são desenhadas com `GradientBorder`/`GradientFrame`, nunca com `Rectangle.border`.
-6. **`hyprctl reload` apaga tudo que foi aplicado com `hyprctl keyword`.** `services/HyprSync.qml` e `services/Keyboard.qml` reaplicam no evento `configreloaded`. Qualquer `keyword` novo precisa entrar num deles.
+6. **`hyprctl reload` apaga tudo que foi aplicado com `hyprctl eval`.** `services/HyprSync.qml` e `services/Keyboard.qml` reaplicam no evento `configreloaded`. Qualquer ajuste novo ao vivo precisa entrar num deles.
 7. **Nada de um tema é executado.** Só se leem `colors.toml`, o nome em `icons.theme` e as imagens de `backgrounds/`. Mantenha assim.
 8. **Valores do usuário nunca entram concatenados num comando de shell.** Passe como argumentos: `["sh", "-c", 'cmd "$1"', "sh", valor]`. As exceções são conscientes e documentadas: `Settings.shell()` para comandos que o próprio usuário escreve (`lockCommand`, `audioApp`) e o `>` do lançador.
 9. **`Process` em execução não pode ser religado.** O padrão é `if (!proc.running) proc.running = true`, com uma flag `_again` quando um pedido chega durante a execução. O `stderr` pode terminar depois do `onExited`: o `Network.qml` espera 120 ms antes de ler.
@@ -75,8 +76,9 @@ O que ele **não** pega: erros de tipo, propriedades inexistentes, bindings queb
 11. **Dentro de `onThemeChanged`, use `Theme.themeByName(Settings.data.theme)`.** Uma propriedade derivada ainda teria o tema anterior nesse momento.
 12. **Ids com nome de propriedade de `Item` escondem a propriedade** (`left`, `right`, `top`, `width`…, ou o mesmo nome de um `alias`). O qmllint acusa (`id-shadows-member`).
 13. **O Kitty não tem `-e`.** Para abrir um comando no terminal, use `Settings.runInTerminal([...])`, que passa por `scripts/term.sh`.
-14. **As cores padrão (Morello) estão repetidas** em `services/Theme.qml`, `sddm/theme.conf`, `sddm/Main.qml`, no `hyprland.conf` e no `hyprlock.conf` que o `arch-setup.sh` grava e no README (seção 6). Mudar o tema padrão é mudar todos.
+14. **As cores padrão (Morello) estão repetidas** em `services/Theme.qml`, `sddm/theme.conf`, `sddm/Main.qml`, no `hyprland.lua` e no `hyprlock.conf` que o `arch-setup.sh` grava e no README (seção 6). Mudar o tema padrão é mudar todos.
 15. **Senhas de Wi-Fi vão na linha de comando do `nmcli`** (`connect … password X`, `modify … psk X`) e ficam visíveis em `/proc` enquanto o comando roda. Limitação conhecida, registrada na auditoria.
+16. **O Hyprland é configurado em Lua** (Hyprland 0.55 ou mais novo). Ao vivo, mande código pelo `hyprctl eval` (resposta `ok` ou o erro) e dispatchers na sintaxe `hl.dsp.*`; o `keyword` e o `dispatch workspace 3` antigos não existem mais. Texto que entra nesse código passa por `HyprSync.lua(s)`, e um bloco com várias instruções vai pelo `HyprSync.guard()` (um erro de Lua interrompe o resto do bloco; uma opção desconhecida no `hl.config` não interrompe, só vira erro de configuração). A referência da API está em `/usr/share/hypr/stubs/hl.meta.lua` e no `/usr/share/hypr/hyprland.lua` de exemplo; `Hyprland --verify-config -c arquivo.lua` confere um arquivo sem mexer na sessão. O `hyprlock.conf` e o `hypridle.conf` continuam no formato antigo.
 
 ## Receitas
 

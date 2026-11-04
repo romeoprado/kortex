@@ -5,6 +5,14 @@ src="$(cd "$(dirname "$0")" && pwd)/kortex"
 dest="${XDG_CONFIG_HOME:-$HOME/.config}/quickshell/kortex"
 
 command -v qs >/dev/null || echo "Aviso: 'qs' (Quickshell) não encontrado. Instale com: sudo pacman -S quickshell"
+# O Kortex exige a configuração do Hyprland em Lua, que existe desde o 0.55
+hypr_ver="$(Hyprland --version 2>/dev/null | sed -nE '1s/^Hyprland ([0-9]+)\.([0-9]+).*/\1 \2/p')"
+if [ -n "$hypr_ver" ]; then
+    read -r hv_maj hv_min <<<"$hypr_ver"
+    if [ "$hv_maj" -eq 0 ] && [ "$hv_min" -lt 55 ]; then
+        echo "Aviso: Hyprland $hv_maj.$hv_min; o Kortex precisa do 0.55 ou mais novo (configuração em Lua). Atualize com: sudo pacman -Syu hyprland"
+    fi
+fi
 for dep in nmcli brightnessctl hyprsunset curl bluetoothctl xdg-mime grim slurp jq; do
     command -v "$dep" >/dev/null || echo "Aviso: '$dep' não encontrado (alguns widgets ficarão limitados)."
 done
@@ -32,8 +40,17 @@ chmod +x "$dest"/scripts/*.sh
 state="${XDG_STATE_HOME:-$HOME/.local/state}/kortex"
 mkdir -p "$state"
 touch "$state/hyprland-colors.conf"
-[ -f "$state/monitors.conf" ] || printf '# Gerado pelo Kortex (widget de tela). Carregado pelo Hyprland.\n' > "$state/monitors.conf"
-[ -f "$state/hyprland-terminal.conf" ] || printf '# Gerado pelo Kortex (Configurações). Carregado pelo Hyprland.\n' > "$state/hyprland-terminal.conf"
+# Monitores: quem vem do formato antigo tem as regras do monitors.conf convertidas para hl.monitor
+if [ ! -f "$state/monitors.lua" ]; then
+    {
+        printf -- '-- Gerado pelo Kortex (widget de tela). Carregado pelo hyprland.lua.\n'
+        [ -f "$state/monitors.conf" ] && awk -F', *' '/^monitor *= */ {
+            sub(/^monitor *= */, "")
+            if (NF >= 4) printf "hl.monitor({ output = \"%s\", mode = \"%s\", position = \"%s\", scale = \"%s\" })\n", $1, $2, $3, $4
+        }' "$state/monitors.conf"
+    } > "$state/monitors.lua"
+fi
+[ -f "$state/hyprland-terminal.lua" ] || printf -- '-- Gerado pelo Kortex (Configurações). Carregado pelo hyprland.lua.\n' > "$state/hyprland-terminal.lua"
 
 cat <<MSG
 
@@ -41,22 +58,25 @@ Kortex instalado em $dest
 
 Próximos passos:
   1. Teste agora:           qs -c kortex
-  2. No hyprland.conf, troque waybar/mako/hyprpaper por:
-       exec-once = qs -c kortex
-       source = $state/hyprland-colors.conf
-       source = $state/monitors.conf
-       source = $state/hyprland-terminal.conf
-       bind = SUPER, SPACE, exec, qs -c kortex ipc call launcher toggle
-       bind = SUPER SHIFT, T, exec, qs -c kortex ipc call themes toggle
-       bind = SUPER, comma, exec, qs -c kortex ipc call settings toggle
+  2. No ~/.config/hypr/hyprland.lua (Hyprland 0.55 ou mais novo), troque waybar/mako/hyprpaper por:
+       hl.on("hyprland.start", function() hl.exec_cmd("qs -c kortex") end)
+       pcall(dofile, "$state/monitors.lua")
+       pcall(dofile, "$state/hyprland-terminal.lua")
+       local ok, c = pcall(dofile, "$state/hyprland-colors.lua")
+       if ok and type(c) == "table" and c.borders ~= false then
+           hl.config({ general = { col = { active_border = c.active_border, inactive_border = c.inactive_border } } })
+       end
+       hl.bind("SUPER + SPACE", hl.dsp.exec_cmd("qs -c kortex ipc call launcher toggle"))
+       hl.bind("SUPER + SHIFT + T", hl.dsp.exec_cmd("qs -c kortex ipc call themes toggle"))
+       hl.bind("SUPER + comma", hl.dsp.exec_cmd("qs -c kortex ipc call settings toggle"))
   3. Opcional: tela de login gráfica (SDDM) com as cores do tema ativo:
        bash $dest/scripts/sddm-setup.sh
   4. Opcional: cores do tema no Kitty (e o terminal translúcido). Ponha por ÚLTIMO no ~/.config/kitty/kitty.conf:
        include $state/kitty-theme.conf
   5. Opcional: atalhos de terminal, explorador e navegador que seguem Configurações › Aplicativos:
-       bind = SUPER, RETURN, exec, $dest/scripts/open-app.sh terminal
-       bind = SUPER, E, exec, $dest/scripts/open-app.sh files
-       bind = SUPER, W, exec, $dest/scripts/open-app.sh browser
+       hl.bind("SUPER + RETURN", hl.dsp.exec_cmd("$dest/scripts/open-app.sh terminal"))
+       hl.bind("SUPER + E", hl.dsp.exec_cmd("$dest/scripts/open-app.sh files"))
+       hl.bind("SUPER + W", hl.dsp.exec_cmd("$dest/scripts/open-app.sh browser"))
   6. Opcional: cores do tema no Firefox (rode depois de abri-lo uma vez; ele lê as cores ao abrir):
        bash $dest/scripts/firefox-setup.sh
   7. Opcional: cores do tema nos apps do GNOME (Nautilus, Calculadora, Editor de Texto):

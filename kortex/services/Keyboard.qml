@@ -5,11 +5,11 @@ import Quickshell
 import Quickshell.Io
 import Quickshell.Hyprland
 
-// Layouts de teclado do Hyprland (input:kb_layout, kb_variant e kb_options), via hyprctl.
+// Layouts de teclado do Hyprland (input.kb_layout, kb_variant e kb_options), via hyprctl eval (Lua).
 //
 // A escolha do usuário fica em Settings.data.keyboard e é reaplicada quando o shell inicia e
 // quando o Hyprland recarrega a configuração ("configreloaded"), então vale mesmo com outro
-// kb_layout no hyprland.conf. Enquanto nada foi escolhido o shell só reflete o que o Hyprland
+// kb_layout no hyprland.lua. Enquanto nada foi escolhido o shell só reflete o que o Hyprland
 // já usa e não muda nada.
 Singleton {
     id: root
@@ -145,13 +145,17 @@ Singleton {
         if (pusher.running || _next === null) return
         const cfg = _next
         _next = null
-        // Cada keyword recompila o mapa de teclado na hora. Trocar o layout antes da variante deixaria,
+        // Cada hl.config recompila o mapa de teclado na hora. Trocar o layout antes da variante deixaria,
         // por um instante, a variante antiga presa ao layout novo (ao inverter "br,us" com ",alt-intl"
         // sairia "br(alt-intl)") e o Hyprland mostraria "Invalid keyboard layout passed". Por isso as
         // variantes são zeradas primeiro: sem variante, qualquer lista de layouts é válida.
-        pusher.command = ["sh", "-c",
-            "hyprctl keyword input:kb_variant \"\"; hyprctl keyword input:kb_layout \"$1\"; hyprctl keyword input:kb_variant \"$2\"; hyprctl keyword input:kb_options \"$3\"",
-            "sh", cfg.layouts.map(l => l.layout).join(","), cfg.layouts.map(l => l.variant).join(","), cfg.options || ""]
+        const set = (key, value) => "hl.config({ input = { " + key + " = " + HyprSync.lua(value) + " } })"
+        pusher.command = ["hyprctl", "eval", [
+            set("kb_variant", ""),
+            set("kb_layout", cfg.layouts.map(l => l.layout).join(",")),
+            set("kb_variant", cfg.layouts.map(l => l.variant).join(",")),
+            set("kb_options", cfg.options || "")
+        ].join("\n")]
         pusher.running = true
     }
 
@@ -272,7 +276,7 @@ Singleton {
         onExited: readback.restart()
     }
 
-    // hyprctl responde "ok" ou a mensagem de erro, uma linha por comando
+    // hyprctl eval responde "ok" ou a mensagem de erro do Lua
     Process {
         id: pusher
         stdout: StdioCollector {

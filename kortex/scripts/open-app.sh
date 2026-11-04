@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # Abre o aplicativo padrão do Kortex: terminal, explorador de arquivos ou navegador.
 #   open-app.sh terminal|files|browser [argumentos]
-# Os atalhos do hyprland.conf chamam este script, então ele não depende do shell estar rodando:
+# Os atalhos do hyprland.lua chamam este script, então ele não depende do shell estar rodando:
 # lê ~/.local/state/kortex/apps.sh (gravado por apps-apply.sh, a partir das Configurações) e, sem
 # escolha feita, cai nos programas mais comuns.
 what="${1:-}"; shift 2>/dev/null || true

@@ -11,6 +11,11 @@
 #  4. Fumaça: roda os scripts do tema, dos ícones, do terminal, da captura, do Matugen (com um
 #     matugen falso), do Firefox e do SDDM (modo de ensaio) num HOME temporário e confere o que
 #     eles gravam. Nada fora da pasta temporária é tocado.
+#  5. Hyprland em Lua: o hyprland.lua que o arch-setup.sh grava, com os arquivos que a fumaça deixou
+#     (cores, desfoque do terminal, monitores convertidos do monitors.conf pelo install.sh). O
+#     dev/hl-mock.lua confere a forma das chamadas sem o Hyprland (precisa do lua); com o Hyprland
+#     instalado, o Hyprland --verify-config confere também os nomes das opções e das regras e, com
+#     o qml do Qt 6, todo o Lua que o Motion.qml e o HyprSync.qml geram (cada combinação das animações).
 #
 # Ferramentas: usa o shellcheck, o qmllint e o qmlformat do sistema (no Arch: pacotes shellcheck e
 # qt6-declarative, em /usr/lib/qt6/bin). Os de /usr/bin, quando existem, costumam ser do Qt 5
@@ -29,7 +34,7 @@ for a in "$@"; do
         --sem-instalar) install=0 ;;
         --so-scripts) only=scripts ;;
         --so-qml) only=qml ;;
-        -h|--help) sed -n '2,17p' "$0" | sed 's/^# \{0,1\}//'; exit 0 ;;
+        -h|--help) sed -n '2,22p' "$0" | sed 's/^# \{0,1\}//'; exit 0 ;;
         *) echo "Opção desconhecida: $a" >&2; exit 2 ;;
     esac
 done
@@ -195,9 +200,16 @@ EOF
             "#343434" "#ffffff" "#9c9c9c" "#a0a0a0" "#393939" "#8b8b8b" "#686868" "#747474" "#868686" "#686868" "#1b1b1b" 0 >/dev/null 2>&1
         check "theme-apply: colors.sh" "( . '$st/colors.sh'; [ \"\$KORTEX_ACCENT\" = '#686868' ] && [ \"\$KORTEX_THEME\" = morello ] )"
         check "theme-apply: hyprland-colors.conf" "grep -qF '\$kortex_accent = rgb(686868)' '$st/hyprland-colors.conf'"
+        check "theme-apply: hyprland-colors.lua" "grep -qF 'accent    = \"rgb(686868)\",' '$st/hyprland-colors.lua' && grep -qF 'inactive_border = \"rgba(525252aa)\",' '$st/hyprland-colors.lua' && grep -qF 'borders         = true,' '$st/hyprland-colors.lua'"
         check "theme-apply: theme.name e current-theme" "[ \"\$(cat '$st/theme.name')\" = morello ] && [ \"\$(readlink '$st/current-theme')\" = '$src/themes/morello' ]"
         check "kitty-theme.conf" "grep -qx 'background #222222' '$st/kitty-theme.conf'"
         check "btop: kortex.theme" "grep -qF 'theme[hi_fg]=\"#686868\"' '$H/.config/btop/themes/kortex.theme'"
+        # o mesmo tema de novo (como a cada início do shell): nada muda e o temporário não pode sobrar
+        for _ in 1 2; do
+            bash "$src/scripts/btop-theme.sh" morello "#222222" "#343434" "#ffffff" "#ffffff" "#9c9c9c" "#686868" \
+                "#525252" "#7c7c7c" "#8b8b8b" "#a0a0a0" "#747474" "#868686" "#686868" >/dev/null 2>&1
+        done
+        check "btop: sem temporário depois de reaplicar" "! ls -A '$H/.config/btop/themes/' | grep -q '^\.kortex\.'"
         check "sddm-colors: 9 cores" "[ \"\$(grep -c '=' '$H/sddm/theme.conf.user')\" = 9 ] && grep -qx 'accent=#686868' '$H/sddm/theme.conf.user'"
         check "firefox: theme-apply configura o perfil" "[ -f '$H/.mozilla/firefox/p.default/chrome/kortex-chrome.css' ] && grep -qF '// kortex' '$H/.mozilla/firefox/p.default/user.js'"
         check "firefox: kortex-colors.css" "grep -qF -- '--kortex-accent: #686868' '$H/.mozilla/firefox/p.default/chrome/kortex-colors.css'"
@@ -207,7 +219,7 @@ EOF
         check "icon-theme pick (awk POSIX)" "[ \"\$(bash '$src/scripts/icon-theme.sh' pick '#61afef' 0)\" = Yaru-blue-dark ] && [ \"\$(bash '$src/scripts/icon-theme.sh' pick '#686868' 1)\" = Yaru-sage ]"
         check "list-themes: 8 temas" "[ \"\$(bash '$src/scripts/list-themes.sh' '$src/themes' | grep -c '^@@THEME')\" = 8 ]"
         bash "$src/scripts/terminal-apply.sh" 70 0 >/dev/null 2>&1
-        check "terminal-apply" "grep -qx 'background_opacity 0.70' '$st/kitty-window.conf' && grep -q 'no_blur' '$st/hyprland-terminal.conf'"
+        check "terminal-apply" "grep -qx 'background_opacity 0.70' '$st/kitty-window.conf' && grep -q 'no_blur = true' '$st/hyprland-terminal.lua'"
         bash "$src/scripts/apps-apply.sh" terminal kitty kitty >/dev/null 2>&1
         check "apps-apply" "grep -qx 'KORTEX_TERMINAL=(kitty )' '$st/apps.sh'"
         check "screenshot.sh dirs" "bash '$src/scripts/screenshot.sh' dirs | head -1 | grep -qx \"Capturas\$(printf '\\t')$H/Pictures/Screenshots\""
@@ -230,6 +242,111 @@ EOF
     while IFS= read -r l; do
         case "$l" in "ok "*) ok "${l#ok }" ;; "FALHA "*) bad "${l#FALHA }" ;; *) printf '        %s\n' "$l" ;; esac
     done < "$work/smoke"
+fi
+
+# ── 5. Hyprland em Lua ────────────────────────────────────────────────────
+if [ "$only" != qml ]; then
+    step "Hyprland em Lua"
+    st="$H/.local/state/kortex"; hypr="$work/hypr"; mkdir -p "$hypr"
+    # Uma instalação antiga: o install.sh converte o monitors.conf para o monitors.lua
+    printf '# Gerado pelo Kortex (widget de tela). Carregado pelo Hyprland.\nmonitor = eDP-1, 2560x1600@120,0x0,1.6\n' > "$st/monitors.conf"
+    HOME="$H" XDG_STATE_HOME="$H/.local/state" XDG_CONFIG_HOME="$H/.config" bash "$repo/install.sh" >/dev/null 2>&1
+    if grep -qxF 'hl.monitor({ output = "eDP-1", mode = "2560x1600@120", position = "0x0", scale = "1.6" })' "$st/monitors.lua" 2>/dev/null; then
+        ok "install.sh: monitors.conf convertido para monitors.lua"
+    else
+        bad "install.sh: monitors.lua sem a regra do monitors.conf"
+    fi
+    # O hyprland.lua do arch-setup.sh: o texto entre "cat > $HYPR/hyprland.lua <<CONF" e "CONF", com as
+    # variáveis do instalador preenchidas (inclusive os trechos da NVIDIA e da máquina virtual)
+    (
+        eval "$(awk "/^ *(NVIDIA|VM)_ENV='\$/{f=1} f{print} f&&/'\$/&&!/_ENV='\$/{f=0}" "$repo/arch-setup.sh")"
+        # shellcheck disable=SC2034  # lidas pelo eval abaixo
+        STATE="$st" DEST="$src" TERMINAL_APP=kitty KB_LAYOUT=br KB_VARIANT=abnt2
+        eval "cat <<CONF
+$(awk '/cat > "\$HYPR\/hyprland.lua" <<CONF$/{f=1;next} f&&/^CONF$/{exit} f' "$repo/arch-setup.sh")
+CONF"
+    ) > "$hypr/hyprland.lua" 2>"$work/err"
+    printf -- '-- user.lua de teste\nhl.config({ general = { gaps_in = 4 } })\n' > "$hypr/user.lua"
+    if [ -s "$work/err" ] || ! grep -q 'kortex_load("hyprland-colors.lua")' "$hypr/hyprland.lua"; then
+        bad "arch-setup.sh: não consegui montar o hyprland.lua"; sed 's/^/        /' "$work/err"
+    elif command -v lua >/dev/null; then
+        if lua "$repo/dev/hl-mock.lua" "$hypr/hyprland.lua" >"$work/mock" 2>&1; then
+            ok "hl-mock: hyprland.lua do arch-setup.sh ($(tail -1 "$work/mock"))"
+        else
+            bad "hl-mock: hyprland.lua do arch-setup.sh"; sed 's/^/        /' "$work/mock"
+        fi
+    else
+        skip "hl-mock (lua não encontrado)"
+    fi
+    if command -v Hyprland >/dev/null && [ -s "$hypr/hyprland.lua" ]; then
+        Hyprland --verify-config -c "$hypr/hyprland.lua" >"$work/verify" 2>&1
+        v="$(Hyprland --version 2>/dev/null | head -1 | awk '{print $2}')"
+        if grep -qx 'config ok' "$work/verify"; then
+            ok "Hyprland $v --verify-config"
+        else
+            bad "Hyprland $v --verify-config:"; sed -n '/parsing result/,$p' "$work/verify" | grep -v '^=*\( Config parsing result:\)\?$' | sed 's/^/        /'
+        fi
+    else
+        skip "Hyprland --verify-config (Hyprland não encontrado)"
+    fi
+    # O Lua do QML: as funções do Motion.qml e do HyprSync.qml copiadas para um QML sem o Quickshell, que
+    # imprime as regras de camada e as animações de todas as combinações de velocidade, intensidade e estilo
+    qmlrt="$(tool qml)" || qmlrt=""
+    if [ -n "$qmlrt" ] && command -v Hyprland >/dev/null; then
+        motion="$src/services/Motion.qml"; sync="$src/services/HyprSync.qml"
+        cat > "$work/motion.qml" <<EOF
+import QtQuick
+QtObject {
+    property bool enabled: true
+    property string speed
+    property string intensity
+    property string windowStyle
+    property string workspaceStyle
+$(grep -E '^    readonly property (real factor|int level):' "$motion")
+$(grep -E '^    function pick\(' "$motion")
+$(awk '/^    function _speed\(/{f=1} f{print} /^    readonly property var hyprlandLua:/{l=1} f&&l&&/^    }$/{exit}' "$motion")
+$(awk '/^    function lua\(s\)/{f=1} f{print} f&&/^    }$/{if(++n==2) exit}' "$sync")
+$(awk '/^    readonly property var _layerRules:/{f=1} f{print} f&&/^    \]$/{exit}' "$sync")
+$(awk '/^    function guard\(/{f=1} f{print} f&&/^    }$/{exit}' "$sync")
+    Component.onCompleted: {
+        const out = [..._layerRules]
+        for (const sp of ["slow", "normal", "fast"])
+            for (const it of ["subtle", "elegant", "intense"])
+                for (const w of ["popin", "slide", "gnomed"])
+                    for (const ws of ["horizontal", "vertical", "fade"]) {
+                        speed = sp; intensity = it; windowStyle = w; workspaceStyle = ws
+                        out.push(...hyprlandLua)
+                    }
+        enabled = false
+        out.push(...hyprlandLua)
+        console.log("@@LUA\n" + out.join("\n") + "\n@@GUARD\n" + guard(out))
+        Qt.quit()
+    }
+}
+EOF
+        QT_QPA_PLATFORM=offscreen timeout 20 "$qmlrt" "$work/motion.qml" >"$work/motion.out" 2>&1
+        sed -n '/@@LUA$/,/@@GUARD$/p' "$work/motion.out" | sed '1d;$d' > "$work/motion.lua"
+        sed -n '/@@GUARD$/,$p' "$work/motion.out" | sed '1d' > "$work/guard.lua"
+        n="$(grep -c '^hl\.animation(' "$work/motion.lua")"
+        if [ "$n" -lt 81 ]; then
+            bad "Lua do Motion.qml/HyprSync.qml: o QML de teste não gerou as animações"; sed 's/^/        /' "$work/motion.out" | head -20
+        elif Hyprland --verify-config -c "$work/motion.lua" >"$work/verify" 2>&1 && grep -qx 'config ok' "$work/verify"; then
+            ok "Lua do Motion.qml e do HyprSync.qml ($n animações, $(grep -c '^hl\.layer_rule(' "$work/motion.lua") regras de camada)"
+        else
+            bad "Lua do Motion.qml/HyprSync.qml:"; sed -n '/parsing result/,$p' "$work/verify" | grep -v '^=*\( Config parsing result:\)\?$' | sed 's/^/        /'
+        fi
+        # O mesmo Lua como o HyprSync o manda ao vivo (cada instrução num pcall, os erros juntos no fim),
+        # rodado pela imitação da API: confere que o guard() é Lua válido e não esconde nenhum erro
+        if command -v lua >/dev/null && [ -s "$work/guard.lua" ]; then
+            if lua "$repo/dev/hl-mock.lua" "$work/guard.lua" >"$work/guard.out" 2>&1; then
+                ok "HyprSync.guard(): o Lua protegido roda na imitação da API"
+            else
+                bad "HyprSync.guard():"; sed 's/^/        /' "$work/guard.out" | head -10
+            fi
+        fi
+    else
+        skip "Lua do Motion.qml e do HyprSync.qml (precisa do qml do Qt 6 e do Hyprland)"
+    fi
 fi
 
 echo

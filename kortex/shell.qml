@@ -49,7 +49,7 @@ ShellRoot {
     RecordSave {}
     ProcessManager {}
 
-    // Atalhos via IPC (use no hyprland.conf):
+    // Atalhos via IPC (use no hyprland.lua, com hl.bind e hl.dsp.exec_cmd):
     //   qs -c kortex ipc call launcher toggle
     //   qs -c kortex ipc call themes toggle | wallpapers | matugen | set <nome> | randomWallpaper | carousel
     //   qs -c kortex ipc call notifications clear | toggleDnd

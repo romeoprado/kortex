@@ -26,22 +26,27 @@ hexa() {   # #rrggbb + alfa (00–ff) → #rrggbbaa, no formato do slurp
 # captura mesmo sem -c. Durante a captura o cursor passa para o plano de hardware, que fica fora da
 # imagem; um passo de 1 px (e a volta) faz o Hyprland trocar na hora. Depois tudo volta como era.
 hw_orig=""; hw_x=""; hw_y=""; hw_nx=""
+hw_set() {   # cursor.no_hardware_cursors e o passo de 1 px (só números chegam aqui)
+    hyprctl eval "hl.config({ cursor = { no_hardware_cursors = $1 } })
+hl.dispatch(hl.dsp.cursor.move({ x = $hw_nx, y = $hw_y }))
+hl.dispatch(hl.dsp.cursor.move({ x = $hw_x, y = $hw_y }))" >/dev/null 2>&1
+}
 hw_restore() {
     [ -n "$hw_orig" ] || return 0
-    hyprctl --batch "keyword cursor:no_hardware_cursors $hw_orig ; dispatch movecursor $hw_nx $hw_y ; dispatch movecursor $hw_x $hw_y" >/dev/null 2>&1
+    hw_set "$hw_orig"
     hw_orig=""
 }
 grab() {
     if [ -n "${HYPRLAND_INSTANCE_SIGNATURE:-}" ] && command -v hyprctl >/dev/null && command -v jq >/dev/null; then
         local orig pos
-        orig="$(hyprctl -j getoption cursor:no_hardware_cursors 2>/dev/null | jq -r '.int // empty' 2>/dev/null)"
+        orig="$(hyprctl -j getoption cursor.no_hardware_cursors 2>/dev/null | jq -r '.int // empty' 2>/dev/null)"
         pos="$(hyprctl -j cursorpos 2>/dev/null | jq -r '"\(.x) \(.y)"' 2>/dev/null)"
         if [[ "$orig" =~ ^[0-9]+$ ]] && [ "$orig" != 0 ] && [[ "$pos" =~ ^-?[0-9]+\ -?[0-9]+$ ]]; then
             hw_x="${pos% *}"; hw_y="${pos#* }"
             hw_nx=$(( hw_x > 0 ? hw_x - 1 : hw_x + 1 ))
             hw_orig="$orig"
             trap hw_restore EXIT
-            hyprctl --batch "keyword cursor:no_hardware_cursors 0 ; dispatch movecursor $hw_nx $hw_y ; dispatch movecursor $hw_x $hw_y" >/dev/null 2>&1
+            hw_set 0
             sleep 0.1
         fi
     fi
