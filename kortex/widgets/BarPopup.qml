@@ -5,6 +5,8 @@ import qs.services
 
 // Painel que desce da barra, centralizado no botão que o abriu.
 // Fecha ao clicar fora (camada ClickAway), ao clicar no botão de novo ou ao abrir outro painel.
+// O fundo segue a opacidade da barra (Theme.barBg) e o desfoque vem da mesma regra de camada dela
+// (blur_popups, em services/HyprSync.qml); os cartões e destaques de dentro continuam sólidos.
 PopupWindow {
     id: root
 
@@ -59,7 +61,7 @@ PopupWindow {
         width: root.implicitWidth
         height: root.implicitHeight
         implicitHeight: column.implicitHeight + root.padding * 2
-        color: Theme.bg
+        color: Theme.barBg
         radius: Theme.radius
         Keys.onEscapePressed: Popups.close(root.popupId)
 

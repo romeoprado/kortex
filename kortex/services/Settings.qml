@@ -56,6 +56,8 @@ Singleton {
             property string barPosition: "top"      // "top" | "bottom"
             property string barStyle: "full"        // "full" (de ponta a ponta, colada à borda) | "floating" (centralizada, solta e arredondada)
             property bool barBorder: true           // borda na barra flutuante (a espessura é a dos painéis)
+            property int barOpacity: 100            // opacidade do fundo da barra e dos painéis dela, 30…100 % (a borda e os itens ficam sólidos)
+            property bool barBlur: true             // desfoque por trás da barra e dos painéis translúcidos (regra de camada do Hyprland)
             property int workspaceCount: 5          // 1…10
             property var barItems: ({})             // { stats: false, ... }: item ausente = visível
             property var barLayout: ({})            // ordem dos itens: { left: [...], center: [...], right: [...] }; vazio = padrão
@@ -202,6 +204,7 @@ Singleton {
         applyBatch([
             ["mainFont", ""], ["titleFont", ""], ["fontSize", 13], ["radius", 6], ["borderWidth", 2],
             ["hyprSyncAppearance", false], ["terminalOpacity", 85], ["terminalBlur", true], ["barPosition", "top"], ["barStyle", "full"], ["barBorder", true],
+            ["barOpacity", 100], ["barBlur", true],
             ["animations", true], ["animIntensity", "elegant"], ["animSpeed", "normal"], ["animWindows", "popin"],
             ["animWorkspaces", "horizontal"], ["wallpaperTransition", "iris"],
             ["workspaceCount", 5],

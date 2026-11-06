@@ -10,6 +10,9 @@ import qs.widgets
 //  centro:   relógio/calendário · clima
 //  direita:  mídia · bandeja · teclado · bluetooth · wi-fi · som · tela · notificações · energia · sessão
 //
+// Fundo translúcido e desfoque (Configurações › Barra › Opacidade e Desfoque): a cor vem de Theme.barBg e o
+// desfoque é uma regra de camada do Hyprland para o namespace "kortex-bar", ligada por services/HyprSync.qml.
+//
 // Dois estilos (Configurações › Barra › Estilo da barra):
 //  Inteira (padrão): de ponta a ponta, colada à borda da tela.
 //  Flutuante: solta da borda e das laterais (a ~Theme.gap px, ver Theme.barMargin), centralizada, só da largura do
@@ -40,8 +43,8 @@ PanelWindow {
     readonly property int widthStep: 2 * Theme.snapStep(devicePixelRatio)
     implicitWidth: floating ? Math.ceil(Math.min(contentWidth, (modelData ? modelData.width : 1920) - 2 * edgeGap) / widthStep - 0.000001) * widthStep : 0
     implicitHeight: Theme.barHeightFor(devicePixelRatio)
-    color: floating ? "transparent" : Theme.bg
-    // Nunca opaca: a cor muda entre a inteira (Theme.bg) e a flutuante (transparente), e com a camada
+    color: floating ? "transparent" : Theme.barBg
+    // Nunca opaca: a cor muda entre a inteira (Theme.barBg) e a flutuante (transparente), e com a camada
     // marcada como opaca o Hyprland deixava de desenhar o papel de parede sob os cantos arredondados
     // a cada redesenho parcial (ao passar o mouse), e eles apareciam pretos
     surfaceFormat.opaque: false
@@ -59,6 +62,7 @@ PanelWindow {
     GradientFrame {
         anchors.fill: parent
         visible: bar.floating
+        color: Theme.barBg
         borderWidth: bar.frameBorder
         Behavior on color { ColorAnimation { duration: 300 } }
     }

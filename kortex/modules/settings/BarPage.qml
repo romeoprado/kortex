@@ -3,7 +3,7 @@ import QtQuick.Layouts
 import qs.services
 import qs.widgets
 
-// Configurações › Barra: estilo, posição, áreas de trabalho e itens
+// Configurações › Barra: estilo, opacidade e desfoque, posição, áreas de trabalho e itens
 SettingsPage {
     id: page
 
@@ -40,6 +40,29 @@ SettingsPage {
         Toggle {
             checked: Settings.data.barBorder
             onToggled: v => Settings.data.barBorder = v
+        }
+    }
+
+    // Fundo translúcido da barra e dos painéis dela, como o do terminal (Aparência › Terminal): de 30% a
+    // 100%, de 5 em 5. O desfoque só aparece com o fundo translúcido, então fica apagado em 100%.
+    SettingRow {
+        title: "Opacidade da barra e dos painéis"
+        SliderBar {
+            Layout.fillWidth: false
+            Layout.preferredWidth: 260
+            value: (Math.round(Theme.barAlpha * 100) - 30) / 70
+            valueText: Math.round(Theme.barAlpha * 100) + "%"
+            step: 1 / 14
+            onMoved: v => Settings.data.barOpacity = 30 + Math.round(v * 14) * 5
+        }
+    }
+
+    SettingRow {
+        title: "Desfoque da barra e dos painéis"
+        dimmed: Theme.barAlpha >= 1
+        Toggle {
+            checked: Settings.data.barBlur
+            onToggled: v => Settings.data.barBlur = v
         }
     }
 

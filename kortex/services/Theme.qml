@@ -47,6 +47,10 @@ Singleton {
     // físicos sairia com a borda e o texto borrados.
     readonly property bool barFloating: Settings.data.barStyle === "floating"
     function barMargin(dpr) { return barFloating ? snapUp(gap, dpr) : 0 }
+    // Fundo da barra e dos painéis dela (Configurações › Barra › Opacidade): o bg do tema com o alfa
+    // escolhido. Só o fundo fica translúcido; a borda, o texto e os destaques dos itens continuam sólidos.
+    readonly property real barAlpha: Math.max(30, Math.min(100, Math.round(Settings.data.barOpacity))) / 100
+    readonly property color barBg: Qt.alpha(bg, barAlpha)
 
     // Primeira família da lista que está instalada (o Qt só escolhe uma família por vez)
     function firstInstalled(names, fallback) {

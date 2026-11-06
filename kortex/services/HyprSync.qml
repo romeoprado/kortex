@@ -15,6 +15,9 @@ import Quickshell.Hyprland
 //    temas, Configurações, rede, cidade, idioma, confirmação de tela, OSD, captura de tela, processos) crescem
 //    do centro, a barra e o carrossel deslizam da borda, e os avisos e os painéis da barra se movem
 //    pelo Qt. A seleção do slurp fica sem animação, para não sair na imagem.
+//  • desfoque por trás da barra translúcida e dos painéis dela (Configurações › Barra): uma regra de camada
+//    para o namespace "kortex-bar" (blur_popups leva o desfoque aos painéis, que são popups dessa camada),
+//    criada uma vez e guardada numa global do Lua (kortex_bar_blur), que só se liga ou desliga.
 // Um "hyprctl reload" recria o estado do Lua e apaga o que foi aplicado em tempo de execução, então
 // tudo é reaplicado quando o Hyprland avisa que recarregou (configreloaded). Nada aqui grava no hyprland.lua.
 //
@@ -27,6 +30,8 @@ Singleton {
     readonly property bool syncWindows: Settings.data.hyprSyncAppearance
     readonly property int windowBorder: Math.round(Theme.border)
     readonly property int windowRounding: Theme.radius
+    // com a barra opaca o desfoque não aparece, então a regra fica desligada
+    readonly property bool barBlur: Settings.data.barBlur && Theme.barAlpha < 1
     // falso quando o Hyprland ainda carrega o hyprland.conf (o eval só existe com a configuração em Lua)
     property bool luaConfig: true
 
@@ -104,6 +109,13 @@ Singleton {
             _animsSet = true
         }
         code.push(...Motion.hyprlandLua)
+        // Desfoque da barra e dos painéis dela. O handle da regra fica numa global, que o estado do Lua guarda entre um eval e
+        // outro (e um reload apaga junto com a regra): criar de novo a cada mudança acumularia regras. O
+        // ignore_alpha deixa de fora o que é quase transparente (os cantos da barra flutuante e a área fora
+        // dela); fica abaixo dos 30% da opacidade mínima, para o fundo da barra sempre entrar. Nos painéis, o
+        // Hyprland usa o decoration.blur.popups_ignorealpha (0,2 por padrão), que tem o mesmo efeito.
+        code.push('kortex_bar_blur = kortex_bar_blur or ' + _layerRule("kortex-bar-blur", "^kortex-bar$", "blur = true, blur_popups = true, ignore_alpha = 0.2"))
+        code.push("kortex_bar_blur:set_enabled(" + (barBlur ? "true" : "false") + ")")
         // As cores da borda das janelas não entram aqui: o theme-apply.sh as aplica ao trocar de tema e
         // grava no hyprland-colors.lua, que o hyprland.lua relê a cada reload (com hyprBorders e o alfa).
         if (syncWindows)
@@ -147,6 +159,7 @@ Singleton {
     readonly property var _motion: Motion.hyprlandLua
     on_MotionChanged: settle.restart()
     onSyncWindowsChanged: settle.restart()
+    onBarBlurChanged: settle.restart()
     onWindowBorderChanged: if (syncWindows) settle.restart()
     onWindowRoundingChanged: if (syncWindows) settle.restart()
 
