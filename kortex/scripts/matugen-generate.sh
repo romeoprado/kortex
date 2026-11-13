@@ -80,12 +80,16 @@ accent="$(sed -nE 's/^accent = "(#[0-9a-fA-F]{6})"$/\1/p' "$dest/colors.toml" | 
 bash "$(dirname "$0")/icon-theme.sh" pick "$accent" "$([ "$mode" = light ] && echo 1 || echo 0)" > "$dest/icons.theme"
 
 # Tema salvo com nome próprio (não o dinâmico): guarda a imagem usada, para lembrar sozinho o
-# papel de parede ao ser aplicado depois. Troca a de uma vez anterior, se houver.
+# papel de parede ao ser aplicado depois. Troca a de uma vez anterior, se houver. A imagem é copiada
+# para a pasta temporária ANTES de a pasta antiga sair: ao salvar de novo com o mesmo nome, o papel de
+# parede em uso pode ser justamente o que está nela, e apagá-la primeiro perderia a imagem.
 if [ "$name" != "matugen" ]; then
+    mkdir -p "$work/keep" || fail "Não foi possível copiar o papel de parede."
+    keep="$work/keep/$(basename "$wallpaper")"
+    cp -f "$wallpaper" "$keep" || fail "Não foi possível copiar o papel de parede."
     rm -rf "$dest/backgrounds"
     mkdir -p "$dest/backgrounds" || fail "Não foi possível criar $dest/backgrounds."
-    cp -f "$wallpaper" "$dest/backgrounds/$(basename "$wallpaper")" \
-        || fail "Não foi possível copiar o papel de parede."
+    cp -f "$keep" "$dest/backgrounds/" || fail "Não foi possível copiar o papel de parede."
 fi
 
 cat "$dest/colors.toml"

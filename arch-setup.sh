@@ -431,7 +431,8 @@ ok "Quickshell $(qs --version 2>/dev/null | head -1 || echo instalado)"
 
 # O Kortex e o hyprland.lua gravado aqui exigem a configuração em Lua (Hyprland 0.55 ou mais novo).
 # Com o pacote do Arch isso já vem; o aviso cobre um Hyprland compilado à mão ou de outra fonte.
-HYPR_VER="$(Hyprland --version 2>/dev/null | sed -nE '1s/^Hyprland ([0-9]+)\.([0-9]+).*/\1 \2/p')"
+# ("|| true": com "set -eo pipefail", um Hyprland fora do PATH encerraria o instalador aqui, sem aviso)
+HYPR_VER="$(Hyprland --version 2>/dev/null | sed -nE '1s/^Hyprland ([0-9]+)\.([0-9]+).*/\1 \2/p' || true)"
 if [ -n "$HYPR_VER" ]; then
     read -r HV_MAJ HV_MIN <<<"$HYPR_VER"
     if [ "$HV_MAJ" -eq 0 ] && [ "$HV_MIN" -lt 55 ]; then

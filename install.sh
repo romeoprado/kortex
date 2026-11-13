@@ -5,8 +5,10 @@ src="$(cd "$(dirname "$0")" && pwd)/kortex"
 dest="${XDG_CONFIG_HOME:-$HOME/.config}/quickshell/kortex"
 
 command -v qs >/dev/null || echo "Aviso: 'qs' (Quickshell) não encontrado. Instale com: sudo pacman -S quickshell"
-# O Kortex exige a configuração do Hyprland em Lua, que existe desde o 0.55
-hypr_ver="$(Hyprland --version 2>/dev/null | sed -nE '1s/^Hyprland ([0-9]+)\.([0-9]+).*/\1 \2/p')"
+# O Kortex exige a configuração do Hyprland em Lua, que existe desde o 0.55. O "|| true" cobre o
+# Hyprland fora do PATH: com "set -eo pipefail", a falha dele encerraria a instalação aqui, sem aviso.
+hypr_ver="$(Hyprland --version 2>/dev/null | sed -nE '1s/^Hyprland ([0-9]+)\.([0-9]+).*/\1 \2/p' || true)"
+[ -n "$hypr_ver" ] || echo "Aviso: 'Hyprland' não encontrado. Instale com: sudo pacman -S hyprland"
 if [ -n "$hypr_ver" ]; then
     read -r hv_maj hv_min <<<"$hypr_ver"
     if [ "$hv_maj" -eq 0 ] && [ "$hv_min" -lt 55 ]; then
