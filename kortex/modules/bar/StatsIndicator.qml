@@ -67,7 +67,7 @@ BarButton {
                     anchors.verticalCenter: parent.verticalCenter
                     text: modelData.icon
                     color: parent.tone
-                    Behavior on color { ColorAnimation { duration: 120 } }
+                    Behavior on color { ColorAnimation { duration: Motion.ms(120) } }
                 }
 
                 Text {
@@ -78,7 +78,7 @@ BarButton {
                     color: parent.tone
                     font.family: Theme.font
                     font.pixelSize: Theme.textBody
-                    Behavior on color { ColorAnimation { duration: 120 } }
+                    Behavior on color { ColorAnimation { duration: Motion.ms(120) } }
                 }
             }
         }

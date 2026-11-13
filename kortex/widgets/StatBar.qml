@@ -20,6 +20,6 @@ Rectangle {
         radius: parent.radius
         color: root.lowAlert ? (root.value <= 0.15 ? Theme.red : root.value < 0.3 ? Theme.yellow : Theme.accent)
              : root.alert && root.value > 0.85 ? Theme.red : root.alert && root.value > 0.6 ? Theme.yellow : Theme.accent
-        Behavior on width { NumberAnimation { duration: 300 } }
+        Behavior on width { NumberAnimation { duration: Motion.ms(300) } }
     }
 }

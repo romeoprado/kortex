@@ -36,7 +36,7 @@ Singleton {
     readonly property int barHeight: 30
     function barHeightFor(dpr) { return snapUp(barHeight, dpr) }
     readonly property int radius: Math.max(0, Math.min(20, Settings.data.radius))
-    readonly property int radiusSmall: Math.max(0, radius - 2)   // controles dentro dos painéis
+    readonly property int radiusSmall: Math.max(0, radius - 2)   // controles dentro dos painéis e o realce das linhas de lista
     readonly property int gap: 8
     // Espessura da borda: só valores inteiros, de 0 (sem borda) a 5 px; um valor fracionário antigo é arredondado
     readonly property int border: Math.max(0, Math.min(5, Math.round(Settings.data.borderWidth)))
@@ -77,6 +77,12 @@ Singleton {
     property color outline: "#7a7a7a"      // contorno de botões, campos e cartões (≥ 3:1 sobre o fundo)
     property color accentText: "#ffffff"   // texto e ícones sobre fundo no acento (≥ 4,5:1, ou o melhor possível)
     property color redText: "#ffffff"      // texto e ícones sobre fundo vermelho (confirmações)
+    // Fundo da barra, dos painéis, das janelas e dos avisos: o `bg` com a opacidade escolhida em
+    // Configurações › Aparência (panelOpacity, de 60 a 100%). Abaixo de 100% o Hyprland desfoca o que
+    // fica por trás (panelBlur, ver HyprSync). O que está dentro dos painéis (cartões, campos, botões)
+    // continua opaco, e o texto segue calculado para contrastar com o `bg` cheio.
+    readonly property int panelOpacity: Math.max(60, Math.min(100, Math.round(Settings.data.panelOpacity)))
+    readonly property color surface: Qt.alpha(bg, panelOpacity / 100)
     // Fundo da linha escolhida numa lista (dispositivo em uso, fonte, layout, app selecionado): o cartão com
     // um toque do acento. Theme.selection não serve: em alguns temas é igual ao acento e apaga o conteúdo.
     readonly property color selectionTint: Qt.tint(bgAlt, Qt.alpha(accent, 0.22))
@@ -224,6 +230,9 @@ Singleton {
         const slug = slugify(name)
         if (!slug) { status = "Digite um nome para o tema."; return }
         if (slug === dynamicName) { status = "Esse nome é reservado ao tema automático; escolha outro."; return }
+        // Como ao renomear: salvar por cima trocaria as cores e os papéis de parede de um tema que já
+        // existe (ou esconderia um embutido de mesmo nome), sem aviso
+        if (themeByName(slug)) { status = "Já existe um tema chamado “" + prettyName(slug) + "”. Escolha outro nome ou exclua o existente."; return }
         if (!Settings.data.wallpaper) { status = "Escolha um papel de parede para gerar as cores."; return }
         if (savingDynamic) return
         savingDynamic = true
@@ -312,7 +321,9 @@ Singleton {
 
     function remove(name) {
         const t = themeByName(name)
-        if (!canRemove(t)) return
+        // uma exclusão por vez: o processo em execução não aceita outro comando, e a pasta ficaria no
+        // disco com as referências a ela já apagadas
+        if (!canRemove(t) || remover.running) return
         const inside = p => typeof p === "string" && p.startsWith(t.dir + "/")
 
         // Referências a arquivos que vão sumir: papel de parede em uso e os lembrados por tema
@@ -528,7 +539,9 @@ Singleton {
         const pick = keys => {
             for (const k of keys) {
                 const v = m[k]
-                if (v && /^(#|0x)?[0-9a-fA-F]{3,8}$/.test(v)) return hex(v)
+                // só #rgb, #rrggbb e #rrggbbaa: com 4, 5 ou 7 dígitos (erro de digitação) hex() devolveria
+                // uma cor quebrada, e é melhor a chave cair no valor padrão
+                if (v && /^(#|0x)?([0-9a-fA-F]{3}|[0-9a-fA-F]{6}|[0-9a-fA-F]{8})$/.test(v)) return hex(v)
             }
             return ""
         }

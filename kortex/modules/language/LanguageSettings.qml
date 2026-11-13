@@ -27,7 +27,6 @@ LazyLoader {
 
         GradientFrame {
             anchors.fill: parent
-            color: Theme.bg
             radius: Theme.radius
             focus: true
             Keys.onEscapePressed: win.close()

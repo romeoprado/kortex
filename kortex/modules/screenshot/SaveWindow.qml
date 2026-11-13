@@ -67,7 +67,6 @@ OverlayPanel {
         id: frame
         width: win.panelWidth
         implicitHeight: column.implicitHeight + 40
-        color: Theme.bg
         radius: Theme.radius
         focus: true
         Keys.onEscapePressed: win.tool.discard()
@@ -227,7 +226,7 @@ OverlayPanel {
 
                             Rectangle {
                                 anchors.fill: parent
-                                radius: 4
+                                radius: Theme.radiusSmall
                                 color: row.containsMouse ? Theme.bgAlt : "transparent"
                             }
 

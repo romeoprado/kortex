@@ -66,7 +66,7 @@ BarButton {
                 radius: height / 2
                 color: Theme.bgAlt
                 opacity: Energy.profilesAvailable && root.tagIndex >= 0 ? 1 : 0
-                Behavior on opacity { NumberAnimation { duration: 120 } }
+                Behavior on opacity { NumberAnimation { duration: Motion.ms(120) } }
                 function sync() { if (root.tagIndex >= 0) shown = Energy.profiles[root.tagIndex].text }
                 Component.onCompleted: sync()
                 Connections {

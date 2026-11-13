@@ -84,7 +84,7 @@ Item {
                     radius: height / 2
                     color: back.hovered ? Qt.tint(Theme.bgAlt, Qt.alpha(Theme.accent, 0.35))
                          : back.occupied ? Theme.bgAlt : "transparent"
-                    Behavior on color { ColorAnimation { duration: 230 } }
+                    Behavior on color { ColorAnimation { duration: Motion.ms(230) } }
                 }
 
                 Rectangle {
@@ -96,7 +96,7 @@ Item {
                     visible: !root.pill
                     width: back.occupied ? 14 : 0
                     color: Theme.accent
-                    Behavior on width { NumberAnimation { duration: 160; easing.type: Easing.OutCubic } }
+                    Behavior on width { NumberAnimation { duration: Motion.ms(160); easing.type: Easing.OutCubic } }
                 }
             }
         }

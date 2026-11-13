@@ -2,7 +2,8 @@ import QtQuick
 import Quickshell
 import qs.services
 
-// Botão de aplicativo: ícone do .desktop e nome; o escolhido fica em destaque.
+// Botão de aplicativo: ícone do .desktop e nome; o escolhido fica em destaque. Tab chega a ele e
+// Espaço ou Enter o aciona.
 MouseArea {
     id: root
 
@@ -14,6 +15,18 @@ MouseArea {
     implicitHeight: 38
     hoverEnabled: true
     cursorShape: Qt.PointingHandCursor
+    // Teclado: Tab chega ao controle (contorno de foco) e Espaço ou Enter o aciona
+    activeFocusOnTab: enabled && visible
+    Keys.onPressed: event => {
+        if (event.key === Qt.Key_Space || event.key === Qt.Key_Return || event.key === Qt.Key_Enter) {
+            root.clicked(null)
+            event.accepted = true
+        }
+    }
+    Accessible.role: Accessible.Button
+    Accessible.name: root.text
+
+    FocusRing {}
 
     GradientBorder {
         anchors.fill: parent
@@ -21,7 +34,7 @@ MouseArea {
         borderWidth: 1
         fill: root.highlighted ? Theme.accent : (root.containsMouse ? Theme.bgAlt : "transparent")
         color: root.highlighted ? Theme.accent : Theme.outline
-        Behavior on fill { ColorAnimation { duration: 100 } }
+        Behavior on fill { ColorAnimation { duration: Motion.ms(100) } }
     }
 
     Row {

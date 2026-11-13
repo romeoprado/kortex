@@ -3,10 +3,23 @@ import QtQuick.Layouts
 import qs.services
 
 // Página rolável das Configurações: o conteúdo declarado dentro dela vira uma coluna de linhas.
+// Ao aparecer (troca de página), o conteúdo surge subindo alguns pixels; com as animações
+// desligadas a troca é na hora (Motion.ms devolve 0).
 Item {
     id: root
 
     default property alias content: column.data
+
+    onVisibleChanged: if (visible) enter.restart()
+
+    ParallelAnimation {
+        id: enter
+        NumberAnimation { target: flick; property: "opacity"; from: 0; to: 1; duration: Motion.ms(180); easing.type: Easing.OutCubic }
+        NumberAnimation {
+            target: shift; property: "y"; from: Motion.pick(6, 10, 16); to: 0; duration: Motion.ms(260)
+            easing.type: Easing.BezierSpline; easing.bezierCurve: Motion.curveOut
+        }
+    }
 
     Flickable {
         id: flick
@@ -17,6 +30,7 @@ Item {
         contentHeight: column.implicitHeight + 8
         boundsBehavior: Flickable.StopAtBounds
         flickableDirection: Flickable.VerticalFlick
+        transform: Translate { id: shift }
 
         ColumnLayout {
             id: column

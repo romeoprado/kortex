@@ -30,7 +30,6 @@ LazyLoader {
             id: frame
             width: win.panelWidth
             implicitHeight: column.implicitHeight + 40
-            color: Theme.bg
             radius: Theme.radius
             focus: true
             Keys.onEscapePressed: win.close()

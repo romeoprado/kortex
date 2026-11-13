@@ -86,7 +86,7 @@ RowLayout {
 
                     Layout.fillWidth: true
                     implicitHeight: 46
-                    radius: 4
+                    radius: Theme.radiusSmall
                     color: "transparent"
 
                     GradientBorder {
@@ -255,7 +255,7 @@ RowLayout {
 
                 Rectangle {
                     anchors.fill: parent
-                    radius: 4
+                    radius: Theme.radiusSmall
                     color: item.containsMouse && item.enabled ? Theme.bgAlt : "transparent"
                 }
 

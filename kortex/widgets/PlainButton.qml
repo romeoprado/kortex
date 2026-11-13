@@ -49,7 +49,7 @@ MouseArea {
         fill: root.lit ? Theme.accent : (root.containsMouse ? Theme.bgAlt : "transparent")
         color: root.lit ? Theme.accent
              : (root.danger && root.containsMouse) ? Theme.red : Theme.outline
-        Behavior on fill { ColorAnimation { duration: 100 } }
+        Behavior on fill { ColorAnimation { duration: Motion.ms(100) } }
     }
 
     Row {

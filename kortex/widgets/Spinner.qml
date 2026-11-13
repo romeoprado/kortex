@@ -21,7 +21,7 @@ Item {
     implicitHeight: size
     opacity: running ? 1 : 0
     visible: opacity > 0
-    Behavior on opacity { NumberAnimation { duration: 180 } }
+    Behavior on opacity { NumberAnimation { duration: Motion.ms(180) } }
 
     NumberAnimation {
         target: root; property: "spin"; from: 0; to: 360

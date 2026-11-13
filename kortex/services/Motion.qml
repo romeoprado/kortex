@@ -31,8 +31,10 @@ Singleton {
     readonly property var curveIn: [0.3, 0, 0.8, 0.15, 1, 1]
     readonly property var curveStd: [0.2, 0, 0, 1, 1, 1]
 
-    // duração em ms de uma animação do Qt (base = velocidade normal)
-    function ms(base) { return Math.round(base * factor) }
+    // Duração em ms de uma animação do Qt (base = velocidade normal). Com as animações desligadas é 0:
+    // a mudança acontece na hora. Vale para tudo, dos painéis aos realces de botão; só os indicadores
+    // de carregamento e as contagens regressivas, que são informação e não enfeite, seguem animados.
+    function ms(base) { return enabled ? Math.round(base * factor) : 0 }
 
     // Painéis da barra: crescem desta escala e deslocam-se tantos px a partir da barra
     readonly property real popupScale: pick(0.96, 0.92, 0.86)

@@ -20,7 +20,7 @@ MouseArea {
     hoverEnabled: true
     cursorShape: Qt.PointingHandCursor
     scale: pressed ? 0.97 : 1
-    Behavior on scale { NumberAnimation { duration: 90; easing.type: Easing.OutCubic } }
+    Behavior on scale { NumberAnimation { duration: Motion.ms(90); easing.type: Easing.OutCubic } }
     Accessible.role: Accessible.Button
     Accessible.name: root.text
 
@@ -30,7 +30,7 @@ MouseArea {
         borderWidth: 1
         fill: root.red ? Theme.red : root.containsMouse ? Qt.tint(Theme.bgAlt, Qt.alpha(Theme.red, 0.18)) : "transparent"
         color: root.red || root.containsMouse ? Theme.red : Theme.outline
-        Behavior on fill { ColorAnimation { duration: 100 } }
+        Behavior on fill { ColorAnimation { duration: Motion.ms(100) } }
     }
 
     Row {

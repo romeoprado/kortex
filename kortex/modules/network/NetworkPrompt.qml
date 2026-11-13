@@ -28,8 +28,8 @@ LazyLoader {
 
         function submit() {
             if (busy || field.text === "") return
-            busy = true
-            Network.connect(ssid, field.text)
+            // recusado (outra conexão em andamento): o motivo aparece embaixo do campo
+            busy = Network.connect(ssid, field.text)
         }
 
         Component.onCompleted: {
@@ -55,7 +55,6 @@ LazyLoader {
             id: frame
             width: win.panelWidth
             implicitHeight: column.implicitHeight + 40
-            color: Theme.bg
             radius: Theme.radius
             focus: true
             Keys.onEscapePressed: win.close()

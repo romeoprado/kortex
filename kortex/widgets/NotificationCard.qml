@@ -35,7 +35,7 @@ Rectangle {
     GradientBorder {
         anchors.fill: parent
         radius: root.radius
-        fill: root.toast ? Theme.bg : Theme.bgAlt
+        fill: root.toast ? Theme.surface : Theme.bgAlt
         borderWidth: root.toast ? Theme.border : 1
         scaled: root.toast
         color: root.toast ? (root.critical ? Theme.red : Theme.borderColor) : Theme.muted

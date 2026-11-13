@@ -72,7 +72,7 @@ ColumnLayout {
 
                 Rectangle {
                     anchors.fill: parent
-                    radius: 4
+                    radius: Theme.radiusSmall
                     color: item.chosen ? Theme.selectionTint : item.containsMouse ? Theme.bgAlt : "transparent"
                 }
 

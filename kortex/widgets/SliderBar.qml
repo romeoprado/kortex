@@ -2,8 +2,9 @@ import QtQuick
 import QtQuick.Layouts
 import qs.services
 
-// Controle deslizante 0–1 com ícone clicável à esquerda e valor à direita.
-// moved(): durante o arraste; committed(): ao soltar ou rolar a roda.
+// Controle deslizante 0–1 com ícone clicável à esquerda e valor à direita. Arraste, role a roda
+// ou, com o foco nele (Tab), use as setas: cada toque anda um passo (`step`).
+// moved(): durante o arraste; committed(): ao soltar, rolar a roda ou usar as setas.
 Item {
     id: root
 
@@ -20,6 +21,21 @@ Item {
     implicitHeight: 26
 
     function clamp(v) { return Math.max(0, Math.min(1, v)) }
+
+    // Teclado: Tab chega ao controle (contorno de foco) e as setas andam um passo
+    activeFocusOnTab: enabled && visible
+    Keys.onPressed: event => {
+        const dir = (event.key === Qt.Key_Right || event.key === Qt.Key_Up) ? 1
+                  : (event.key === Qt.Key_Left || event.key === Qt.Key_Down) ? -1 : 0
+        if (dir === 0) return
+        const v = root.clamp(root.value + dir * root.step)
+        root.moved(v)
+        root.committed(v)
+        event.accepted = true
+    }
+    Accessible.role: Accessible.Slider
+
+    FocusRing {}
 
     RowLayout {
         anchors.fill: parent

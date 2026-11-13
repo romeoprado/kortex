@@ -36,7 +36,6 @@ LazyLoader {
             width: win.implicitWidth
             height: win.implicitHeight
             implicitHeight: column.implicitHeight + 40
-            color: Theme.bg
             radius: Theme.radius
             borderColor: win.failed ? Theme.red : Theme.borderColor
             focus: true

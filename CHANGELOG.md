@@ -1,5 +1,38 @@
 # Histórico de versões
 
+## Em desenvolvimento (depois da 0.3)
+
+**Novidades**
+
+- **Painéis translúcidos e com desfoque** (*Configurações › Aparência › Painéis*; `panelOpacity` e `panelBlur`). A opacidade abaixo de 100% deixa translúcido o fundo da barra, dos painéis, do lançador, das janelas, dos avisos e do aviso de volume e brilho, e o Hyprland desfoca o que fica por trás, como já fazia com o terminal. O padrão continua opaco. O Kortex manda a regra de camada ao vivo e a reaplica a cada recarga do Hyprland, sem gravar no `hyprland.lua`.
+- **Teclado nas Configurações.** Os controles deslizantes aceitam as setas com o foco neles (Tab), e os botões de aplicativo (*Configurações › Aplicativos*) recebem o foco e respondem a Espaço e Enter, como os outros botões.
+- Nas Configurações, cada página surge subindo alguns pixels ao ser escolhida.
+
+**Mudanças**
+
+- **Animações desligadas desligam tudo.** Os realces de botões, interruptores e itens da barra, a troca de cor da barra e o esmaecer do papel de parede ignoravam a opção e a velocidade escolhida. Agora toda duração passa pelo `Motion`: a velocidade vale para tudo e, com as animações desligadas, as mudanças são imediatas (a troca do papel de parede, que antes ainda esmaecia, também). Só continuam os indicadores de carregamento e as contagens regressivas.
+- O realce das linhas de lista (redes, fontes, dispositivos, pastas, processos) acompanha o raio dos cantos escolhido, como os botões. Com o raio em 0 ele ficava arredondado.
+- Salvar as cores do Matugen com o nome de um tema que já existe passa a ser recusado, com aviso, como ao renomear. Antes o tema existente era sobrescrito em silêncio e perdia os papéis de parede.
+- O seletor de fontes marca a fonte em uso quando nenhuma foi escolhida (antes marcava a fonte padrão mesmo que ela não estivesse instalada).
+- `qs -c kortex ipc call settings open <página>` com uma página desconhecida abre a última vista. Antes abria a primeira, sem nenhuma marcada.
+
+**Correções**
+
+- **Mudanças no `settings.json` podiam se perder.** Quando três ou mais opções mudavam de uma vez, a do meio voltava ao valor antigo (a gravação é em outra thread e, ao terminar, devolvia o estado anterior à memória). O caso mais visível era excluir o tema em uso: o tema apagado continuava como o tema atual e o shell caía no Morello. A gravação passa a ser síncrona, e a causa está explicada em `docs/arquitetura.md`.
+- **Salvar de novo um tema do Matugen apagava o papel de parede.** Se a imagem em uso era a da pasta do próprio tema, o script apagava a pasta antes de copiar a imagem, e ela se perdia. Agora a cópia vem antes.
+- **O `install.sh` parava sem dizer nada quando o Hyprland não estava no `PATH`**, logo depois dos primeiros avisos e sem instalar. Agora avisa e continua. O `arch-setup.sh` tinha a mesma linha.
+- **Clicar em outra rede durante uma conexão** fazia a segunda aparecer como "conectando" sem ser tentada, e o resultado da primeira era atribuído a ela (o perfil de uma rede nova com a senha errada podia ficar salvo). Agora o segundo pedido é recusado com um aviso até a conexão em andamento terminar.
+- O registro de horários das notificações crescia sem limite enquanto o shell ficava aberto. Agora só guarda os dos avisos que ainda existem.
+- Excluir dois temas em seguida, depressa, podia deixar a pasta do segundo no disco com as referências já apagadas.
+- Uma cor com 4, 5 ou 7 dígitos no `colors.toml` de um tema (erro de digitação) virava uma cor quebrada. Agora a chave cai no valor padrão.
+- README: o exemplo do `hyprland.lua` (seção 3) pintava a borda inativa opaca e ignorava o `hyprBorders`. Agora usa as bordas prontas do `hyprland-colors.lua`, como o instalador.
+
+**Manutenção**
+
+- Auditoria completa do código (relatório em `docs/auditoria-2026-11-13.md`), com a pesquisa de skills e de outros shells feitos com o Quickshell.
+- `dev/verificar.sh`: confere a regra de desfoque no Lua gerado, o tema do Matugen salvo duas vezes e o `install.sh` sem o Hyprland; roda o Lua do `Motion.qml` e do `HyprSync.qml` na imitação da API mesmo sem o Hyprland instalado.
+- `CLAUDE.md` e `docs/arquitetura.md`: a causa da perda de valores no `settings.json`, o fundo translúcido, a regra de camada com nome e a convenção das durações.
+
 ## 0.3 — 2026-11-03
 
 **Novidades**

@@ -15,9 +15,16 @@ Singleton {
 
     property alias data: adapter
 
+    // blockWrites: cada gravação termina antes de a atribuição que a causou devolver o controle. Sem
+    // isso a gravação roda em outra thread, e uma segunda chave mudada antes de ela acabar faz o
+    // FileView esperar a primeira e reler dela o estado (a segunda chave volta ao valor antigo na
+    // memória até a própria gravação terminar). Uma terceira chave na mesma volta gravava esse estado
+    // incompleto: de três mudanças seguidas, a do meio se perdia (excluir o tema em uso, por exemplo,
+    // deixava o tema apagado como o tema atual). O arquivo é pequeno, então a espera não se nota.
     FileView {
         path: root.stateDir + "/settings.json"
         watchChanges: true
+        blockWrites: true
         onFileChanged: reload()
         onAdapterUpdated: writeAdapter()
         onLoadFailed: error => {
@@ -41,6 +48,8 @@ Singleton {
             property int radius: 6             // raio dos cantos arredondados dos painéis, 0…20 px
             property real borderWidth: 2       // espessura da borda dos painéis, inteiro de 0 a 5 px
             property bool hyprSyncAppearance: false   // aplica raio e borda também às janelas do Hyprland
+            property int panelOpacity: 100            // opacidade do fundo da barra, dos painéis e dos avisos, 60…100 %
+            property bool panelBlur: true             // desfoque do que aparece por trás deles (só abaixo de 100 %)
             property int terminalOpacity: 85          // opacidade do fundo do terminal, 30…100 %
             property bool terminalBlur: true          // desfoque do que aparece por trás do terminal
 
@@ -175,8 +184,10 @@ Singleton {
         adapter[map] = m
     }
 
-    // Aplica várias chaves em sequência, com uma pausa entre elas. Gravar o arquivo e relê-lo não é
-    // instantâneo: várias mudanças na mesma volta do laço faziam algumas voltar ao valor antigo.
+    // Aplica várias chaves em sequência, com uma pausa entre elas. Vem de quando as gravações eram
+    // assíncronas e várias mudanças na mesma volta do laço faziam algumas voltar ao valor antigo (ver
+    // o blockWrites acima). Continua útil para o que precisa esperar outra coisa acontecer primeiro,
+    // como a pasta de um tema mudar de nome, e espalha o trabalho de uma restauração completa.
     property var _queue: []
 
     function applyBatch(pairs) {
@@ -201,7 +212,7 @@ Singleton {
     function resetAppearance() {
         applyBatch([
             ["mainFont", ""], ["titleFont", ""], ["fontSize", 13], ["radius", 6], ["borderWidth", 2],
-            ["hyprSyncAppearance", false], ["terminalOpacity", 85], ["terminalBlur", true], ["barPosition", "top"], ["barStyle", "full"], ["barBorder", true],
+            ["hyprSyncAppearance", false], ["panelOpacity", 100], ["panelBlur", true], ["terminalOpacity", 85], ["terminalBlur", true], ["barPosition", "top"], ["barStyle", "full"], ["barBorder", true],
             ["animations", true], ["animIntensity", "elegant"], ["animSpeed", "normal"], ["animWindows", "popin"],
             ["animWorkspaces", "horizontal"], ["wallpaperTransition", "iris"],
             ["workspaceCount", 5],

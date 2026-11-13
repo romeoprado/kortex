@@ -24,7 +24,13 @@ Os singletons de `services/` só nascem no primeiro acesso. Por isso o `Componen
 
 As janelas com `OverlayPanel` são o lançador, o seletor de temas, as Configurações, o editor de rede, a senha do Wi-Fi, a cidade do clima, teclado e idioma, os menus de captura e de gravação e as duas janelas de salvar. Cada uma fica dentro de um `LazyLoader`, então só existe enquanto está aberta e começa do zero a cada vez.
 
-Os namespaces importam: `services/HyprSync.qml` usa as regras de camada do Hyprland para dar a animação de cada uma (as janelas crescem do centro, a barra e o carrossel deslizam, os avisos e a camada de clique fora não têm animação do Hyprland).
+Os namespaces importam: `services/HyprSync.qml` usa as regras de camada do Hyprland para dar a animação de cada uma (as janelas crescem do centro, a barra e o carrossel deslizam, os avisos e a camada de clique fora não têm animação do Hyprland) e para desfocar o que fica por trás das translúcidas.
+
+### Fundo translúcido e desfoque
+
+O fundo da barra, dos painéis, das janelas, dos avisos e do OSD é `Theme.surface`: o `bg` do tema com a opacidade de `panelOpacity` (60 a 100%; o padrão, 100, é opaco). É a cor padrão do `GradientFrame`; a barra inteira e o cartão dos avisos a usam direto. O que fica dentro (cartões em `bgAlt`, campos em `bgDark`, botões) e as bordas continuam opacos, então só o "papel" do painel deixa ver o fundo.
+
+O desfoque não é do Qt: é o do Hyprland, pedido por uma regra de camada (`HyprSync._blurRule`) com `blur`, `blur_popups` (os painéis da barra são popups da camada `kortex-bar`) e `ignore_alpha = 0.35`, que deixa sem desfoque o que é transparente (o resto da tela nas janelas `OverlayPanel`, o vão entre os avisos) e fica abaixo da menor opacidade permitida. A regra tem nome (`kortex-blur`): mandada de novo, o Hyprland a atualiza no lugar e reaplica às camadas abertas, então ligar e desligar vale na hora. Com os painéis opacos ou `panelBlur` desligado ela vai com `blur = false`. Ficam de fora o papel de parede, a camada de clique fora e o carrossel, que tem fundo próprio.
 
 ### Por que dois tipos de janela
 
@@ -51,7 +57,7 @@ Todo item é um `widgets/BarButton.qml`. Ele trata o realce, o espaço entre íc
 | `Settings` | preferências persistidas, ordem da barra, utilitários de execução | `~/.local/state/kortex/settings.json` (`FileView` + `JsonAdapter`) |
 | `Theme` | paleta, fontes e métricas, catálogo de temas e papéis de parede, Matugen | `list-themes.sh`, `list-wallpapers.sh`, `matugen-generate.sh`, `theme-apply.sh`, `gio trash`, `rm`, `mv` |
 | `Motion` | parâmetros das animações (Qt e Hyprland) | `Settings` |
-| `HyprSync` | o que as Configurações aplicam ao Hyprland ao vivo, e o aviso quando o Hyprland ainda usa o `hyprland.conf` | `hyprctl eval` (Lua) |
+| `HyprSync` | o que as Configurações aplicam ao Hyprland ao vivo (atalhos, animações, regras das camadas, desfoque dos painéis, borda e cantos das janelas), e o aviso quando o Hyprland ainda usa o `hyprland.conf` | `hyprctl eval` (Lua) |
 | `Popups` | estado das janelas e painéis | |
 | `Icons` | nomes dos ícones (Material Symbols) e a fonte | `fonts/MaterialSymbolsOutlined.ttf` |
 | `Notifs` | servidor de notificações, avisos flutuantes, `flash()` do próprio Kortex | `NotificationServer` |
@@ -96,7 +102,9 @@ O tema `matugen` não é uma pasta fixa: `Theme.generate()` roda `matugen-genera
 
 ## `settings.json`
 
-`Settings.qml` liga um `FileView` (com `watchChanges`) a um `JsonAdapter`. Mudar uma propriedade de `Settings.data` grava o arquivo (`onAdapterUpdated: writeAdapter()`), e uma edição externa é relida (`onFileChanged: reload()`). Arquivo ausente é criado com os padrões. Duas consequências estão nas armadilhas do `CLAUDE.md`: várias chaves na mesma volta precisam de `applyBatch`, e mapas e listas precisam ser reatribuídos, não mudados no lugar.
+`Settings.qml` liga um `FileView` (com `watchChanges` e `blockWrites`) a um `JsonAdapter`. Mudar uma propriedade de `Settings.data` grava o arquivo (`onAdapterUpdated: writeAdapter()`), e uma edição externa é relida (`onFileChanged: reload()`). Arquivo ausente é criado com os padrões. A leitura inicial é assíncrona: os serviços nascem com os padrões e recebem os valores salvos logo depois, pelos sinais de mudança (é assim que a luz noturna salva liga ao iniciar).
+
+A gravação é síncrona de propósito (`blockWrites: true`). O `FileView` do Quickshell, quando termina uma gravação, devolve ao `JsonAdapter` o conteúdo que gravou. Com a gravação em outra thread, uma segunda chave mudada antes do fim da primeira fazia o adaptador voltar ao estado da primeira (a segunda chave regredia na memória até a gravação dela terminar), e uma terceira chave na mesma volta gravava esse estado incompleto: de três mudanças seguidas, a do meio se perdia. Era o caso de excluir o tema em uso (lembrados, papel de parede e tema mudam juntos). Síncrona, cada gravação devolve exatamente o que a memória já tem. Mapas e listas continuam precisando ser reatribuídos, não mudados no lugar.
 
 ## Arquivos
 
@@ -167,7 +175,9 @@ Variáveis só para teste: `KORTEX_GNOME_NO_GSETTINGS=1` (pula o `gsettings`), `
 
 ## Animações
 
-`services/Motion.qml` concentra tudo. Para o Hyprland, `hyprlandLua` gera as curvas Bézier (`hl.curve`) (`kortexOut`, `kortexIn`, `kortexStd`, `kortexBack`) e as animações (`hl.animation`) de janelas, áreas de trabalho, camadas e popups, que o `HyprSync` aplica ao vivo e reaplica a cada recarga. Para o Qt, expõe as curvas no formato do `easing.bezierCurve`, `ms(base)` (a duração na velocidade escolhida) e os deslocamentos e escalas dos painéis (`BarPopup`) e dos avisos (`NotificationToasts`), que o Hyprland não sabe animar além de esmaecer.
+`services/Motion.qml` concentra tudo. Para o Hyprland, `hyprlandLua` gera as curvas Bézier (`hl.curve`) (`kortexOut`, `kortexIn`, `kortexStd`, `kortexBack`) e as animações (`hl.animation`) de janelas, áreas de trabalho, camadas e popups, que o `HyprSync` aplica ao vivo e reaplica a cada recarga. Para o Qt, expõe as curvas no formato do `easing.bezierCurve`, `ms(base)` (a duração na velocidade escolhida, ou 0 com as animações desligadas) e os deslocamentos e escalas dos painéis (`BarPopup`) e dos avisos (`NotificationToasts`), que o Hyprland não sabe animar além de esmaecer.
+
+As curvas são as do Material 3 (as mesmas que o Caelestia e outros shells do Quickshell usam): `kortexOut` é a *emphasized decelerate* (o que entra), `kortexIn` a *emphasized accelerate* (o que sai) e `kortexStd` a *standard* (o que muda de lugar). As durações seguem a mesma lógica: entrar leva mais tempo que sair, e áreas pequenas (realces, interruptores) ficam em torno de 100 ms. Toda duração do Qt passa por `Motion.ms()`, dos painéis aos realces de botão, então a velocidade e o desligamento valem para tudo. As exceções são os indicadores de carregamento e as contagens regressivas, que são informação e continuam se mexendo com as animações desligadas.
 
 ## Hyprland em Lua
 

@@ -336,7 +336,6 @@ LazyLoader {
 
         GradientFrame {
             anchors.fill: parent
-            color: Theme.bg
             radius: Theme.radius
 
             ColumnLayout {
@@ -550,7 +549,7 @@ LazyLoader {
 
                                     Rectangle {
                                         anchors.fill: parent
-                                        radius: 4
+                                        radius: Theme.radiusSmall
                                         color: line.rowColor
 
                                         // marca da linha escolhida, como no lançador

@@ -84,7 +84,7 @@ MouseArea {
             size: Math.round(Theme.iconSize * root.iconScale)
             filled: root.iconFilled
             font.family: root.iconFamily
-            Behavior on color { ColorAnimation { duration: 120 } }
+            Behavior on color { ColorAnimation { duration: Motion.ms(120) } }
         }
 
         Text {
@@ -95,7 +95,7 @@ MouseArea {
             font.family: Theme.font
             font.pixelSize: Theme.textBody
             font.features: root.tabular ? { "tnum": 1 } : {}
-            Behavior on color { ColorAnimation { duration: 120 } }
+            Behavior on color { ColorAnimation { duration: Motion.ms(120) } }
         }
     }
 }
