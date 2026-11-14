@@ -765,11 +765,13 @@ hl.window_rule({
 })
 
 -- ------------------------------------------------------------ do usuário ----
--- Um erro no user.lua aparece como erro de configuração (hyprctl configerrors) sem desfazer o que está
--- acima; o pcall só cobre o user.lua apagado.
+-- Um erro no user.lua aparece na faixa vermelha de erros do Hyprland ("Your config has errors"), mas não
+-- no hyprctl configerrors, sem desfazer o que está acima; o pcall só cobre o user.lua apagado.
 pcall(require, "user")
 CONF
     if [ ! -f "$HYPR/user.lua" ]; then
+        # O aviso fica para depois do bloco: dentro dele, a saída do warn iria parar no user.lua
+        user_conf_copied=0
         {
             printf -- '-- Suas configurações pessoais do Hyprland, em Lua (este arquivo não é sobrescrito).\n'
             printf -- '-- Sintaxe: https://wiki.hypr.land/configuring/ (hl.config, hl.bind, hl.window_rule…)\n'
@@ -777,9 +779,11 @@ CONF
             if [ -f "$HYPR/user.conf" ] && grep -qv '^[[:space:]]*\(#.*\)\?$' "$HYPR/user.conf"; then
                 printf -- '\n-- Conteúdo do user.conf (formato antigo, que o Hyprland não lê mais). Reescreva em Lua:\n'
                 sed 's/^/-- /' "$HYPR/user.conf"
-                warn "Seu ~/.config/hypr/user.conf foi copiado, comentado, para o user.lua: reescreva-o em Lua."
+                user_conf_copied=1
             fi
         } > "$HYPR/user.lua"
+        [ "$user_conf_copied" = 1 ] &&
+            warn "Seu ~/.config/hypr/user.conf foi copiado, comentado, para o user.lua: reescreva-o em Lua."
     fi
     # O HyprMod grava os ajustes dele no hyprland-gui.lua e acrescenta o require no fim do hyprland.lua.
     # Como o arquivo acima foi regravado inteiro, a linha volta aqui, com o mesmo marcador que o HyprMod

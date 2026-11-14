@@ -283,6 +283,27 @@ CONF"
     else
         skip "hl-mock (lua não encontrado)"
     fi
+    # O user.lua que o arch-setup.sh grava a partir de um user.conf antigo: precisa ser Lua válido, com o
+    # aviso no terminal (um warn dentro do bloco redirecionado já foi parar no arquivo, com as cores ANSI)
+    ul="$work/user-lua"; mkdir -p "$ul"
+    printf '# comentário\nexec-once = algo\n' > "$ul/user.conf"
+    (
+        # shellcheck disable=SC2034  # lida pelo eval abaixo
+        HYPR="$ul"
+        # shellcheck disable=SC2329  # chamada pelo eval abaixo
+        warn() { printf 'warn: %s\n' "$*"; }
+        eval "$(awk '/^    if \[ ! -f "\$HYPR\/user.lua" \]; then$/{f=1} f{print} f&&/^    fi$/{exit}' "$repo/arch-setup.sh")"
+    ) > "$work/ul-out" 2>&1
+    if ! [ -s "$ul/user.lua" ]; then
+        bad "arch-setup.sh: não consegui montar o user.lua"; sed 's/^/        /' "$work/ul-out"
+    elif grep -q $'\e' "$ul/user.lua" || ! grep -q '^-- exec-once = algo$' "$ul/user.lua" ||
+        ! grep -q '^warn: Seu ~/.config/hypr/user.conf foi copiado' "$work/ul-out"; then
+        bad "arch-setup.sh: user.lua gerado do user.conf (o aviso foi para o arquivo?)"; sed 's/^/        /' "$ul/user.lua"
+    elif command -v lua >/dev/null && ! lua -e 'assert(loadfile(arg[1]))' "$ul/user.lua" 2>"$work/ul-err"; then
+        bad "arch-setup.sh: user.lua gerado não é Lua válido"; sed 's/^/        /' "$work/ul-err"
+    else
+        ok "arch-setup.sh: user.lua gerado do user.conf"
+    fi
     if command -v Hyprland >/dev/null && [ -s "$hypr/hyprland.lua" ]; then
         Hyprland --verify-config -c "$hypr/hyprland.lua" >"$work/verify" 2>&1
         v="$(Hyprland --version 2>/dev/null | head -1 | awk '{print $2}')"
