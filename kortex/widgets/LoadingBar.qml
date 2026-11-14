@@ -18,7 +18,7 @@ Item {
     implicitHeight: 2
     opacity: active ? 1 : 0
     visible: !collapse || opacity > 0
-    Behavior on opacity { NumberAnimation { duration: 220 } }
+    Behavior on opacity { NumberAnimation { duration: Motion.ms(220) } }
 
     NumberAnimation {
         target: root; property: "slide"; from: 0; to: 1

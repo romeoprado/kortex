@@ -132,7 +132,7 @@ LazyLoader {
                     target: back
                     property: "opacity"
                     to: 0
-                    duration: 250
+                    duration: Motion.ms(250)
                     easing.type: Easing.InOutQuad
                 }
             }
@@ -172,7 +172,7 @@ LazyLoader {
             preferredHighlightBegin: 0.5
             preferredHighlightEnd: 0.5
             highlightRangeMode: PathView.StrictlyEnforceRange
-            highlightMoveDuration: 220
+            highlightMoveDuration: Motion.ms(220)
             snapMode: PathView.SnapToItem
             focus: true
 

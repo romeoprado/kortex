@@ -3,7 +3,8 @@ import QtQuick.Layouts
 import qs.services
 import qs.widgets
 
-// Configurações › Aparência: fontes, tamanho do texto, cantos e bordas
+// Configurações › Aparência: fontes, tamanho do texto, cantos e bordas, opacidade e desfoque dos
+// painéis e do terminal
 SettingsPage {
     id: page
 
@@ -38,7 +39,7 @@ SettingsPage {
         Layout.fillWidth: true
         sourceComponent: FontPicker {
             current: Settings.data.mainFont
-            fallback: Theme.baseFont
+            fallback: Theme.font   // sem escolha, a marcada é a que está em uso (a primeira instalada da lista do Theme)
             onPicked: family => Settings.data.mainFont = family
             onCloseRequested: page.picking = ""
         }
@@ -72,7 +73,7 @@ SettingsPage {
         Layout.fillWidth: true
         sourceComponent: FontPicker {
             current: Settings.data.titleFont
-            fallback: "Iosevka Fixed SmBd Ex"
+            fallback: Theme.titleFont
             onPicked: family => Settings.data.titleFont = family
             onCloseRequested: page.picking = ""
         }
@@ -122,6 +123,30 @@ SettingsPage {
         Toggle {
             checked: Settings.data.hyprSyncAppearance
             onToggled: v => Settings.data.hyprSyncAppearance = v
+        }
+    }
+
+    SettingsSection { text: "Painéis" }
+
+    SettingRow {
+        title: "Opacidade dos painéis"
+        description: "Fundo da barra, dos painéis, das janelas e dos avisos."
+        SliderBar {
+            Layout.fillWidth: false
+            Layout.preferredWidth: 260
+            value: (Theme.panelOpacity - 60) / 40
+            valueText: Theme.panelOpacity + "%"
+            step: 1 / 8
+            onMoved: v => Settings.data.panelOpacity = 60 + Math.round(v * 8) * 5
+        }
+    }
+
+    SettingRow {
+        title: "Desfoque dos painéis"
+        dimmed: Theme.panelOpacity >= 100
+        Toggle {
+            checked: Settings.data.panelBlur
+            onToggled: v => Settings.data.panelBlur = v
         }
     }
 

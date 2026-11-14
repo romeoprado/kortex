@@ -270,7 +270,18 @@ Singleton {
     }
 
     // ── Conectar / desconectar ──────────────────────────────────────────
+    // Uma conexão por vez: o processo em execução não aceita outro comando, e trocar o pedido no meio
+    // faria o resultado da primeira tentativa ser atribuído à segunda (a rede errada apareceria como
+    // "conectando" e o perfil de uma rede nova com a senha errada ficaria salvo). Devolve false, com
+    // o motivo em `error`, quando o pedido não foi aceito.
+    function _busyConnecting() {
+        if (!conn.running) return false
+        error = "Aguarde a conexão em andamento terminar."
+        return true
+    }
+
     function connect(ssid, password) {
+        if (_busyConnecting()) return false
         error = ""
         connecting = ssid
         _connectSsid = ssid
@@ -280,15 +291,18 @@ Singleton {
         else
             conn.command = ["nmcli", "-w", "30", "device", "wifi", "connect", ssid].concat(password ? ["password", password] : [])
         conn.running = true
+        return true
     }
 
     // Ativa um perfil salvo (Wi-Fi ou cabo)
     function activate(name) {
+        if (_busyConnecting()) return false
         error = ""
         connecting = name
         _connectSsid = ""
         conn.command = ["nmcli", "-w", "30", "connection", "up", "id", name]
         conn.running = true
+        return true
     }
 
     function disconnect(name) {

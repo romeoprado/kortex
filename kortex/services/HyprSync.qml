@@ -10,6 +10,9 @@ import Quickshell.Hyprland
 //    mostra mais de cinco. Os atalhos 1–5 já vêm do hyprland.lua.
 //  • espessura da borda e raio dos cantos das janelas, quando "aplicar às janelas" está ligado.
 //  • atalhos do Caps Lock e do Num Lock que avisam o OSD (non_consuming: não consomem a tecla).
+//  • o desfoque atrás da barra, dos painéis, das janelas e dos avisos do Kortex, quando eles estão
+//    translúcidos (Configurações › Aparência › Painéis): uma regra de camada com nome, que o Hyprland
+//    atualiza no lugar quando ela é mandada de novo e reaplica às camadas já abertas.
 //  • as animações do Hyprland (Configurações › Animações, ver services/Motion.qml): janelas, áreas
 //    de trabalho, camadas e popups, reaplicadas a cada mudança. As janelas do Kortex (lançador,
 //    temas, Configurações, rede, cidade, idioma, confirmação de tela, OSD, captura de tela, processos) crescem
@@ -35,14 +38,20 @@ Singleton {
     property bool _wasSyncing: false
     property bool _osdBound: false   // atalhos do OSD já criados (um reload do Hyprland os apaga)
     property bool _animsSet: false   // regras de camada já aplicadas (se repetiriam a cada vez)
+    property bool _blurSent: false   // o desfoque que o Hyprland tem agora (um reload volta a "sem regra")
     property var _queued: []         // instruções que chegaram com o eval anterior ainda rodando
     property bool _warned: false
+
+    // Desfoque atrás do que é translúcido: só com a opacidade dos painéis abaixo de 100%
+    readonly property bool panelBlur: Settings.data.panelBlur && Theme.panelOpacity < 100
+
+    // Janelas do Kortex feitas com OverlayPanel (e a confirmação de tela), sem o prefixo "kortex-"
+    readonly property string _windows: "themes|settings|network-settings|network-prompt|city|language|display-confirm|screenshot|screenshot-save|record|record-save|processes"
 
     // Regras das camadas do Kortex (as curvas e velocidades vêm de Motion, ver services/Motion.qml)
     readonly property var _layerRules: [
         // janelas do Kortex crescem do centro; a barra e o carrossel deslizam da borda em que estão
-        _layerRule("kortex-popin", "^kortex-(themes|settings|network-settings|network-prompt|city|language|display-confirm|screenshot|screenshot-save|record|record-save|processes)$",
-                   'animation = "popin 90%"'),
+        _layerRule("kortex-popin", "^kortex-(" + _windows + ")$", 'animation = "popin 90%"'),
         _layerRule("kortex-slide", "^kortex-(bar|wallpaper-carousel)$", 'animation = "slide"'),
         // o lançador só esmaece: a cascata de dentro é do Qt (modules/launcher/Launcher.qml)
         _layerRule("kortex-fade", "^kortex-launcher$", 'animation = "fade"'),
@@ -60,6 +69,18 @@ Singleton {
 
     function _layerRule(name, namespace, effect) {
         return "hl.layer_rule({ name = " + lua(name) + ", match = { namespace = " + lua(namespace) + " }, " + effect + " })"
+    }
+
+    // Desfoque das camadas translúcidas do Kortex: a barra (e os painéis dela, que são popups), o
+    // lançador, as janelas, os avisos e o OSD. Ficam de fora o papel de parede, a camada de clique
+    // fora e o carrossel, que tem fundo próprio. O ignore_alpha deixa sem desfoque o que é
+    // transparente (o resto da tela nas janelas de tela cheia, o vão entre os avisos) e fica abaixo
+    // da menor opacidade que os painéis podem ter (60%). Desligado, a mesma regra vai com
+    // blur = false: mandada com o mesmo nome, vale a última.
+    function _blurRule() {
+        const on = panelBlur ? "true" : "false"
+        return _layerRule("kortex-blur", "^kortex-(bar|launcher|notifications|osd|" + _windows + ")$",
+                          "blur = " + on + ", blur_popups = " + on + ", ignore_alpha = 0.35")
     }
 
     function _key(n) { return n === 10 ? "0" : String(n) }
@@ -102,6 +123,12 @@ Singleton {
         if (!_animsSet) {
             code.push(..._layerRules)
             _animsSet = true
+        }
+        // O desfoque muda com as Configurações, então vai a cada vez que mudou (ou depois de um reload).
+        // Com os painéis opacos e nenhuma regra mandada antes, não há o que desligar.
+        if (panelBlur !== _blurSent) {
+            code.push(_blurRule())
+            _blurSent = panelBlur
         }
         code.push(...Motion.hyprlandLua)
         // As cores da borda das janelas não entram aqui: o theme-apply.sh as aplica ao trocar de tema e
@@ -149,6 +176,7 @@ Singleton {
     onSyncWindowsChanged: settle.restart()
     onWindowBorderChanged: if (syncWindows) settle.restart()
     onWindowRoundingChanged: if (syncWindows) settle.restart()
+    onPanelBlurChanged: settle.restart()
 
     Timer {
         id: settle
@@ -177,6 +205,7 @@ Singleton {
                 root._bound = []
                 root._osdBound = false
                 root._animsSet = false
+                root._blurSent = false
                 settle.restart()
             }
         }

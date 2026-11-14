@@ -40,15 +40,15 @@ PanelWindow {
     readonly property int widthStep: 2 * Theme.snapStep(devicePixelRatio)
     implicitWidth: floating ? Math.ceil(Math.min(contentWidth, (modelData ? modelData.width : 1920) - 2 * edgeGap) / widthStep - 0.000001) * widthStep : 0
     implicitHeight: Theme.barHeightFor(devicePixelRatio)
-    color: floating ? "transparent" : Theme.bg
-    // Nunca opaca: a cor muda entre a inteira (Theme.bg) e a flutuante (transparente), e com a camada
+    color: floating ? "transparent" : Theme.surface
+    // Nunca opaca: a cor muda entre a inteira (Theme.surface) e a flutuante (transparente), e com a camada
     // marcada como opaca o Hyprland deixava de desenhar o papel de parede sob os cantos arredondados
     // a cada redesenho parcial (ao passar o mouse), e eles apareciam pretos
     surfaceFormat.opaque: false
     WlrLayershell.namespace: "kortex-bar"
     WlrLayershell.layer: WlrLayer.Top
 
-    Behavior on color { ColorAnimation { duration: 300 } }
+    Behavior on color { ColorAnimation { duration: Motion.ms(300) } }
 
     // a camada ClickAway recorta o espaço da barra flutuante com esta largura
     readonly property real floatingWidth: floating ? implicitWidth : 0
@@ -60,7 +60,7 @@ PanelWindow {
         anchors.fill: parent
         visible: bar.floating
         borderWidth: bar.frameBorder
-        Behavior on color { ColorAnimation { duration: 300 } }
+        Behavior on color { ColorAnimation { duration: Motion.ms(300) } }
     }
 
     // Manter Acordado: a barra está sempre à vista, então segura o pedido de "não ficar inativo"

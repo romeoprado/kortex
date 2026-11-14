@@ -226,7 +226,7 @@ BarButton {
 
             Rectangle {
                 anchors.fill: parent
-                radius: 4
+                radius: Theme.radiusSmall
                 color: parent.containsMouse ? Theme.bgAlt : "transparent"
             }
 
@@ -302,7 +302,7 @@ BarButton {
 
                 Rectangle {
                     anchors.fill: parent
-                    radius: 4
+                    radius: Theme.radiusSmall
                     color: row.modelData.active ? Theme.accent : (row.containsMouse ? Theme.bgAlt : "transparent")
                 }
 
@@ -380,7 +380,7 @@ BarButton {
 
             Rectangle {
                 anchors.fill: parent
-                radius: 4
+                radius: Theme.radiusSmall
                 color: tsHead.expandable && tsHead.containsMouse ? Theme.bgAlt : "transparent"
             }
 
@@ -480,7 +480,7 @@ BarButton {
 
                 Rectangle {
                     anchors.fill: parent
-                    radius: 4
+                    radius: Theme.radiusSmall
                     color: peer.p.isSelf ? Theme.selectionTint : (peer.containsMouse ? Theme.bgAlt : "transparent")
                 }
 

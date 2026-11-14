@@ -118,7 +118,7 @@ Variants {
                     if (status === Image.Ready) {
                         fading = true
                         if (!instant && win.shade(img)) return
-                        fadeIn.duration = instant ? 0 : win.fadeMs
+                        fadeIn.duration = instant ? 0 : Motion.ms(win.fadeMs)   // 0 com as animações desligadas
                         fadeIn.start()
                     } else if (status === Image.Error) {
                         destroy()

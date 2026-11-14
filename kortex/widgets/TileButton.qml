@@ -28,7 +28,7 @@ MouseArea {
     hoverEnabled: true
     cursorShape: Qt.PointingHandCursor
     scale: pressed ? 0.97 : 1
-    Behavior on scale { NumberAnimation { duration: 90; easing.type: Easing.OutCubic } }
+    Behavior on scale { NumberAnimation { duration: Motion.ms(90); easing.type: Easing.OutCubic } }
 
     onAskingChanged: if (asking) drain.restart(); else drain.stop()
     // Teclado: Tab chega ao controle (contorno de foco) e Espaço ou Enter o aciona
@@ -50,8 +50,8 @@ MouseArea {
         borderWidth: 1
         fill: root.asking ? Theme.red : root.selected ? Theme.accent : root.containsMouse ? root.hoverFill : Theme.bgAlt
         color: root.asking ? Theme.red : root.selected ? Theme.accent : root.containsMouse ? root.hue : "transparent"
-        Behavior on fill { ColorAnimation { duration: 120 } }
-        Behavior on color { ColorAnimation { duration: 120 } }
+        Behavior on fill { ColorAnimation { duration: Motion.ms(120) } }
+        Behavior on color { ColorAnimation { duration: Motion.ms(120) } }
     }
 
     ColumnLayout {
@@ -64,7 +64,7 @@ MouseArea {
             text: root.icon
             color: root.tone
             size: root.iconOnly ? Theme.iconSize + 3 : Theme.iconSize + 8
-            Behavior on color { ColorAnimation { duration: 120 } }
+            Behavior on color { ColorAnimation { duration: Motion.ms(120) } }
         }
 
         Text {
@@ -75,7 +75,7 @@ MouseArea {
             font.family: Theme.font
             font.pixelSize: Theme.textBody
             font.bold: root.asking || root.selected
-            Behavior on color { ColorAnimation { duration: 120 } }
+            Behavior on color { ColorAnimation { duration: Motion.ms(120) } }
         }
     }
 

@@ -96,8 +96,8 @@ BarButton {
                 radius: height / 2
                 color: asking ? Theme.red : Theme.bgAlt
                 opacity: root.tagText !== "" ? 1 : 0
-                Behavior on opacity { NumberAnimation { duration: 120 } }
-                Behavior on color { ColorAnimation { duration: 120 } }
+                Behavior on opacity { NumberAnimation { duration: Motion.ms(120) } }
+                Behavior on color { ColorAnimation { duration: Motion.ms(120) } }
                 Connections {
                     target: root
                     function onTagTextChanged() { if (root.tagText !== "") tag.shown = root.tagText }

@@ -48,7 +48,7 @@ LazyLoader {
         readonly property var settingsWords: [
             "configurações", "configuracoes", "configuração", "configurar", "settings", "ajustes", "preferências",
             "preferencias", "opções", "opcoes", "aparência", "aparencia", "kortex", "barra", "fonte", "fontes",
-            "cantos", "bordas", "transparência", "transparencia", "áreas", "areas", "trabalho", "sessão", "sessao"
+            "cantos", "bordas", "transparência", "transparencia", "opacidade", "desfoque", "painéis", "paineis", "áreas", "areas", "trabalho", "sessão", "sessao"
         ]
         // Começo de alguma palavra (3+ letras), ou parte do nome da entrada
         function matchesSettings(q) {
@@ -142,7 +142,6 @@ LazyLoader {
         GradientFrame {
             id: frame
             anchors.fill: parent
-            color: Theme.bg
             radius: Theme.radius
             opacity: Motion.enabled ? 0 : 1
 
@@ -271,7 +270,7 @@ LazyLoader {
 
                         Rectangle {
                             anchors.fill: parent
-                            radius: 4
+                            radius: Theme.radiusSmall
                             color: row.selected ? Theme.selectionTint : "transparent"
 
                             Rectangle {

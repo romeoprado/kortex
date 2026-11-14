@@ -15,7 +15,9 @@
 #     (cores, desfoque do terminal, monitores convertidos do monitors.conf pelo install.sh). O
 #     dev/hl-mock.lua confere a forma das chamadas sem o Hyprland (precisa do lua); com o Hyprland
 #     instalado, o Hyprland --verify-config confere também os nomes das opções e das regras e, com
-#     o qml do Qt 6, todo o Lua que o Motion.qml e o HyprSync.qml geram (cada combinação das animações).
+#     o qml do Qt 6, todo o Lua que o Motion.qml e o HyprSync.qml geram (cada combinação das animações
+#     e a regra de desfoque dos painéis, ligada e desligada). O install.sh roda sem o Hyprland no PATH
+#     quando ele não está instalado, o que também confere que a instalação não para por isso.
 #
 # Ferramentas: usa o shellcheck, o qmllint e o qmlformat do sistema (no Arch: pacotes shellcheck e
 # qt6-declarative, em /usr/lib/qt6/bin). Os de /usr/bin, quando existem, costumam ser do Qt 5
@@ -34,7 +36,7 @@ for a in "$@"; do
         --sem-instalar) install=0 ;;
         --so-scripts) only=scripts ;;
         --so-qml) only=qml ;;
-        -h|--help) sed -n '2,22p' "$0" | sed 's/^# \{0,1\}//'; exit 0 ;;
+        -h|--help) sed -n '2,27p' "$0" | sed 's/^# \{0,1\}//'; exit 0 ;;
         *) echo "Opção desconhecida: $a" >&2; exit 2 ;;
     esac
 done
@@ -227,6 +229,9 @@ EOF
         check "matugen-generate: prévia" "bash '$src/scripts/matugen-generate.sh' '$H/papel.jpg' dark scheme-vibrant - | grep -qx 'accent = \"#61afef\"' && [ ! -e '$H/.local/share/kortex/themes/matugen' ]"
         bash "$src/scripts/matugen-generate.sh" "$H/papel.jpg" dark scheme-vibrant "$H/t" salvo >/dev/null 2>&1
         check "matugen-generate: tema salvo" "[ -f '$H/t/salvo/backgrounds/papel.jpg' ] && [ \"\$(cat '$H/t/salvo/icons.theme')\" = Yaru-blue-dark ]"
+        # salvo de novo a partir do papel de parede que está na pasta do próprio tema: a imagem não pode sumir
+        bash "$src/scripts/matugen-generate.sh" "$H/t/salvo/backgrounds/papel.jpg" dark scheme-vibrant "$H/t" salvo >/dev/null 2>&1
+        check "matugen-generate: salvar de novo mantém o papel de parede" "[ \"\$(cat '$H/t/salvo/backgrounds/papel.jpg')\" = x ]"
         bash "$src/scripts/firefox-setup.sh" --remove >/dev/null 2>&1
         bash "$src/scripts/gnome-setup.sh" --remove >/dev/null 2>&1
         check "gnome-setup --remove" "[ ! -e '$H/.config/gtk-4.0' ] && [ ! -e '$H/.config/gtk-3.0/kortex-colors.css' ] && [ \"\$(cat '$H/.config/gtk-3.0/gtk.css')\" = '.minha-regra { color: red; }' ]"
@@ -294,7 +299,10 @@ CONF"
     elif grep -q $'\e' "$ul/user.lua" || ! grep -q '^-- exec-once = algo$' "$ul/user.lua" ||
         ! grep -q '^warn: Seu ~/.config/hypr/user.conf foi copiado' "$work/ul-out"; then
         bad "arch-setup.sh: user.lua gerado do user.conf (o aviso foi para o arquivo?)"; sed 's/^/        /' "$ul/user.lua"
-    elif command -v lua >/dev/null && ! lua -e 'assert(loadfile(arg[1]))' "$ul/user.lua" 2>"$work/ul-err"; then
+    # (O código vai pela entrada padrão e o arquivo é o arg[1]. Com "lua -e código arquivo", o arquivo
+    # vira o arg[0] e o arg[1] fica vazio: o loadfile lia a entrada padrão, e num terminal o verificador
+    # ficava parado esperando alguém digitar.)
+    elif command -v lua >/dev/null && ! lua - "$ul/user.lua" <<<'assert(loadfile(arg[1]))' 2>"$work/ul-err"; then
         bad "arch-setup.sh: user.lua gerado não é Lua válido"; sed 's/^/        /' "$work/ul-err"
     else
         ok "arch-setup.sh: user.lua gerado do user.conf"
@@ -313,7 +321,7 @@ CONF"
     # O Lua do QML: as funções do Motion.qml e do HyprSync.qml copiadas para um QML sem o Quickshell, que
     # imprime as regras de camada e as animações de todas as combinações de velocidade, intensidade e estilo
     qmlrt="$(tool qml)" || qmlrt=""
-    if [ -n "$qmlrt" ] && command -v Hyprland >/dev/null; then
+    if [ -n "$qmlrt" ] && { command -v Hyprland >/dev/null || command -v lua >/dev/null; }; then
         motion="$src/services/Motion.qml"; sync="$src/services/HyprSync.qml"
         cat > "$work/motion.qml" <<EOF
 import QtQuick
@@ -327,10 +335,15 @@ $(grep -E '^    readonly property (real factor|int level):' "$motion")
 $(grep -E '^    function pick\(' "$motion")
 $(awk '/^    function _speed\(/{f=1} f{print} /^    readonly property var hyprlandLua:/{l=1} f&&l&&/^    }$/{exit}' "$motion")
 $(awk '/^    function lua\(s\)/{f=1} f{print} f&&/^    }$/{if(++n==2) exit}' "$sync")
+$(grep -E '^    readonly property string _windows:' "$sync")
+    property bool panelBlur: true
+$(awk '/^    function _blurRule\(/{f=1} f{print} f&&/^    }$/{exit}' "$sync")
 $(awk '/^    readonly property var _layerRules:/{f=1} f{print} f&&/^    \]$/{exit}' "$sync")
 $(awk '/^    function guard\(/{f=1} f{print} f&&/^    }$/{exit}' "$sync")
     Component.onCompleted: {
-        const out = [..._layerRules]
+        const out = [..._layerRules, _blurRule()]
+        panelBlur = false
+        out.push(_blurRule())
         for (const sp of ["slow", "normal", "fast"])
             for (const it of ["subtle", "elegant", "intense"])
                 for (const w of ["popin", "slide", "gnomed"])
@@ -351,6 +364,8 @@ EOF
         n="$(grep -c '^hl\.animation(' "$work/motion.lua")"
         if [ "$n" -lt 81 ]; then
             bad "Lua do Motion.qml/HyprSync.qml: o QML de teste não gerou as animações"; sed 's/^/        /' "$work/motion.out" | head -20
+        elif ! command -v Hyprland >/dev/null; then
+            skip "Hyprland --verify-config do Lua do Motion.qml e do HyprSync.qml (Hyprland não encontrado)"
         elif Hyprland --verify-config -c "$work/motion.lua" >"$work/verify" 2>&1 && grep -qx 'config ok' "$work/verify"; then
             ok "Lua do Motion.qml e do HyprSync.qml ($n animações, $(grep -c '^hl\.layer_rule(' "$work/motion.lua") regras de camada)"
         else
@@ -366,7 +381,7 @@ EOF
             fi
         fi
     else
-        skip "Lua do Motion.qml e do HyprSync.qml (precisa do qml do Qt 6 e do Hyprland)"
+        skip "Lua do Motion.qml e do HyprSync.qml (precisa do qml do Qt 6 e do Hyprland ou do lua)"
     fi
 fi
 

@@ -153,10 +153,15 @@ Singleton {
         networkSettingsOpen = true
     }
 
+    // Páginas das Configurações (as de modules/settings/KortexSettings.qml)
+    readonly property var settingsPages: ["appearance", "animations", "bar", "apps", "power", "general", "about"]
+
+    // Uma página desconhecida (erro de digitação no atalho IPC) abre a última vista: antes abria a
+    // primeira, sem nenhuma marcada na lista
     function openSettings(page) {
         close()
         _closeOverlays()
-        settingsPage = page || settingsPage
+        if (settingsPages.includes(page)) settingsPage = page
         settingsOpen = true
     }
 

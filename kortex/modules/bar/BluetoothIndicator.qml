@@ -174,7 +174,7 @@ BarButton {
 
                 Rectangle {
                     anchors.fill: parent
-                    radius: 4
+                    radius: Theme.radiusSmall
                     color: row.containsMouse ? Theme.bgAlt : "transparent"
                 }
 

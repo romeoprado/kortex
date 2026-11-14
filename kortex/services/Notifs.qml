@@ -13,6 +13,18 @@ Singleton {
     readonly property var list: server.trackedNotifications.values.slice().reverse()
     readonly property int count: server.trackedNotifications.values.length
 
+    // Marca a hora de chegada de `id` e esquece as de avisos que já saíram do histórico e da tela.
+    // Sem isso o mapa crescia a cada notificação e a cada aviso do Kortex, até o shell reiniciar.
+    function _stamp(id) {
+        const t = {}
+        for (const n of server.trackedNotifications.values.concat(toasts)) {
+            const known = n ? times[n.id] : undefined   // (um aviso já destruído chega aqui como nulo)
+            if (known !== undefined) t[n.id] = known
+        }
+        t[id] = Date.now()
+        times = t
+    }
+
     // Os avisos do Kortex chegam ao Repeater como CÓPIA (objeto JS, não QObject): compara pela chave
     function removeToast(n) {
         toasts = toasts.filter(t => t !== n && !(n && n.kortexKey && t.kortexKey === n.kortexKey))
@@ -24,9 +36,7 @@ Singleton {
         const n = { kortexKey: key, kortexIcon: icon, id: "kortex-" + key + "-" + Date.now(), appName: "Kortex",
                     summary: summary, body: body || "", image: "", appIcon: "",
                     urgency: NotificationUrgency.Normal, expireTimeout: 2500, actions: [] }
-        const t = Object.assign({}, times)
-        t[n.id] = Date.now()
-        times = t
+        _stamp(n.id)
         toasts = [n].concat(toasts.filter(x => x.kortexKey !== key)).slice(0, 5)
     }
 
@@ -64,9 +74,7 @@ Singleton {
 
         onNotification: n => {
             n.tracked = true
-            const t = Object.assign({}, root.times)
-            t[n.id] = Date.now()
-            root.times = t
+            root._stamp(n.id)
             n.closed.connect(() => root.removeToast(n))
             if (!Settings.data.dnd || n.urgency === NotificationUrgency.Critical)
                 root.toasts = [n].concat(root.toasts.filter(x => x !== n)).slice(0, 5)

@@ -31,7 +31,7 @@ MouseArea {
         borderWidth: 1
         fill: root.checked ? Theme.accent : Theme.bgAlt
         color: root.checked ? Theme.accent : Theme.outline
-        Behavior on fill { ColorAnimation { duration: 120 } }
+        Behavior on fill { ColorAnimation { duration: Motion.ms(120) } }
 
         Rectangle {
             width: parent.height - 6
@@ -40,7 +40,7 @@ MouseArea {
             y: 3
             x: root.checked ? parent.width - width - 3 : 3
             color: root.checked ? Theme.accentText : Theme.fgDim
-            Behavior on x { NumberAnimation { duration: 120; easing.type: Easing.OutCubic } }
+            Behavior on x { NumberAnimation { duration: Motion.ms(120); easing.type: Easing.OutCubic } }
         }
     }
 }

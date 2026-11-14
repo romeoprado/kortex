@@ -59,7 +59,6 @@ PopupWindow {
         width: root.implicitWidth
         height: root.implicitHeight
         implicitHeight: column.implicitHeight + root.padding * 2
-        color: Theme.bg
         radius: Theme.radius
         Keys.onEscapePressed: Popups.close(root.popupId)
 

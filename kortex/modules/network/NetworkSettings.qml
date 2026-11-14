@@ -182,7 +182,6 @@ LazyLoader {
 
         GradientFrame {
             anchors.fill: parent
-            color: Theme.bg
             radius: Theme.radius
             focus: true
             Keys.onEscapePressed: win.close()
@@ -225,7 +224,7 @@ LazyLoader {
 
                             Rectangle {
                                 anchors.fill: parent
-                                radius: 4
+                                radius: Theme.radiusSmall
                                 color: row.modelData.name === win.sel ? Theme.selectionTint
                                      : row.containsMouse ? Theme.bgAlt : "transparent"
                             }
@@ -253,7 +252,7 @@ LazyLoader {
                                     visible: row.modelData.active
                                     width: 8
                                     height: 8
-                                    radius: 4
+                                    radius: width / 2
                                     color: Theme.green
                                 }
                             }
