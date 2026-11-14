@@ -299,7 +299,10 @@ CONF"
     elif grep -q $'\e' "$ul/user.lua" || ! grep -q '^-- exec-once = algo$' "$ul/user.lua" ||
         ! grep -q '^warn: Seu ~/.config/hypr/user.conf foi copiado' "$work/ul-out"; then
         bad "arch-setup.sh: user.lua gerado do user.conf (o aviso foi para o arquivo?)"; sed 's/^/        /' "$ul/user.lua"
-    elif command -v lua >/dev/null && ! lua -e 'assert(loadfile(arg[1]))' "$ul/user.lua" 2>"$work/ul-err"; then
+    # (O código vai pela entrada padrão e o arquivo é o arg[1]. Com "lua -e código arquivo", o arquivo
+    # vira o arg[0] e o arg[1] fica vazio: o loadfile lia a entrada padrão, e num terminal o verificador
+    # ficava parado esperando alguém digitar.)
+    elif command -v lua >/dev/null && ! lua - "$ul/user.lua" <<<'assert(loadfile(arg[1]))' 2>"$work/ul-err"; then
         bad "arch-setup.sh: user.lua gerado não é Lua válido"; sed 's/^/        /' "$work/ul-err"
     else
         ok "arch-setup.sh: user.lua gerado do user.conf"

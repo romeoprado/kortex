@@ -6,7 +6,7 @@ Foi feita no ambiente da nuvem, sem Hyprland nem Quickshell. Tudo o que é QML f
 
 ## Como foi feita
 
-- Leitura dos 26 serviços, dos 30 widgets, dos 26 scripts, do `shell.qml`, da barra, do lançador, das Configurações, das janelas de temas, captura, rede e tela, do `install.sh`, do `hyprland.lua` do `arch-setup.sh` e do README. As janelas grandes que não mudaram desde a auditoria anterior (Gerenciador de Processos, editor de rede, teclado e idioma, carrossel, tema do SDDM) foram conferidas por busca de padrões, não linha a linha.
+- Leitura dos 26 serviços, dos 30 widgets, dos 26 scripts, do `shell.qml` e de todos os módulos (barra, lançador, Configurações, temas, captura e gravação, rede, tela, processos, teclado e idioma, carrossel), do tema do SDDM, do `install.sh`, do `hyprland.lua` do `arch-setup.sh` e do README. As janelas grandes (Gerenciador de Processos, editor de rede, teclado e idioma, carrossel, painéis de energia, clima e Bluetooth, SDDM) ficaram para uma segunda passada, no dia 14, e foram lidas por inteiro. O `arch-setup.sh` também foi lido por inteiro na segunda passada.
 - `bash dev/verificar.sh`, com o `lua` instalado para o `dev/hl-mock.lua`.
 - Checagens mecânicas escritas para esta auditoria:
   - toda referência a um membro de serviço (`Theme.x`, `Settings.data.x`, `Icons.x`…) existe no serviço: nenhuma quebrada;
@@ -42,7 +42,7 @@ O código continua cuidadoso e coerente com as próprias regras. As duas auditor
 
 9. **"Animações desligadas" não desligava tudo.** O README e o `Settings.qml` prometem que `animations: false` desliga todas, e o `Motion` diz que a velocidade multiplica todas as durações. Mas 27 animações tinham a duração escrita direto (realces de botões, interruptores, itens da barra, cor da barra, áreas de trabalho) e o esmaecer do papel de parede (700 ms) ignorava as duas opções. `Motion.ms()` passou a devolver 0 com as animações desligadas (todos os usos existentes já tratavam o caso) e as 27 durações passam por ele. Ficaram de fora, de propósito, os indicadores de carregamento e as contagens regressivas.
 
-10. **Realce de linha com raio fixo.** Dezesseis listas usavam `radius: 4`, enquanto os botões seguem `Theme.radiusSmall`. Com o raio dos cantos em 0, as linhas continuavam arredondadas. Agora seguem o tema (no padrão, o valor é o mesmo).
+10. **Realce de linha com raio fixo.** Quinze listas usavam `radius: 4`, enquanto os botões seguem `Theme.radiusSmall`. Com o raio dos cantos em 0, as linhas continuavam arredondadas. Agora seguem o tema (no padrão, o valor é o mesmo).
 
 11. **README, seção 3.** O exemplo do `hyprland.lua` ainda pintava a borda inativa opaca (`colors.muted`) e ignorava o `hyprBorders`, o defeito 6 da auditoria anterior, corrigido no instalador e esquecido no manual.
 
@@ -51,6 +51,18 @@ O código continua cuidadoso e coerente com as próprias regras. As duas auditor
 13. **`settings open <página>` com página desconhecida** abria a primeira página sem nenhuma marcada na lista. Agora abre a última vista.
 
 14. **Acesso pelo teclado.** `PlainButton`, `Toggle` e `TileButton` recebem o foco e respondem a Espaço e Enter; o `AppChip` (Configurações › Aplicativos) e o `SliderBar` não. Agora os dois recebem o foco, e o controle deslizante anda com as setas.
+
+15. **Temperatura do clima com tamanho fixo.** O painel do clima usava `font.pixelSize: 24`, o único tamanho de texto fora do `Theme`. Agora deriva do tamanho escolhido (`Theme.textTitle + 6`, o mesmo valor no padrão).
+
+16. **Rolagem das Configurações pelo teclado.** O Tab chegava a um controle fora da área visível sem a página acompanhar. O editor de rede já fazia isso para os campos dele (`reveal`); a `SettingsPage` agora rola o mínimo necessário até o controle com o foco.
+
+## Segunda passada (14 de novembro)
+
+A leitura das janelas que tinham ficado só nas checagens mecânicas não achou defeito novo nelas. Achou um erro desta própria auditoria: a troca de `radius: 4` por `Theme.radiusSmall` (item 10) foi feita por padrão de texto e pegou também o ponto verde de 8 px que marca a conexão ativa no editor de rede, que é um círculo e não um realce de linha. Com o raio dos cantos em 0 ele viraria um quadrado. Voltou a ser círculo (`radius: width / 2`), e as outras 15 trocas foram conferidas uma a uma: todas são realces de linha.
+
+A `main` recebeu o PR #7 (aviso do `user.conf` no instalador) nesse intervalo. Foi juntada ao branch sem conflito, com o `dev/verificar.sh` em **Tudo certo**.
+
+O teste que esse PR acrescentou ao verificador tinha um defeito que só aparece com o `lua` instalado: `lua -e 'assert(loadfile(arg[1]))' arquivo` põe o arquivo no `arg[0]`, o `arg[1]` fica vazio e o `loadfile` passa a ler a entrada padrão. Com a entrada vazia o teste passava (porque o `lua` executa o arquivo em seguida), mas num terminal o `dev/verificar.sh` ficava parado esperando alguém digitar. Aqui ele travou por dez minutos numa das execuções. O código do teste agora vai pela entrada padrão e o arquivo é o `arg[1]`, sem executar o `user.lua`. Na sua máquina isso não aparecia, provavelmente porque o `lua` não está instalado e o teste era pulado.
 
 ## Pesquisa: skills
 
@@ -90,14 +102,13 @@ Nada disto pôde ser aberto aqui. Depois de instalar, rode `qs -c kortex kill; q
 2. **Excluir o tema em uso** (um tema salvo do Matugen, por exemplo): o shell deve ir para outro tema e continuar nele depois de reiniciar.
 3. **Opacidade dos painéis** em 85%, com o desfoque ligado e desligado: barra inteira e flutuante, um painel da barra, o lançador, as Configurações, um aviso e o OSD. `hyprctl configerrors` deve ficar vazio. Se o desfoque dos painéis da barra não acompanhar, o ponto é o `blur_popups`.
 4. **Animações desligadas**: nada deve se mover além dos indicadores de carregamento. Ligadas na velocidade *Lenta*: os realces dos botões ficam mais lentos também.
-5. **Teclado nas Configurações**: Tab chega aos controles deslizantes e aos botões de aplicativo; as setas mudam o valor.
+5. **Teclado nas Configurações**: Tab chega aos controles deslizantes e aos botões de aplicativo; as setas mudam o valor; a página rola sozinha quando o foco vai para um controle fora da área visível (teste na página Aparência, que é a mais comprida).
 6. **`bash dev/verificar.sh`** na máquina, que roda o `Hyprland --verify-config` no Lua gerado (inclusive a regra `kortex-blur`).
 
 ## Pendências
 
-- **Não lidos linha a linha nesta rodada**: `ProcessManager.qml`, `NetworkSettings.qml`, as páginas de teclado e idioma, `WallpaperCarousel.qml`, `StatsCards.qml`, os painéis de energia, clima e Bluetooth e o `sddm/Main.qml`. Passaram pelas checagens mecânicas e pelas buscas de padrões, sem achados.
+- **`arch-setup.sh`**: foi lido por inteiro, sem achados além da linha da versão do Hyprland (defeito 4), mas só pode ser exercitado de verdade num Arch limpo. Os trechos `[ teste ] && comando` no fim de um bloco, que costumam derrubar scripts com `set -e`, foram testados e não encerram o instalador.
 - **Leitura inicial do `settings.json` é assíncrona.** Os serviços nascem com os padrões e recebem os valores salvos logo depois. Funciona, mas uma gravação feita antes de a leitura terminar sobrescreveria o arquivo com os padrões. Hoje nada grava tão cedo. Tornar a leitura síncrona mudaria quem depende do sinal de mudança ao iniciar (a luz noturna, por exemplo) e precisa de teste na máquina.
-- **Rolagem das Configurações pelo teclado.** Tab chega a um controle fora da área visível sem a página rolar até ele.
 - **Consultas periódicas** (`nmcli` a cada 8 s, brilho a cada 5 s, bateria a cada 10 s) poderiam virar eventos, como sugere a skill do Omarchy.
 - **`visibleMask`** nas janelas `OverlayPanel`, se o desfoque pesar em telas grandes.
 - Continuam valendo as pendências 7 a 10 e 12 da auditoria de 3 de novembro (commits do Firefox fora da `main`, branches antigas, arquivos do formato antigo, o `.qsb` sem conferência) e os pontos de outubro (senha do Wi-Fi na linha de comando do `nmcli`, pequenas duplicações). O `qsb` do PySide6 não vem no pacote `PySide6-Essentials`, então o `.qsb` também não pôde ser conferido aqui.

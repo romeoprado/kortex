@@ -91,7 +91,7 @@ BarButton {
                     text: Weather.temp + " °C"
                     color: Theme.fgBright
                     font.family: Theme.font
-                    font.pixelSize: 24
+                    font.pixelSize: Theme.textTitle + 6   // 24 no tamanho padrão; acompanha o tamanho do texto
                     font.bold: true
                 }
                 Text {

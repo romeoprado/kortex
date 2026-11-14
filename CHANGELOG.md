@@ -5,7 +5,7 @@
 **Novidades**
 
 - **Painéis translúcidos e com desfoque** (*Configurações › Aparência › Painéis*; `panelOpacity` e `panelBlur`). A opacidade abaixo de 100% deixa translúcido o fundo da barra, dos painéis, do lançador, das janelas, dos avisos e do aviso de volume e brilho, e o Hyprland desfoca o que fica por trás, como já fazia com o terminal. O padrão continua opaco. O Kortex manda a regra de camada ao vivo e a reaplica a cada recarga do Hyprland, sem gravar no `hyprland.lua`.
-- **Teclado nas Configurações.** Os controles deslizantes aceitam as setas com o foco neles (Tab), e os botões de aplicativo (*Configurações › Aplicativos*) recebem o foco e respondem a Espaço e Enter, como os outros botões.
+- **Teclado nas Configurações.** Os controles deslizantes aceitam as setas com o foco neles (Tab), os botões de aplicativo (*Configurações › Aplicativos*) recebem o foco e respondem a Espaço e Enter, como os outros botões, e a página rola sozinha até o controle que ganhou o foco.
 - Nas Configurações, cada página surge subindo alguns pixels ao ser escolhida.
 
 **Mudanças**
@@ -13,6 +13,7 @@
 - **Animações desligadas desligam tudo.** Os realces de botões, interruptores e itens da barra, a troca de cor da barra e o esmaecer do papel de parede ignoravam a opção e a velocidade escolhida. Agora toda duração passa pelo `Motion`: a velocidade vale para tudo e, com as animações desligadas, as mudanças são imediatas (a troca do papel de parede, que antes ainda esmaecia, também). Só continuam os indicadores de carregamento e as contagens regressivas.
 - O realce das linhas de lista (redes, fontes, dispositivos, pastas, processos) acompanha o raio dos cantos escolhido, como os botões. Com o raio em 0 ele ficava arredondado.
 - Salvar as cores do Matugen com o nome de um tema que já existe passa a ser recusado, com aviso, como ao renomear. Antes o tema existente era sobrescrito em silêncio e perdia os papéis de parede.
+- A temperatura no painel do clima acompanha o tamanho do texto escolhido, como o resto da interface.
 - O seletor de fontes marca a fonte em uso quando nenhuma foi escolhida (antes marcava a fonte padrão mesmo que ela não estivesse instalada).
 - `qs -c kortex ipc call settings open <página>` com uma página desconhecida abre a última vista. Antes abria a primeira, sem nenhuma marcada.
 
@@ -31,6 +32,7 @@
 
 - Auditoria completa do código (relatório em `docs/auditoria-2026-11-13.md`), com a pesquisa de skills e de outros shells feitos com o Quickshell.
 - `dev/verificar.sh`: confere a regra de desfoque no Lua gerado, o tema do Matugen salvo duas vezes e o `install.sh` sem o Hyprland; roda o Lua do `Motion.qml` e do `HyprSync.qml` na imitação da API mesmo sem o Hyprland instalado.
+- `dev/verificar.sh` não fica mais parado esperando o teclado quando o `lua` está instalado (o teste do `user.lua` gerado lia a entrada padrão em vez do arquivo).
 - `CLAUDE.md` e `docs/arquitetura.md`: a causa da perda de valores no `settings.json`, o fundo translúcido, a regra de camada com nome e a convenção das durações.
 
 ## 0.3 — 2026-11-03

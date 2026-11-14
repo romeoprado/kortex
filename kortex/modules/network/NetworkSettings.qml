@@ -252,7 +252,7 @@ LazyLoader {
                                     visible: row.modelData.active
                                     width: 8
                                     height: 8
-                                    radius: Theme.radiusSmall
+                                    radius: width / 2
                                     color: Theme.green
                                 }
                             }
