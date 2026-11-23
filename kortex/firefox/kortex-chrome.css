@@ -1,9 +1,23 @@
 /* Kortex: cores do tema na interface do Firefox. As cores vêm de kortex-colors.css (gerado a cada
-   troca de tema). Só variáveis e regras simples: um seletor inválido derruba a regra inteira. */
+   troca de tema). Só variáveis e regras simples: um seletor inválido derruba a regra inteira.
+   Os nomes das variáveis seguem o Firefox 160 (os do chrome mudam de nome de vez em quando; para
+   conferir, extraia o omni.ja e procure o nome em tokens-shared.css e tab.tokens.css). */
 @import "kortex-colors.css";
 
 :root {
-  color-scheme: var(--kortex-scheme);
+  /* O esquema (claro ou escuro) tem de ser o do tema do Kortex e precisa do !important: sem ele o
+     do próprio Firefox vence, e o Firefox segue o sistema (GTK ou ui.systemUsesDarkTheme). Com um
+     tema escuro e o sistema no claro, todo light-dark() dele caía no claro e deixava texto quase
+     preto sobre o fundo escuro, a começar pelo título da aba selecionada. Com o esquema certo, o que
+     este arquivo não cobre cai na paleta do Firefox do mesmo modo, que continua legível. As duas
+     variáveis são as que o Firefox aplica às barras e à aba selecionada. */
+  color-scheme: var(--kortex-scheme) !important;
+  --toolbar-color-scheme: var(--kortex-scheme) !important;
+  --tab-selected-color-scheme: var(--kortex-scheme) !important;
+  --toolbox-background-color: var(--kortex-bg) !important;
+  --toolbox-background-color-inactive: var(--kortex-bg) !important;
+  --toolbox-text-color: var(--kortex-fg) !important;
+  --toolbox-text-color-inactive: var(--kortex-fg) !important;
   --toolbar-background-color: var(--kortex-bg-alt) !important;
   --toolbar-text-color: var(--kortex-fg) !important;
   --toolbarbutton-icon-fill: var(--kortex-fg) !important;
@@ -12,8 +26,10 @@
   --toolbarbutton-background-color-active: color-mix(in srgb, var(--kortex-fg) 24%, transparent) !important;
   --tab-background-color-selected: var(--kortex-bg-alt) !important;
   --tab-background-color-hover: color-mix(in srgb, var(--kortex-fg) 11%, transparent) !important;
-  --tab-selected-textcolor: var(--kortex-fg) !important;
-  --tab-loading-fill: var(--kortex-accent) !important;
+  --tab-text-color: var(--kortex-fg) !important;
+  --tab-text-color-hover: var(--kortex-fg-bright) !important;
+  --tab-text-color-selected: var(--kortex-fg-bright) !important;
+  --tab-icon-fill-loading: var(--kortex-accent) !important;
   --toolbar-field-background-color: var(--kortex-bg) !important;
   --toolbar-field-background-color-focus: var(--kortex-bg) !important;
   --toolbar-field-text-color: var(--kortex-fg) !important;
@@ -36,7 +52,7 @@
   --urlbar-box-text-color-hover: var(--kortex-fg-bright) !important;
   --icon-color: var(--kortex-fg) !important;
   --border-color-interactive: var(--kortex-muted) !important;
-  --text-color-deemphasized: var(--kortex-fg-dim) !important;
+  --text-color-deemphasized: color-mix(in srgb, var(--kortex-fg) 80%, var(--kortex-bg)) !important;
   --color-accent-primary: var(--kortex-accent) !important;
   --text-color-accent-primary-selected: var(--kortex-bg) !important;
 }
@@ -49,9 +65,10 @@
 #toolbar-menubar { background-color: var(--kortex-bg) !important; color: var(--kortex-fg) !important; }
 
 /* Aba selecionada: regra explícita além da variável, porque um tema de extensão (como o Dark
-   embutido) pode redefinir a variável por conta própria */
+   embutido) pode redefinir a variável por conta própria. A cor vai no .tab-content, que é quem
+   define a cor do título: posta na .tabbrowser-tab, ela não chegava ao texto. */
 .tab-background:is([selected], [multiselected]) { background-color: var(--kortex-bg-alt) !important; }
-.tabbrowser-tab[selected] { color: var(--kortex-fg) !important; }
+.tab-content:is([selected], [multiselected]) { color: var(--kortex-fg-bright) !important; }
 
 /* Menus e painéis definem estas variáveis no próprio elemento, então o valor da raiz não chega */
 menupopup {
@@ -67,9 +84,6 @@ panel {
   --panel-text-color: var(--kortex-fg) !important;
   --panel-border-color: var(--kortex-muted) !important;
   --panel-separator-color: var(--kortex-muted) !important;
-  --arrowpanel-background: var(--kortex-bg-alt) !important;
-  --arrowpanel-color: var(--kortex-fg) !important;
-  --arrowpanel-border-color: var(--kortex-muted) !important;
 }
 
 /* Menus: cantos e borda no tema (o fundo vem de --panel-background-color) */

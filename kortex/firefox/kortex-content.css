@@ -1,45 +1,44 @@
 /* Kortex: cores do tema nas páginas internas do Firefox (about:…, nova aba, configurações). Os
-   sites não são tocados. As cores vêm de kortex-colors.css, gerado a cada troca de tema. */
+   sites não são tocados. As cores vêm de kortex-colors.css, gerado a cada troca de tema.
+   Os nomes seguem os tokens do Firefox 160 (os antigos --in-content-* não são mais lidos).
+   Nem todo about: é página do Firefox: about:blank e about:srcdoc são os endereços dos quadros
+   (iframes) que os sites montam por script, como o artefato aberto ao lado de uma conversa no
+   claude.ai, e o about:reader é o modo de leitura, que tem as próprias cores. Com o url-prefix
+   ("about:") de antes, o fundo do tema entrava nesses quadros por baixo do texto escuro do site, e
+   a leitura ficava impossível. A expressão (que precisa casar o endereço inteiro) deixa os três de
+   fora. */
 @import "kortex-colors.css";
-@-moz-document url-prefix("about:") {
+@-moz-document regexp("about:(?!blank|srcdoc|reader).*") {
   :root {
-    --in-content-page-background: var(--kortex-bg) !important;
-    --in-content-page-color: var(--kortex-fg) !important;
-    --in-content-text-color: var(--kortex-fg) !important;
-    --in-content-deemphasized-text: var(--kortex-fg-dim) !important;
-    --in-content-box-background: var(--kortex-bg-alt) !important;
-    --in-content-box-background-hover: color-mix(in srgb, var(--kortex-fg) 8%, var(--kortex-bg-alt)) !important;
-    --in-content-box-border-color: var(--kortex-muted) !important;
-    --in-content-border-color: var(--kortex-muted) !important;
-    --in-content-primary-button-background: var(--kortex-accent) !important;
-    --in-content-primary-button-text-color: var(--kortex-bg) !important;
-    --in-content-accent-color: var(--kortex-accent) !important;
-    --in-content-link-color: var(--kortex-accent) !important;
+    /* Com !important, senão o esquema da página (que segue o sistema) vence e os light-dark() das
+       páginas caem no modo errado, com texto escuro sobre o fundo escuro do tema (ver o
+       kortex-chrome.css). */
+    color-scheme: var(--kortex-scheme) !important;
     --background-color-canvas: var(--kortex-bg) !important;
     --background-color-box: var(--kortex-bg-alt) !important;
+    --background-color-box-info: var(--kortex-bg-alt) !important;
+    --background-color-information: var(--kortex-bg-alt) !important;
     --text-color: var(--kortex-fg) !important;
-    --text-color-deemphasized: var(--kortex-fg-dim) !important;
+    --text-color-deemphasized: color-mix(in srgb, var(--kortex-fg) 80%, var(--kortex-bg)) !important;
     --border-color: var(--kortex-muted) !important;
+    --border-color-interactive: var(--kortex-muted) !important;
     --color-accent-primary: var(--kortex-accent) !important;
     --link-color: var(--kortex-accent) !important;
+    --icon-color: var(--kortex-fg) !important;
+    --card-background-color: var(--kortex-bg-alt) !important;
+    --card-border-color: var(--kortex-muted) !important;
+    --input-background-color: var(--kortex-bg) !important;
+    --input-text-color: var(--kortex-fg) !important;
+    --input-border-color: var(--kortex-muted) !important;
+    --button-background-color-primary: var(--kortex-accent) !important;
+    --button-text-color-primary: var(--kortex-bg) !important;
     --newtab-background-color: var(--kortex-bg) !important;
     --newtab-background-color-secondary: var(--kortex-bg-alt) !important;
     --newtab-text-primary-color: var(--kortex-fg) !important;
-    --newtab-textbox-background-color: var(--kortex-bg-alt) !important;
-    --input-text-background-color: var(--kortex-bg) !important;
-    --input-text-color: var(--kortex-fg) !important;
-    --input-text-border-color: var(--kortex-muted) !important;
-    --border-color-interactive: var(--kortex-muted) !important;
-    --icon-color: var(--kortex-fg) !important;
     --message-bar-background-color: var(--kortex-bg-alt) !important;
     --message-bar-text-color: var(--kortex-fg) !important;
     --message-bar-border-color: var(--kortex-muted) !important;
     --message-bar-icon-color: var(--kortex-accent) !important;
-    --background-color-information: var(--kortex-bg-alt) !important;
-    --text-color-information: var(--kortex-fg) !important;
-    --border-color-information: var(--kortex-muted) !important;
-    --background-color-information-subdued: var(--kortex-bg-alt) !important;
-    color-scheme: var(--kortex-scheme);
   }
   body { background-color: var(--kortex-bg) !important; color: var(--kortex-fg) !important; }
 }
